@@ -1,0 +1,28 @@
+RewriteEngine On
+RewriteBase /takweenweb
+
+DirectoryIndex public/index.php
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ public/index.php [QSA,L]
+
+# [FIX-30] تعزيز حماية الملفات الحساسة
+<FilesMatch "\.(env|log|sql|md|json|lock|yml|yaml|xml|ini|conf|sh|bak|dist)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# [FIX-30] منع الوصول لملفات التكوين
+<FilesMatch "^(config|database|composer|package)\.(php|json|lock)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# [FIX-30] منع الوصول لمجلدات التطبيق
+<IfModule mod_rewrite.c>
+    RewriteRule ^(app|vendor|core) - [F,L]
+    RewriteRule ^(.*)\.(php|inc|tpl)$ - [F,L]
+</IfModule>
+
+Options -Indexes

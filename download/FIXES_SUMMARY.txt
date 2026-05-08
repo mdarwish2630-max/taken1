@@ -1,0 +1,59 @@
+ملخص التعديلات - takweenweb PHP Script
+==========================================
+
+## 1. اصلاحات معمارية (فصل الأدمن عن المستأجر)
+
+### app/core/Router.php
+- اضافة middleware 'customer' لمنع الأدمن من الوصول لصفحات العميل
+
+### app/controllers/AuthController.php
+- تعديل login() لتحويل الأدمن إلى /admin بدل /dashboard عند الدخول
+
+### app/controllers/DashboardController.php
+- اضافة حماية في constructor لمنع الأدمن من دخول لوحة تحكم العميل
+
+### app/routes.php
+- تغيير middleware مجموعة /dashboard من 'auth' إلى 'customer'
+
+### app/views/layouts/admin.php
+- حذف رابط /dashboard من القائمة المنسدلة
+- حذف رابط "عرض الموقع" من sidebar (الأدمن ليس لديه tenant)
+
+## 2. اصلاحات ملفات العرض (Admin Views)
+
+### ملفات تم تعديل layout (من dashboard إلى admin):
+- app/views/admin/plans.php
+- app/views/admin/plan-form.php
+- app/views/admin/site-settings.php
+- app/views/admin/site-features.php
+- app/views/admin/site-testimonials.php
+
+### ملفات تم اضافة layout (كانت بدون layout):
+- app/views/admin/users.php
+- app/views/admin/sites.php
+- app/views/admin/subscriptions.php
+- app/views/admin/site-detail.php
+- app/views/admin/tenants.php
+
+### ملفات تم انشاؤها من الصفر (كانت مفقودة):
+- app/views/admin/settings.php
+- app/views/admin/analytics.php
+
+### ملفات تم اعادة كتابتها بالكامل:
+- app/views/admin/users.php
+- app/views/admin/sites.php
+- app/views/admin/subscriptions.php
+- app/views/admin/site-detail.php
+
+## 3. اصلاحات اللغة العربية
+
+### app/lang/ar.php
+- اضافة ~55 مفتاح لغة عربية جديد
+- تغطية جميع المفاتيح المستخدمة في admin views
+
+## التغييرات الجوهرية:
+1. فصل كامل بين لوحة تحكم الأدمن ولوحة تحكم المستأجر
+2. جميع صفحات الأدمن تستخدم layout 'admin' الصحيح
+3. جميع الصفحات تستخدم اصطلاحات موحدة (lang(), url(), csrf())
+4. الأدمن لا يمكنه دخول /dashboard والمستأجر لا يمكنه دخول /admin
+5. انشاء ملفات الـ view المفقودة التي كانت تسبب HTTP 500

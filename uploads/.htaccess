@@ -1,0 +1,27 @@
+# Prevent PHP execution in uploads
+<FilesMatch "\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# [FIX-31] أيضاً منع تنفيذ ملفات خطرة أخرى
+<FilesMatch "\.(php[0-9]?|phtml|pht|phps|cgi|pl|py|jsp|asp|aspx|sh|bash)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# [FIX-31] منع تنفيذ PHP حتى لو تم تغيير الامتداد
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule \.(php[0-9]?|phtml?|cgi|pl|py|jsp|asp|aspx|sh|bash)$ - [F,L]
+</IfModule>
+
+# Prevent directory listing
+Options -Indexes
+
+# [FIX-31] تقييد أنواع الملفات المسموح رفعها
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|pdf|doc|docx|svg)$">
+    Order allow,deny
+    Allow from all
+</FilesMatch>
