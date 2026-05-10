@@ -29,11 +29,7 @@ class ThemeController extends Controller
         $tenant = Auth::tenant();
         $themeSettings = $this->themeSettingsModel->getTenantSettings($tenant->id);
 
-        if (!$themeSettings) {
-            // إنشاء إعدادات افتراضية
-            $this->themeSettingsModel->createDefault($tenant->id);
-            $themeSettings = $this->themeSettingsModel->getTenantSettings($tenant->id);
-        }
+        // getTenantSettings يعمل create تلقائياً إذا ما كانت موجودة
 
         // الخطوط المتاحة
         $fonts = $this->getAvailableFonts();

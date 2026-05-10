@@ -72,7 +72,7 @@ date_default_timezone_set('Asia/Riyadh');
 // [FIX-01] تعطيل DEBUG_MODE في بيئة الإنتاج
 // يجب تغيير هذا إلى false عند النشر
 // =============================================
-define('DEBUG_MODE', false);
+define('DEBUG_MODE', true);
 
 if (DEBUG_MODE) {
     error_reporting(E_ALL);
@@ -89,7 +89,7 @@ if (DEBUG_MODE) {
 // =============================================
 if (headers_sent() === false) {
     // Content Security Policy - منع تنفيذ الأكواد الخبيثة
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://code.iconify.design; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; frame-src 'self' https://www.youtube.com https://player.vimeo.com; connect-src 'self';");
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://code.iconify.design https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; frame-src 'self' https://www.youtube.com https://player.vimeo.com; connect-src 'self';");
 
     // منع تضمين الموقع في iframe (Clickjacking Protection)
     header("X-Frame-Options: SAMEORIGIN");

@@ -215,8 +215,40 @@ class DashboardController extends Controller
      */
     public function changeTheme()
     {
-        // قالب واحد فقط - لا حاجة للتغيير
-        $this->redirect('/dashboard/settings');
+        $this->verifyCsrf();
+        $tenant = Auth::tenant();
+        $themeSlug = $this->input('theme_slug');
+
+        if (!$themeSlug) {
+            Session::error('يرجى اختيار قالب');
+            $this->redirect('/dashboard/themes');
+        }
+
+        $themeModel = $this->model('Theme');
+        $theme = $themeModel->findBySlug($themeSlug);
+
+        if (!$theme) {
+            Session::error('القالب غير موجود');
+            $this->redirect('/dashboard/themes');
+        }
+
+        // Check if paid theme and not owned
+        if (!empty($theme->is_paid)) {
+            $ownsTheme = $themeModel->tenantOwnsTheme($tenant->id, $theme->id);
+            if (!$ownsTheme) {
+                Session::error('هذا القالب مدفوع. يرجى تقديم طلب تفعيل أولاً.');
+                $this->redirect('/dashboard/themes');
+            }
+        }
+
+        // Update tenant theme
+        $this->tenantModel->update($tenant->id, [
+            'theme_id' => $theme->id,
+            'theme_slug' => $theme->slug
+        ]);
+
+        Session::success('تم تغيير القالب بنجاح إلى: ' . $theme->name);
+        $this->redirect('/dashboard/themes');
     }
 
     /**
@@ -224,8 +256,48 @@ class DashboardController extends Controller
      */
     public function requestPaidTheme()
     {
-        // قالب واحد مجاني - لا حاجة لطلبات
-        $this->redirect('/dashboard/settings');
+        $this->verifyCsrf();
+        $tenant = Auth::tenant();
+        $themeId = $this->input('theme_id');
+
+        if (!$themeId) {
+            $this->redirect('/dashboard/themes');
+        }
+
+        $themeModel = $this->model('Theme');
+        $theme = $themeModel->find($themeId);
+
+        if (!$theme || empty($theme->is_paid)) {
+            Session::error('القالب غير موجود أو غير مدفوع');
+            $this->redirect('/dashboard/themes');
+        }
+
+        // Check if already has pending request
+        if ($themeModel->hasPendingRequest($tenant->id, $themeId)) {
+            Session::error('لديك طلب معلق بالفعل لهذا القالب');
+            $this->redirect('/dashboard/themes');
+        }
+
+        // Check if already approved
+        if ($themeModel->tenantOwnsTheme($tenant->id, $themeId)) {
+            Session::error('لديك بالفعل هذا القالب. يمكنك تفعيله مباشرة.');
+            $this->redirect('/dashboard/themes');
+        }
+
+        // Create request
+        require_once ROOT_PATH . '/app/models/ThemeRequest.php';
+        $requestModel = new ThemeRequest();
+        $requestModel->create([
+            'tenant_id' => $tenant->id,
+            'theme_id' => $themeId,
+            'status' => 'pending',
+            'amount' => $theme->price,
+            'currency' => $theme->currency ?? 'SAR',
+            'tenant_notes' => $this->input('notes')
+        ]);
+
+        Session::success('تم تقديم طلب تفعيل القالب بنجاح. سيتم مراجعة الطلب من قبل الإدارة.');
+        $this->redirect('/dashboard/themes');
     }
 
     /**
@@ -233,8 +305,23 @@ class DashboardController extends Controller
      */
     public function themes()
     {
-        // قالب واحد فقط - توجيه للإعدادات
-        $this->redirect('/dashboard/settings');
+        $tenant = Auth::tenant();
+        $themeModel = $this->model('Theme');
+        $themes = $themeModel->getActive();
+
+        // Get tenant's theme requests
+        $db = Database::getInstance();
+        $themeRequests = $db->query(
+            "SELECT * FROM theme_requests WHERE tenant_id = ?",
+            [$tenant->id]
+        )->results();
+
+        $this->view('dashboard/themes-selection', [
+            'title' => lang('choose_theme') ?? 'اختيار القالب',
+            'tenant' => $tenant,
+            'themes' => $themes,
+            'themeRequests' => $themeRequests
+        ]);
     }
 
     /**

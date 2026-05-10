@@ -283,6 +283,17 @@ Router::group(['middleware' => 'admin'], function() {
     Router::post('/admin/email-settings/test', 'AdminController@testEmailSettings');
 });
 
+// ==================== معاينة القوالب (Theme Preview) ====================
+Router::get('/theme-preview/{slug}', 'SiteController@previewDemo');
+Router::get('/theme-preview/{slug}/about', 'SiteController@previewDemoAbout');
+Router::get('/theme-preview/{slug}/services', 'SiteController@previewDemoServices');
+Router::get('/theme-preview/{slug}/contact', 'SiteController@previewDemoContact');
+Router::get('/theme-preview/{slug}/gallery', 'SiteController@previewDemoGallery');
+Router::get('/theme-preview/{slug}/faq', 'SiteController@previewDemoFaq');
+Router::get('/theme-preview/{slug}/partners', 'SiteController@previewDemoPartners');
+Router::get('/theme-preview/{slug}/booking', 'SiteController@previewDemoBooking');
+Router::get('/theme-preview/{slug}/service/{serviceSlug}', 'SiteController@previewDemoService');
+
 // ==================== عرض مواقع المستأجرين (المسارات المختصرة - يجب أن تكون الأخيرة) ====================
 Router::get('/{slug}', 'SiteController@show');
 Router::post('/{slug}/contact', 'SiteController@contact');

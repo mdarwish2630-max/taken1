@@ -9,10 +9,17 @@ class ThemeSettings extends Model
     protected $table = 'theme_settings';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'tenant_id', 'font_primary', 'font_secondary', 'font_size_base',
-        'border_radius', 'header_style', 'footer_style', 'hero_style',
-        'custom_css', 'custom_js', 'header_logo_height', 'footer_logo_height',
-        'button_style', 'card_style', 'animation_enabled'
+        'tenant_id', 'primary_font', 'secondary_font', 'base_font_size',
+        'heading_font_weight', 'body_font_weight',
+        'primary_color', 'secondary_color', 'accent_color',
+        'text_color', 'text_muted_color', 'background_color',
+        'card_background', 'border_color',
+        'border_radius', 'button_radius', 'card_radius',
+        'header_style', 'footer_style', 'hero_style',
+        'button_style', 'button_shadow', 'card_style', 'card_hover_effect',
+        'enable_animations', 'animation_type',
+        'container_width', 'header_fixed', 'sidebar_position',
+        'custom_css', 'custom_js'
     ];
 
     /**
@@ -78,19 +85,24 @@ class ThemeSettings extends Model
     {
         $settings = $this->getTenantSettings($tenantId);
 
+        // Read colors from settings (theme_settings table) with fallback to tenant
+        $primaryColor = $settings->primary_color ?? $tenant->primary_color ?? '#2563eb';
+        $secondaryColor = $settings->secondary_color ?? $tenant->secondary_color ?? '#1e40af';
+        $accentColor = $settings->accent_color ?? $tenant->accent_color ?? '#f59e0b';
+        $textColor = $settings->text_color ?? $tenant->text_color ?? '#1f2937';
+        $bgColor = $settings->background_color ?? $tenant->background_color ?? '#ffffff';
+
         $css = "/* Custom Theme CSS */\n";
         $css .= ":root {\n";
-        $css .= "  --primary: {$tenant->primary_color};\n";
-        $css .= "  --primary-dark: {$tenant->secondary_color};\n";
-        $css .= "  --accent: {$tenant->accent_color};\n";
-        $css .= "  --text: {$tenant->text_color};\n";
-        $css .= "  --bg: {$tenant->background_color};\n";
-        $css .= "  --font-primary: '{$settings->font_primary}', sans-serif;\n";
-        $css .= "  --font-secondary: '{$settings->font_secondary}', sans-serif;\n";
-        $css .= "  --font-size-base: {$settings->font_size_base};\n";
+        $css .= "  --primary: {$primaryColor};\n";
+        $css .= "  --primary-dark: {$secondaryColor};\n";
+        $css .= "  --accent: {$accentColor};\n";
+        $css .= "  --text: {$textColor};\n";
+        $css .= "  --bg: {$bgColor};\n";
+        $css .= "  --font-primary: '{$settings->primary_font}', sans-serif;\n";
+        $css .= "  --font-secondary: '{$settings->secondary_font}', sans-serif;\n";
+        $css .= "  --font-size-base: {$settings->base_font_size};\n";
         $css .= "  --border-radius: {$settings->border_radius};\n";
-        $css .= "  --header-logo-height: {$settings->header_logo_height};\n";
-        $css .= "  --footer-logo-height: {$settings->footer_logo_height};\n";
         $css .= "}\n\n";
 
         // أنماط الأزرار
@@ -215,7 +227,7 @@ CSS;
         }
 
         // الرسوم المتحركة
-        if ($settings->animation_enabled) {
+        if (!empty($settings->enable_animations)) {
             $css .= <<<CSS
 /* Animations */
 @keyframes fadeIn {
@@ -255,11 +267,14 @@ CSS;
         $settings = $this->getTenantSettings($tenantId);
         
         $fonts = [];
-        if ($settings->font_primary) {
-            $fonts[] = str_replace(' ', '+', $settings->font_primary) . ':wght@400;500;700';
+        $primaryFont = $settings->primary_font ?? $settings->font_primary ?? null;
+        $secondaryFont = $settings->secondary_font ?? $settings->font_secondary ?? null;
+
+        if ($primaryFont) {
+            $fonts[] = str_replace(' ', '+', $primaryFont) . ':wght@400;500;700';
         }
-        if ($settings->font_secondary && $settings->font_secondary !== $settings->font_primary) {
-            $fonts[] = str_replace(' ', '+', $settings->font_secondary) . ':wght@400;500;700';
+        if ($secondaryFont && $secondaryFont !== $primaryFont) {
+            $fonts[] = str_replace(' ', '+', $secondaryFont) . ':wght@400;500;700';
         }
 
         if (empty($fonts)) {
@@ -277,20 +292,44 @@ CSS;
         $settings = $this->getTenantSettings($tenantId);
 
         return $this->update($settings->id, [
-            'font_primary' => 'Tajawal',
-            'font_secondary' => 'Tajawal',
-            'font_size_base' => '16px',
-            'border_radius' => '8px',
+            'primary_font' => 'Tajawal',
+            'secondary_font' => 'Tajawal',
+            'base_font_size' => '16',
+            'heading_font_weight' => '700',
+            'body_font_weight' => '400',
+            'primary_color' => '#2563eb',
+            'secondary_color' => '#1e40af',
+            'accent_color' => '#f59e0b',
+            'text_color' => '#1f2937',
+            'text_muted_color' => '#6b7280',
+            'background_color' => '#ffffff',
+            'card_background' => '#ffffff',
+            'border_color' => '#e5e7eb',
+            'border_radius' => '8',
+            'button_radius' => '8',
+            'card_radius' => '12',
             'header_style' => 'default',
             'footer_style' => 'default',
             'hero_style' => 'default',
+            'button_style' => 'rounded',
+            'button_shadow' => 0,
+            'card_style' => 'shadow',
+            'card_hover_effect' => 'lift',
+            'enable_animations' => 1,
+            'animation_type' => 'fade',
+            'container_width' => '1200',
+            'header_fixed' => 0,
+            'sidebar_position' => 'right',
             'custom_css' => null,
             'custom_js' => null,
-            'header_logo_height' => '50px',
-            'footer_logo_height' => '40px',
-            'button_style' => 'rounded',
-            'card_style' => 'shadow',
-            'animation_enabled' => 1
         ]);
+    }
+
+    /**
+     * Alias for backward compatibility (ThemeController calls resetToDefault without 's')
+     */
+    public function resetToDefault($tenantId)
+    {
+        return $this->resetToDefaults($tenantId);
     }
 }

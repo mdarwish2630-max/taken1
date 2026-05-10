@@ -1,0 +1,78 @@
+<?php include __DIR__ . '/partials/_head.php'; ?>
+<?php include __DIR__ . '/partials/_navbar.php'; ?>
+
+<!-- Page Header -->
+<section class="hero-gradient relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-20 right-20 w-60 h-60 bg-primary rounded-full blur-3xl"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative z-10 text-center">
+        <span class="inline-block bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-sm text-accent mb-6">
+            <i class="fas fa-images ml-2"></i> أعمالنا
+        </span>
+        <h1 class="text-4xl lg:text-5xl font-extrabold text-white mb-4">
+            <?php echo htmlspecialchars($page['heading'] ?? 'معرض أعمالنا'); ?>
+        </h1>
+        <p class="text-lg text-white/70 max-w-2xl mx-auto">
+            <?php echo htmlspecialchars($page['subheading'] ?? 'نماذج من مشاريعنا المكتملة بنجاح'); ?>
+        </p>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0">
+        <svg viewBox="0 0 1440 60" fill="none"><path d="M0 30L60 25C120 20 240 10 360 8.3C480 6.7 600 13.3 720 18.3C840 23.3 960 26.7 1080 25C1200 23.3 1320 16.7 1380 13.3L1440 10V60H1380C1320 60 1200 60 1080 60C960 60 840 60 720 60C600 60 480 60 360 60C240 60 120 60 60 60H0V30Z" fill="#f8f5f1"/></svg>
+    </div>
+</section>
+
+<!-- Gallery Section -->
+<section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <?php if (!empty($gallery)): ?>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <?php foreach ($gallery as $idx => $item): ?>
+                    <div class="card-hover bg-white rounded-card overflow-hidden group" data-aos="fade-up" data-aos-delay="<?php echo ($idx % 3) * 100; ?>">
+                        <?php if (!empty($item['hero_image'] ?? $item['image'] ?? '')): ?>
+                            <div class="h-64 overflow-hidden">
+                                <img src="<?php echo htmlspecialchars($item['hero_image'] ?? $item['image']); ?>" alt="<?php echo htmlspecialchars($item['title'] ?? ''); ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            </div>
+                        <?php else: ?>
+                            <div class="h-64 bg-gradient-to-br from-warm-200 to-warm-300 flex items-center justify-center">
+                                <i class="<?php echo htmlspecialchars($item['icon'] ?? 'fas fa-image'); ?> text-5xl text-primary/30"></i>
+                            </div>
+                        <?php endif; ?>
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold text-secondary group-hover:text-primary transition-colors">
+                                <?php echo htmlspecialchars($item['title'] ?? 'مشروع ' . ($idx + 1)); ?>
+                            </h3>
+                            <?php if (!empty($item['content'])): ?>
+                                <p class="text-gray-500 text-sm mt-2 line-clamp-2"><?php echo strip_tags($item['content']); ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <!-- Placeholder gallery when no items exist -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <?php for ($i = 1; $i <= 6; $i++): ?>
+                    <div class="bg-white rounded-card overflow-hidden group" data-aos="fade-up" data-aos-delay="<?php echo (($i-1) % 3) * 100; ?>">
+                        <div class="h-64 bg-gradient-to-br from-warm-200 to-warm-300 flex items-center justify-center group-hover:from-warm-300 group-hover:to-warm-400 transition-colors duration-300">
+                            <i class="fas fa-tools text-5xl text-primary/20 group-hover:text-primary/40 transition-colors duration-300"></i>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-lg font-bold text-secondary">مشروع <?php echo $i; ?></h3>
+                            <p class="text-gray-400 text-sm mt-2">صيانة احترافية - ركاز</p>
+                        </div>
+                    </div>
+                <?php endfor; ?>
+            </div>
+            <div class="text-center mt-10" data-aos="fade-up">
+                <div class="bg-warm-200 rounded-card p-8 max-w-md mx-auto">
+                    <i class="fas fa-info-circle text-primary text-2xl mb-3"></i>
+                    <p class="text-gray-500 text-sm">سيتم إضافة صور المشاريع قريباً</p>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+</section>
+
+<?php include __DIR__ . '/partials/_footer.php'; ?>
+<?php include __DIR__ . '/partials/_scripts.php'; ?>

@@ -112,8 +112,12 @@ class SiteController extends Controller
             return;
         }
 
-        // قالب واحد فقط - نوفا
-        $themeSlug = 'nova';
+        // استخدام الثيم المحدد من الموقع
+        $themeSlug = !empty($tenant->theme_slug) ? $tenant->theme_slug : 'nova';
+
+        // Determine current language for templates
+        $currentLang  = function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar');
+        $currentDir   = ($currentLang === 'en') ? 'ltr' : 'rtl';
 
         $data = [
             'tenant' => $tenant,
@@ -131,6 +135,9 @@ class SiteController extends Controller
             'partnerItems' => $this->partnerModel->getTenantPartners($tenant->id, true),
             'title' => $page->meta_title ?: $page->title . ' - ' . $tenant->site_name,
             'meta_description' => $page->meta_description ?: $tenant->meta_description,
+            'lang'  => $currentLang,
+            'dir'   => $currentDir,
+            'siteBase' => '/site/' . $tenant->slug,
         ];
 
         // تحميل الثيم
@@ -138,19 +145,10 @@ class SiteController extends Controller
     }
 
     /**
-     * ✅ صفحة معاينة ديمو للثيم (بدون مستأجر)
-     * تعرض الثيم بمحتواه التجريبي الكامل من theme_contents و theme_media
+     * ✅ بناء بيانات المعاينة التجريبية للثيم (مشترك بين كل صفحات المعاينة)
      */
-    public function previewDemo($themeSlug)
+    private function buildPreviewData($theme, $themeSlug, $template)
     {
-        $themeModel = $this->model('Theme');
-        $theme = $themeModel->findBySlug($themeSlug);
-
-        if (!$theme) {
-            $this->redirect('/');
-            return;
-        }
-
         // تحميل محتوى الثيم التجريبي
         require_once ROOT_PATH . '/app/models/ThemeContent.php';
         require_once ROOT_PATH . '/app/models/ThemeMedia.php';
@@ -160,9 +158,7 @@ class SiteController extends Controller
         $content = $contentModel->getContentForEditor($theme->id);
         $media = $mediaModel->getThemeMediaGrouped($theme->id);
 
-        // بناء كائن tenant وهمي من محتوى الثيم
-        $lang = Language::current();
-
+        // بناء كائن tenant وهمي
         $tenantDemo = (object)[
             'id' => 0,
             'slug' => 'demo',
@@ -193,6 +189,7 @@ class SiteController extends Controller
                     $tenantDemo->contact_email = $contact['email'] ?? '';
                     $tenantDemo->contact_whatsapp = $contact['whatsapp'] ?? '';
                     $tenantDemo->address = $contact['address'] ?? '';
+                    $tenantDemo->working_hours = $contact['working_hours'] ?? '';
                     break;
                 }
             }
@@ -231,7 +228,6 @@ class SiteController extends Controller
                 $svcData = $sVal['decoded'] ?? json_decode($sVal['content_ar'], true) ?? [];
                 if (empty($svcData)) continue;
 
-                // البحث عن صورة الخدمة
                 $svcImage = null;
                 foreach ($media as $mType => $mItems) {
                     foreach ($mItems as $mItem) {
@@ -252,8 +248,8 @@ class SiteController extends Controller
                     'description_en' => $svcData['description_en'] ?? $svcEn['description_en'] ?? '',
                     'icon' => $svcData['icon'] ?? 'fas fa-star',
                     'image' => $svcImage,
-                    'price' => null,
-                    'price_text' => null,
+                    'price' => $svcData['price'] ?? null,
+                    'price_text' => $svcData['price_text'] ?? null,
                     'slug' => 'service-' . ($idx + 1),
                     'show_on_home' => $svcData['show_on_home'] ?? 1,
                     'status' => 'active',
@@ -293,11 +289,82 @@ class SiteController extends Controller
                     'image' => $img->file_path,
                     'title' => $img->alt_text_ar ?? '',
                     'title_en' => $img->alt_text_en ?? '',
+                    'category' => $img->section_ref ?? '',
+                    'category_en' => $img->section_ref ?? '',
                 ];
             }
         }
 
-        // بناء قائمة صفحات وهمية
+        // بناء الأسئلة الشائعة من محتوى الثيم
+        $faqItemsDemo = [];
+        if (!empty($content['faq'])) {
+            foreach ($content['faq'] as $fKey => $fVal) {
+                $faqData = $fVal['decoded'] ?? json_decode($fVal['content_ar'], true) ?? [];
+                if (empty($faqData)) continue;
+                $faqItemsDemo[] = (object)[
+                    'id' => 0,
+                    'question' => $faqData['question_ar'] ?? '',
+                    'question_en' => $faqData['question_en'] ?? '',
+                    'answer' => $faqData['answer_ar'] ?? '',
+                    'answer_en' => $faqData['answer_en'] ?? '',
+                    'category' => $faqData['category'] ?? '',
+                    'sort_order' => 0,
+                    'status' => 'active',
+                ];
+            }
+        }
+
+        // بناء شركاء من محتوى الثيم
+        $partnerItemsDemo = [];
+        if (!empty($media['partner'])) {
+            foreach ($media['partner'] as $pItem) {
+                $partnerItemsDemo[] = (object)[
+                    'id' => 0,
+                    'name' => $pItem->alt_text_ar ?? '',
+                    'name_en' => $pItem->alt_text_en ?? '',
+                    'logo' => $pItem->file_path,
+                    'website' => '',
+                    'status' => 'active',
+                ];
+            }
+        }
+
+        // بناء إحصائيات من محتوى الثيم
+        $siteStatsDemo = [];
+        if (!empty($content['stats'])) {
+            foreach ($content['stats'] as $sKey => $sVal) {
+                $statData = $sVal['decoded'] ?? json_decode($sVal['content_ar'], true) ?? [];
+                if (empty($statData)) continue;
+                $siteStatsDemo[] = (object)[
+                    'id' => 0,
+                    'label' => $statData['label_ar'] ?? '',
+                    'label_en' => $statData['label_en'] ?? '',
+                    'value' => $statData['value'] ?? '0',
+                    'icon' => $statData['icon'] ?? 'fas fa-chart-line',
+                    'status' => 'active',
+                ];
+            }
+        }
+
+        // بناء مميزات "لماذا نحن" من محتوى الثيم
+        $siteFeaturesDemo = [];
+        if (!empty($content['features'])) {
+            foreach ($content['features'] as $fKey => $fVal) {
+                $featData = $fVal['decoded'] ?? json_decode($fVal['content_ar'], true) ?? [];
+                if (empty($featData)) continue;
+                $siteFeaturesDemo[] = (object)[
+                    'id' => 0,
+                    'title' => $featData['title_ar'] ?? '',
+                    'title_en' => $featData['title_en'] ?? '',
+                    'description' => $featData['description_ar'] ?? '',
+                    'description_en' => $featData['description_en'] ?? '',
+                    'icon' => $featData['icon'] ?? 'fas fa-check',
+                    'status' => 'active',
+                ];
+            }
+        }
+
+        // بناء قائمة صفحات وهمية (روابط المعاينة)
         $menuDemo = [
             (object)['id' => 0, 'slug' => '', 'title' => 'الرئيسية', 'title_en' => 'Home', 'is_home' => 1],
             (object)['id' => 0, 'slug' => 'about', 'title' => 'من نحن', 'title_en' => 'About Us', 'is_home' => 0],
@@ -305,20 +372,50 @@ class SiteController extends Controller
             (object)['id' => 0, 'slug' => 'gallery', 'title' => 'المعرض', 'title_en' => 'Gallery', 'is_home' => 0],
             (object)['id' => 0, 'slug' => 'contact', 'title' => 'اتصل بنا', 'title_en' => 'Contact Us', 'is_home' => 0],
         ];
+        if (!empty($faqItemsDemo)) {
+            $menuDemo[] = (object)['id' => 0, 'slug' => 'faq', 'title' => 'الأسئلة الشائعة', 'title_en' => 'FAQ', 'is_home' => 0];
+        }
+        if (!empty($partnerItemsDemo)) {
+            $menuDemo[] = (object)['id' => 0, 'slug' => 'partners', 'title' => 'شركاؤنا', 'title_en' => 'Partners', 'is_home' => 0];
+        }
 
-        // صفحة وهمية
+        // عناوين الصفحات حسب القالب
+        $pageTitles = [
+            'default'    => ['ar' => $theme->name, 'en' => $theme->name_en ?? ''],
+            'about'      => ['ar' => 'من نحن', 'en' => 'About Us'],
+            'services'   => ['ar' => 'خدماتنا', 'en' => 'Our Services'],
+            'contact'    => ['ar' => 'اتصل بنا', 'en' => 'Contact Us'],
+            'gallery'    => ['ar' => 'المعرض', 'en' => 'Gallery'],
+            'faq'        => ['ar' => 'الأسئلة الشائعة', 'en' => 'FAQ'],
+            'partners'   => ['ar' => 'شركاؤنا', 'en' => 'Our Partners'],
+            'booking'    => ['ar' => 'حجز موعد', 'en' => 'Book Appointment'],
+        ];
+        $pt = $pageTitles[$template] ?? $pageTitles['default'];
+
         $pageDemo = (object)[
             'id' => 0,
-            'slug' => '',
-            'title' => $theme->name,
-            'title_en' => $theme->name_en ?? '',
-            'content' => '',
-            'content_en' => '',
-            'template' => 'default',
-            'meta_title' => $theme->name . ' - معاينة القالب',
+            'slug' => $template === 'default' ? '' : $template,
+            'title' => $pt['ar'],
+            'title_en' => $pt['en'],
+            'content' => $content['about']['about_content']['content_ar'] ?? '',
+            'content_en' => $content['about']['about_content']['content_en'] ?? '',
+            'template' => $template,
+            'meta_title' => $pt['ar'] . ' - ' . $theme->name,
             'meta_description' => $theme->description ?? '',
-            'is_home' => 1,
+            'is_home' => ($template === 'default') ? 1 : 0,
         ];
+
+        // Build faqCategories from faqItems (grouped)
+        $faqCategoriesDemo = [];
+        if (!empty($faqItemsDemo)) {
+            foreach ($faqItemsDemo as $faq) {
+                $cat = $faq->category ?? 'general';
+                if (!isset($faqCategoriesDemo[$cat])) {
+                    $faqCategoriesDemo[$cat] = [];
+                }
+                $faqCategoriesDemo[$cat][] = $faq;
+            }
+        }
 
         $data = [
             'tenant' => $tenantDemo,
@@ -328,20 +425,136 @@ class SiteController extends Controller
             'services' => $servicesDemo,
             'gallery' => $galleryDemo,
             'testimonials' => $testimonialsDemo,
+            'faqItems' => $faqItemsDemo,
+            'faqCategories' => $faqCategoriesDemo,
+            'siteStats' => $siteStatsDemo,
+            'siteFeatures' => $siteFeaturesDemo,
+            'partnerItems' => $partnerItemsDemo,
             'sectionsConfig' => [
                 'hero' => true,
                 'services' => true,
                 'gallery' => !empty($galleryDemo),
                 'testimonials' => !empty($testimonialsDemo),
                 'contact' => true,
+                'stats' => !empty($siteStatsDemo),
+                'features' => !empty($siteFeaturesDemo),
+                'partners' => !empty($partnerItemsDemo),
+                'faq' => !empty($faqItemsDemo),
+                'why_us' => !empty($siteFeaturesDemo),
             ],
-            'title' => $theme->name . ' - معاينة القالب',
+            'title' => $pt['ar'] . ' - ' . $theme->name . ' (معاينة)',
             'meta_description' => $theme->description ?? '',
             'is_preview' => true,
+            'siteBase' => '/theme-preview/' . $themeSlug,
+            'lang'  => 'ar',
+            'dir'   => 'rtl',
         ];
 
-        // تحميل الثيم
+        return $data;
+    }
+
+    /**
+     * ✅ صفحة معاينة ديمو للثيم - الرئيسية
+     */
+    public function previewDemo($themeSlug)
+    {
+        $themeModel = $this->model('Theme');
+        $theme = $themeModel->findBySlug($themeSlug);
+        if (!$theme) { $this->redirect('/'); return; }
+
+        $data = $this->buildPreviewData($theme, $themeSlug, 'default');
         $this->renderTheme($themeSlug, 'default', $data);
+    }
+
+    /**
+     * ✅ صفحة معاينة ديمو - من نحن
+     */
+    public function previewDemoAbout($themeSlug)
+    {
+        $themeModel = $this->model('Theme');
+        $theme = $themeModel->findBySlug($themeSlug);
+        if (!$theme) { $this->redirect('/'); return; }
+
+        $data = $this->buildPreviewData($theme, $themeSlug, 'about');
+        $this->renderTheme($themeSlug, 'about', $data);
+    }
+
+    /**
+     * ✅ صفحة معاينة ديمو - خدماتنا
+     */
+    public function previewDemoServices($themeSlug)
+    {
+        $themeModel = $this->model('Theme');
+        $theme = $themeModel->findBySlug($themeSlug);
+        if (!$theme) { $this->redirect('/'); return; }
+
+        $data = $this->buildPreviewData($theme, $themeSlug, 'services');
+        $this->renderTheme($themeSlug, 'services', $data);
+    }
+
+    /**
+     * ✅ صفحة معاينة ديمو - اتصل بنا
+     */
+    public function previewDemoContact($themeSlug)
+    {
+        $themeModel = $this->model('Theme');
+        $theme = $themeModel->findBySlug($themeSlug);
+        if (!$theme) { $this->redirect('/'); return; }
+
+        $data = $this->buildPreviewData($theme, $themeSlug, 'contact');
+        $this->renderTheme($themeSlug, 'contact', $data);
+    }
+
+    /**
+     * ✅ صفحة معاينة ديمو - المعرض
+     */
+    public function previewDemoGallery($themeSlug)
+    {
+        $themeModel = $this->model('Theme');
+        $theme = $themeModel->findBySlug($themeSlug);
+        if (!$theme) { $this->redirect('/'); return; }
+
+        $data = $this->buildPreviewData($theme, $themeSlug, 'gallery');
+        $this->renderTheme($themeSlug, 'gallery', $data);
+    }
+
+    /**
+     * ✅ صفحة معاينة ديمو - الأسئلة الشائعة
+     */
+    public function previewDemoFaq($themeSlug)
+    {
+        $themeModel = $this->model('Theme');
+        $theme = $themeModel->findBySlug($themeSlug);
+        if (!$theme) { $this->redirect('/'); return; }
+
+        $data = $this->buildPreviewData($theme, $themeSlug, 'faq');
+        $this->renderTheme($themeSlug, 'faq', $data);
+    }
+
+    /**
+     * ✅ صفحة معاينة ديمو - شركاؤنا
+     */
+    public function previewDemoPartners($themeSlug)
+    {
+        $themeModel = $this->model('Theme');
+        $theme = $themeModel->findBySlug($themeSlug);
+        if (!$theme) { $this->redirect('/'); return; }
+
+        $data = $this->buildPreviewData($theme, $themeSlug, 'partners');
+        $this->renderTheme($themeSlug, 'partners', $data);
+    }
+
+    /**
+     * ✅ صفحة معاينة ديمو - حجز موعد
+     */
+    public function previewDemoBooking($themeSlug)
+    {
+        $themeModel = $this->model('Theme');
+        $theme = $themeModel->findBySlug($themeSlug);
+        if (!$theme) { $this->redirect('/'); return; }
+
+        $data = $this->buildPreviewData($theme, $themeSlug, 'booking');
+        $this->renderTheme($themeSlug, 'booking', $data);
     }
 
     /**
@@ -536,8 +749,7 @@ class SiteController extends Controller
             $this->view('site/maintenance', ['tenant' => $tenant]);
             return;
         }
-        // قالب واحد فقط - نوفا
-        $themeSlug = 'nova';
+        $themeSlug = !empty($tenant->theme_slug) ? $tenant->theme_slug : 'nova';
         $page = $this->pageModel->findBySlug('faq', $tenant->id);
         if (!$page) {
             $page = (object) [
@@ -578,8 +790,7 @@ class SiteController extends Controller
             $this->view('site/maintenance', ['tenant' => $tenant]);
             return;
         }
-        // قالب واحد فقط - نوفا
-        $themeSlug = 'nova';
+        $themeSlug = !empty($tenant->theme_slug) ? $tenant->theme_slug : 'nova';
         $page = $this->pageModel->findBySlug('partners', $tenant->id);
         if (!$page) {
             $page = (object) [
@@ -618,8 +829,7 @@ class SiteController extends Controller
             $this->view('site/maintenance', ['tenant' => $tenant]);
             return;
         }
-        // قالب واحد فقط - نوفا
-        $themeSlug = 'nova';
+        $themeSlug = !empty($tenant->theme_slug) ? $tenant->theme_slug : 'nova';
         $page = $this->pageModel->findBySlug('booking', $tenant->id);
         if (!$page) {
             $page = (object) [

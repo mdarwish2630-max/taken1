@@ -128,6 +128,22 @@ class DemoData extends Model
 
     private function getDemoDataForTheme($themeSlug)
     {
+        // If ThemeContent system has data for this theme, let DashboardController handle it
+        try {
+            require_once ROOT_PATH . '/app/models/Theme.php';
+            require_once ROOT_PATH . '/app/models/ThemeContent.php';
+            $themeModel = new Theme();
+            $theme = $themeModel->findBySlug($themeSlug);
+            if ($theme) {
+                $contentModel = new ThemeContent();
+                $content = $contentModel->getThemeContent($theme->id);
+                if (!empty($content)) {
+                    return null; // Let the newer ThemeContent system handle it
+                }
+            }
+        } catch (\Exception $e) {}
+
+        // Fallback to static data for old themes
         return self::$demoData[$themeSlug] ?? self::$demoData['general'];
     }
 

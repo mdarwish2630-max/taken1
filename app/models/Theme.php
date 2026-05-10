@@ -210,21 +210,6 @@ class Theme extends Model
      */
     public function getDefaultThemes()
     {
-        return [
-            (object) [
-                'id' => 1,
-                'name' => 'نوفا - احترافي',
-                'name_en' => 'Nova - Professional',
-                'slug' => 'nova',
-                'description' => 'قالب عصري واحترافي متوافق مع جميع الأجهزة',
-                'description_en' => 'Modern and professional template, fully responsive',
-                'category' => 'general',
-                'is_premium' => 0,
-                'is_paid' => 0,
-                'is_active' => 1,
-                'price' => 0,
-                'sort_order' => 1
-            ]
-        ];
+        return [];
     }
 }
