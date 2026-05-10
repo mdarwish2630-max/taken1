@@ -11,10 +11,10 @@
             <i class="fas fa-th-large ml-2"></i> خدماتنا
         </span>
         <h1 class="text-4xl lg:text-5xl font-extrabold text-white mb-4">
-            <?php echo htmlspecialchars($page['heading'] ?? 'خدماتنا المتميزة'); ?>
+            <?php echo htmlspecialchars($page->heading ?? 'خدماتنا المتميزة'); ?>
         </h1>
         <p class="text-lg text-white/70 max-w-2xl mx-auto">
-            <?php echo htmlspecialchars($page['subheading'] ?? 'نقدم مجموعة واسعة من خدمات الصيانة المتخصصة'); ?>
+            <?php echo htmlspecialchars($page->subheading ?? 'نقدم مجموعة واسعة من خدمات الصيانة المتخصصة'); ?>
         </p>
     </div>
     <div class="absolute bottom-0 left-0 right-0">
@@ -28,11 +28,11 @@
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <?php if (!empty($services)): ?>
                 <?php foreach ($services as $idx => $svc): ?>
-                    <a href="<?php echo ($siteBase ?? '/') . '/service/' . ($svc['slug'] ?? ''); ?>" class="card-hover bg-white rounded-card overflow-hidden group" data-aos="fade-up" data-aos-delay="<?php echo ($idx % 3) * 100; ?>">
+                    <a href="<?php echo url(($siteBase ?? '/') . '/service/' . ($svc->slug ?? '')); ?>" class="card-hover bg-white rounded-card overflow-hidden group" data-aos="fade-up" data-aos-delay="<?php echo ($idx % 3) * 100; ?>">
                         <!-- Service Icon Area -->
                         <div class="h-48 bg-gradient-to-br from-warm-100 to-warm-200 flex items-center justify-center relative">
                             <div class="service-icon-wrapper w-24 h-24 rounded-3xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <i class="<?php echo htmlspecialchars($svc['icon'] ?? 'fas fa-cog'); ?> text-4xl text-primary"></i>
+                                <i class="<?php echo htmlspecialchars($svc->icon ?? 'fas fa-cog'); ?> text-4xl text-primary"></i>
                             </div>
                             <div class="absolute top-4 left-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
                                 <span class="text-primary font-bold text-sm"><?php echo $idx + 1; ?></span>
@@ -41,10 +41,10 @@
                         <!-- Service Info -->
                         <div class="p-7">
                             <h3 class="text-xl font-bold text-secondary mb-3 group-hover:text-primary transition-colors">
-                                <?php echo htmlspecialchars($svc['title'] ?? ''); ?>
+                                <?php echo htmlspecialchars($svc->title ?? ''); ?>
                             </h3>
                             <p class="text-gray-500 text-sm leading-relaxed mb-5 line-clamp-3">
-                                <?php echo strip_tags($svc['content'] ?? ''); ?>
+                                <?php echo strip_tags($svc->content ?? ''); ?>
                             </p>
                             <div class="flex items-center justify-between">
                                 <span class="text-primary text-sm font-semibold flex items-center gap-2">
@@ -76,7 +76,7 @@
                 <h2 class="text-2xl lg:text-3xl font-extrabold text-white mb-3">لم تجد ما تبحث عنه؟</h2>
                 <p class="text-white/70 mb-6">تواصل معنا وسنقدم لك الخدمة التي تحتاجها. نغطي جميع مجالات الصيانة.</p>
                 <div class="flex flex-wrap justify-center gap-4">
-                    <a href="<?php echo ($siteBase ?? '/') . '/contact'; ?>" class="btn-primary text-white px-8 py-3 rounded-full font-bold inline-flex items-center gap-2">
+                    <a href="<?php echo url(($siteBase ?? '/') . '/contact'); ?>" class="btn-primary text-white px-8 py-3 rounded-full font-bold inline-flex items-center gap-2">
                         <span>تواصل معنا</span>
                         <i class="fas fa-arrow-left"></i>
                     </a>

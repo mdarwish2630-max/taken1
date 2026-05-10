@@ -14,17 +14,17 @@
                     <i class="fas fa-tools ml-2"></i> شركة ركاز للصيانة
                 </span>
                 <h1 class="text-4xl lg:text-6xl font-extrabold leading-tight mb-6">
-                    <?php echo htmlspecialchars($page['heading'] ?? 'حلول صيانة موثوقة لمنزلك'); ?>
+                    <?php echo htmlspecialchars($page->heading ?? 'حلول صيانة موثوقة لمنزلك'); ?>
                 </h1>
                 <p class="text-lg text-white/80 leading-relaxed mb-8 max-w-lg">
-                    <?php echo htmlspecialchars($page['subheading'] ?? 'نقدم خدمات صيانة شاملة بأيدي فنيين محترفين وبأسعار تنافسية'); ?>
+                    <?php echo htmlspecialchars($page->subheading ?? 'نقدم خدمات صيانة شاملة بأيدي فنيين محترفين وبأسعار تنافسية'); ?>
                 </p>
                 <div class="flex flex-wrap gap-4">
-                    <a href="<?php echo ($siteBase ?? '/') . '/booking'; ?>" class="btn-primary text-white px-8 py-4 rounded-full font-bold text-lg inline-flex items-center gap-2">
+                    <a href="<?php echo url(($siteBase ?? '/') . '/booking'); ?>" class="btn-primary text-white px-8 py-4 rounded-full font-bold text-lg inline-flex items-center gap-2">
                         <span>احجز موعد الآن</span>
                         <i class="fas fa-arrow-left"></i>
                     </a>
-                    <a href="<?php echo ($siteBase ?? '/') . '/services'; ?>" class="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white/20 transition-all duration-300 inline-flex items-center gap-2">
+                    <a href="<?php echo url(($siteBase ?? '/') . '/services'); ?>" class="bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white/20 transition-all duration-300 inline-flex items-center gap-2">
                         <span>خدماتنا</span>
                         <i class="fas fa-th-large"></i>
                     </a>
@@ -77,10 +77,10 @@
             <?php foreach ($siteStats as $stat): ?>
                 <div class="stat-card rounded-card p-8 text-center text-white" data-aos="fade-up">
                     <div class="w-14 h-14 mx-auto mb-4 bg-primary/20 rounded-2xl flex items-center justify-center">
-                        <i class="<?php echo htmlspecialchars($stat['icon'] ?? 'fas fa-chart-line'); ?> text-2xl text-accent"></i>
+                        <i class="<?php echo htmlspecialchars($stat->icon ?? 'fas fa-chart-line'); ?> text-2xl text-accent"></i>
                     </div>
-                    <h3 class="text-3xl lg:text-4xl font-extrabold text-primary mb-2"><?php echo htmlspecialchars($stat['title'] ?? ''); ?></h3>
-                    <p class="text-white/70 text-sm"><?php echo htmlspecialchars($stat['content'] ?? ''); ?></p>
+                    <h3 class="text-3xl lg:text-4xl font-extrabold text-primary mb-2"><?php echo htmlspecialchars($stat->title ?? ''); ?></h3>
+                    <p class="text-white/70 text-sm"><?php echo htmlspecialchars($stat->content ?? ''); ?></p>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -95,21 +95,21 @@
         <div class="text-center mb-14" data-aos="fade-up">
             <span class="inline-block bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">خدماتنا المتميزة</span>
             <h2 class="text-3xl lg:text-4xl font-extrabold text-secondary mb-4">
-                <?php echo htmlspecialchars($page['heading'] ?? 'كل ما تحتاجه تحت سقف واحد'); ?>
+                <?php echo htmlspecialchars($page->heading ?? 'كل ما تحتاجه تحت سقف واحد'); ?>
             </h2>
             <div class="section-divider mx-auto"></div>
         </div>
         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <?php foreach (array_slice($services, 0, 8) as $svc): ?>
-                <a href="<?php echo ($siteBase ?? '/') . '/service/' . ($svc['slug'] ?? ''); ?>" class="card-hover bg-white rounded-card p-7 block group" data-aos="fade-up">
+                <a href="<?php echo url(($siteBase ?? '/') . '/service/' . ($svc->slug ?? '')); ?>" class="card-hover bg-white rounded-card p-7 block group" data-aos="fade-up">
                     <div class="service-icon-wrapper w-16 h-16 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-primary/20 transition-colors duration-300">
-                        <i class="<?php echo htmlspecialchars($svc['icon'] ?? 'fas fa-cog'); ?> text-2xl text-primary"></i>
+                        <i class="<?php echo htmlspecialchars($svc->icon ?? 'fas fa-cog'); ?> text-2xl text-primary"></i>
                     </div>
                     <h3 class="text-lg font-bold text-secondary mb-3 group-hover:text-primary transition-colors">
-                        <?php echo htmlspecialchars($svc['title'] ?? ''); ?>
+                        <?php echo htmlspecialchars($svc->title ?? ''); ?>
                     </h3>
                     <p class="text-gray-500 text-sm leading-relaxed line-clamp-2">
-                        <?php echo strip_tags($svc['content'] ?? ''); ?>
+                        <?php echo strip_tags($svc->content ?? ''); ?>
                     </p>
                     <div class="mt-5 flex items-center gap-2 text-primary text-sm font-semibold">
                         <span>التفاصيل</span>
@@ -119,7 +119,7 @@
             <?php endforeach; ?>
         </div>
         <div class="text-center mt-12">
-            <a href="<?php echo ($siteBase ?? '/') . '/services'; ?>" class="btn-primary text-white px-8 py-4 rounded-full font-bold inline-flex items-center gap-2">
+            <a href="<?php echo url(($siteBase ?? '/') . '/services'); ?>" class="btn-primary text-white px-8 py-4 rounded-full font-bold inline-flex items-center gap-2">
                 <span>عرض جميع الخدمات</span>
                 <i class="fas fa-arrow-left"></i>
             </a>
@@ -141,10 +141,10 @@
             <?php foreach ($siteFeatures as $feat): ?>
                 <div class="bg-white rounded-card p-7 border border-warm-200 hover:border-primary/30 transition-all duration-300" data-aos="fade-up">
                     <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-5">
-                        <i class="<?php echo htmlspecialchars($feat['icon'] ?? 'fas fa-check'); ?> text-2xl text-primary"></i>
+                        <i class="<?php echo htmlspecialchars($feat->icon ?? 'fas fa-check'); ?> text-2xl text-primary"></i>
                     </div>
-                    <h3 class="text-lg font-bold text-secondary mb-3"><?php echo htmlspecialchars($feat['title'] ?? ''); ?></h3>
-                    <p class="text-gray-500 text-sm leading-relaxed"><?php echo htmlspecialchars($feat['content'] ?? ''); ?></p>
+                    <h3 class="text-lg font-bold text-secondary mb-3"><?php echo htmlspecialchars($feat->title ?? ''); ?></h3>
+                    <p class="text-gray-500 text-sm leading-relaxed"><?php echo htmlspecialchars($feat->content ?? ''); ?></p>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -175,12 +175,12 @@
                         <i class="fas fa-star text-yellow-400 text-sm"></i>
                         <i class="fas fa-star text-yellow-400 text-sm"></i>
                     </div>
-                    <p class="text-white/70 text-sm leading-relaxed mb-5"><?php echo htmlspecialchars($test['content'] ?? ''); ?></p>
+                    <p class="text-white/70 text-sm leading-relaxed mb-5"><?php echo htmlspecialchars($test->content ?? ''); ?></p>
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
                             <i class="fas fa-user text-accent text-sm"></i>
                         </div>
-                        <h4 class="text-white font-semibold text-sm"><?php echo htmlspecialchars($test['title'] ?? ''); ?></h4>
+                        <h4 class="text-white font-semibold text-sm"><?php echo htmlspecialchars($test->title ?? ''); ?></h4>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -201,7 +201,7 @@
                 <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-4">هل تحتاج خدمة صيانة؟</h2>
                 <p class="text-white/80 text-lg mb-8 max-w-lg mx-auto">تواصل معنا الآن واحصل على استشارة مجانية. فريقنا جاهز لخدمتك على مدار الساعة.</p>
                 <div class="flex flex-wrap justify-center gap-4">
-                    <a href="<?php echo ($siteBase ?? '/') . '/booking'; ?>" class="bg-white text-primary px-8 py-4 rounded-full font-bold text-lg hover:bg-warm-100 transition-all duration-300 inline-flex items-center gap-2">
+                    <a href="<?php echo url(($siteBase ?? '/') . '/booking'); ?>" class="bg-white text-primary px-8 py-4 rounded-full font-bold text-lg hover:bg-warm-100 transition-all duration-300 inline-flex items-center gap-2">
                         <span>احجز موعد</span>
                         <i class="fas fa-calendar-check"></i>
                     </a>

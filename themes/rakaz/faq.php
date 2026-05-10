@@ -11,10 +11,10 @@
             <i class="fas fa-question-circle ml-2"></i> الأسئلة الشائعة
         </span>
         <h1 class="text-4xl lg:text-5xl font-extrabold text-white mb-4">
-            <?php echo htmlspecialchars($page['heading'] ?? 'الأسئلة المتكررة'); ?>
+            <?php echo htmlspecialchars($page->heading ?? 'الأسئلة المتكررة'); ?>
         </h1>
         <p class="text-lg text-white/70 max-w-2xl mx-auto">
-            <?php echo htmlspecialchars($page['subheading'] ?? 'إجابات على أكثر الأسئلة شيوعاً حول خدماتنا'); ?>
+            <?php echo htmlspecialchars($page->subheading ?? 'إجابات على أكثر الأسئلة شيوعاً حول خدماتنا'); ?>
         </p>
     </div>
     <div class="absolute bottom-0 left-0 right-0">
@@ -34,13 +34,13 @@
                                 <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
                                     <i class="fas fa-question text-primary text-sm"></i>
                                 </div>
-                                <h3 class="text-base font-bold text-secondary"><?php echo htmlspecialchars($faq['title'] ?? ''); ?></h3>
+                                <h3 class="text-base font-bold text-secondary"><?php echo htmlspecialchars($faq->title ?? ''); ?></h3>
                             </div>
                             <i class="fas fa-chevron-down faq-icon text-primary text-sm transition-transform duration-300 flex-shrink-0"></i>
                         </button>
                         <div class="faq-answer hidden px-6 pb-6">
                             <div class="pr-14 text-gray-600 text-sm leading-relaxed">
-                                <?php echo $faq['content'] ?? ''; ?>
+                                <?php echo $faq->content ?? ''; ?>
                             </div>
                         </div>
                     </div>
@@ -58,7 +58,7 @@
             <h3 class="text-2xl font-bold mb-3">لم تجد إجابتك؟</h3>
             <p class="text-white/80 mb-6">تواصل معنا مباشرة وسنجيب على جميع استفساراتك</p>
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="<?php echo ($siteBase ?? '/') . '/contact'; ?>" class="bg-white text-primary px-8 py-3 rounded-full font-bold hover:bg-warm-100 transition-all duration-300 inline-flex items-center gap-2">
+                <a href="<?php echo url(($siteBase ?? '/') . '/contact'); ?>" class="bg-white text-primary px-8 py-3 rounded-full font-bold hover:bg-warm-100 transition-all duration-300 inline-flex items-center gap-2">
                     <span>تواصل معنا</span>
                     <i class="fas fa-arrow-left"></i>
                 </a>

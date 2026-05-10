@@ -11,10 +11,10 @@
             <i class="fas fa-calendar-check ml-2"></i> حجز موعد
         </span>
         <h1 class="text-4xl lg:text-5xl font-extrabold text-white mb-4">
-            <?php echo htmlspecialchars($page['heading'] ?? 'احجز موعدك الآن'); ?>
+            <?php echo htmlspecialchars($page->heading ?? 'احجز موعدك الآن'); ?>
         </h1>
         <p class="text-lg text-white/70 max-w-2xl mx-auto">
-            <?php echo htmlspecialchars($page['subheading'] ?? 'احجز موعد لخدمة الصيانة بسهولة وسرعة'); ?>
+            <?php echo htmlspecialchars($page->subheading ?? 'احجز موعد لخدمة الصيانة بسهولة وسرعة'); ?>
         </p>
     </div>
     <div class="absolute bottom-0 left-0 right-0">
@@ -101,8 +101,8 @@
                                         <option value="">اختر الخدمة</option>
                                         <?php if (!empty($services)): ?>
                                             <?php foreach ($services as $svc): ?>
-                                                <option value="<?php echo htmlspecialchars($svc['title'] ?? ''); ?>">
-                                                    <?php echo htmlspecialchars($svc['title'] ?? ''); ?>
+                                                <option value="<?php echo htmlspecialchars($svc->title ?? ''); ?>">
+                                                    <?php echo htmlspecialchars($svc->title ?? ''); ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         <?php endif; ?>

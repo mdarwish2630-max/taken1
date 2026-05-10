@@ -43,11 +43,11 @@
             <div>
                 <h4 class="text-lg font-bold mb-6 text-primary">روابط سريعة</h4>
                 <ul class="space-y-3">
-                    <li><a href="<?php echo $siteBase ?? '/'; ?>" class="text-white/70 hover:text-primary transition-colors text-sm flex items-center gap-2"><i class="fas fa-chevron-left text-xs text-primary/50"></i> الرئيسية</a></li>
-                    <li><a href="<?php echo ($siteBase ?? '/') . '/services'; ?>" class="text-white/70 hover:text-primary transition-colors text-sm flex items-center gap-2"><i class="fas fa-chevron-left text-xs text-primary/50"></i> خدماتنا</a></li>
-                    <li><a href="<?php echo ($siteBase ?? '/') . '/about'; ?>" class="text-white/70 hover:text-primary transition-colors text-sm flex items-center gap-2"><i class="fas fa-chevron-left text-xs text-primary/50"></i> من نحن</a></li>
-                    <li><a href="<?php echo ($siteBase ?? '/') . '/gallery'; ?>" class="text-white/70 hover:text-primary transition-colors text-sm flex items-center gap-2"><i class="fas fa-chevron-left text-xs text-primary/50"></i> أعمالنا</a></li>
-                    <li><a href="<?php echo ($siteBase ?? '/') . '/contact'; ?>" class="text-white/70 hover:text-primary transition-colors text-sm flex items-center gap-2"><i class="fas fa-chevron-left text-xs text-primary/50"></i> اتصل بنا</a></li>
+                    <li><a href="<?php echo url($siteBase ?? '/'); ?>" class="text-white/70 hover:text-primary transition-colors text-sm flex items-center gap-2"><i class="fas fa-chevron-left text-xs text-primary/50"></i> الرئيسية</a></li>
+                    <li><a href="<?php echo url(($siteBase ?? '/') . '/services'); ?>" class="text-white/70 hover:text-primary transition-colors text-sm flex items-center gap-2"><i class="fas fa-chevron-left text-xs text-primary/50"></i> خدماتنا</a></li>
+                    <li><a href="<?php echo url(($siteBase ?? '/') . '/about'); ?>" class="text-white/70 hover:text-primary transition-colors text-sm flex items-center gap-2"><i class="fas fa-chevron-left text-xs text-primary/50"></i> من نحن</a></li>
+                    <li><a href="<?php echo url(($siteBase ?? '/') . '/gallery'); ?>" class="text-white/70 hover:text-primary transition-colors text-sm flex items-center gap-2"><i class="fas fa-chevron-left text-xs text-primary/50"></i> أعمالنا</a></li>
+                    <li><a href="<?php echo url(($siteBase ?? '/') . '/contact'); ?>" class="text-white/70 hover:text-primary transition-colors text-sm flex items-center gap-2"><i class="fas fa-chevron-left text-xs text-primary/50"></i> اتصل بنا</a></li>
                 </ul>
             </div>
 
@@ -58,9 +58,9 @@
                     <?php if (!empty($services)): ?>
                         <?php foreach (array_slice($services, 0, 5) as $svc): ?>
                             <li>
-                                <a href="<?php echo ($siteBase ?? '/') . '/service/' . ($svc['slug'] ?? ''); ?>" class="text-white/70 hover:text-primary transition-colors text-sm flex items-center gap-2">
+                                <a href="<?php echo url(($siteBase ?? '/') . '/service/' . ($svc->slug ?? '')); ?>" class="text-white/70 hover:text-primary transition-colors text-sm flex items-center gap-2">
                                     <i class="fas fa-chevron-left text-xs text-primary/50"></i>
-                                    <?php echo htmlspecialchars($svc['title'] ?? ''); ?>
+                                    <?php echo htmlspecialchars($svc->title ?? ''); ?>
                                 </a>
                             </li>
                         <?php endforeach; ?>
@@ -109,7 +109,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
                 <p class="text-white/50 text-sm"><?php echo htmlspecialchars($footer_text ?? '&copy; ' . date('Y') . ' شركة ركاز للصيانة. جميع الحقوق محفوظة.'); ?></p>
-                <a href="<?php echo $siteBase ?? '/'; ?>" class="text-primary text-sm hover:text-accent transition-colors">ركاز للصيانة</a>
+                <a href="<?php echo url($siteBase ?? '/'); ?>" class="text-primary text-sm hover:text-accent transition-colors">ركاز للصيانة</a>
             </div>
         </div>
     </div>

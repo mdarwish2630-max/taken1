@@ -558,6 +558,88 @@ class SiteController extends Controller
     }
 
     /**
+ * ✅ صفحة معاينة ديمو - تفاصيل خدمة واحدة
+ */
+public function previewDemoService($themeSlug, $serviceSlug)
+{
+    $themeModel = $this->model('Theme');
+    $theme = $themeModel->findBySlug($themeSlug);
+    if (!$theme) { $this->redirect('/'); return; }
+
+    $data = $this->buildPreviewData($theme, $themeSlug, 'services');
+
+    // البحث عن الخدمة المطلوبة من قائمة الخدمات التجريبية
+    $foundService = null;
+
+    if (!empty($data['services'])) {
+        foreach ($data['services'] as $svc) {
+            if (($svc->slug ?? '') === $serviceSlug) {
+                $foundService = $svc;
+                break;
+            }
+        }
+    }
+
+    // ← إذا ما لقناها بالـ slug، نجرب نطابق بالرقم
+    // (مثلاً service-2 → الخدمة الثانية في المصفوفة)
+    if (!$foundService && !empty($data['services'])) {
+        $idx = (int) preg_replace('/[^0-9]/', '', $serviceSlug) - 1;
+        if ($idx >= 0 && isset($data['services'][$idx])) {
+            $foundService = $data['services'][$idx];
+        }
+    }
+
+    // ← إذا ما في خدمات أبداً (ثيم جديد بدون محتوى بالداتا بيز)
+    // نعمل خدمة وهمية عشان القالب ما يخرب
+    if (!$foundService) {
+        $svcIdx = (int) preg_replace('/[^0-9]/', '', $serviceSlug);
+        if ($svcIdx < 1) { $svcIdx = 1; }
+
+        $defaultTitles = [
+            1 => ['ar' => 'خدمة احترافية',   'en' => 'Professional Service'],
+            2 => ['ar' => 'حلول متكاملة',     'en' => 'Integrated Solutions'],
+            3 => ['ar' => 'صيانة ودعم',       'en' => 'Maintenance & Support'],
+            4 => ['ar' => 'استشارات تقنية',    'en' => 'Tech Consulting'],
+            5 => ['ar' => 'التطوير والبرمجة',  'en' => 'Development & Programming'],
+            6 => ['ar' => 'الحماية والأمان',   'en' => 'Security & Protection'],
+        ];
+        $t = $defaultTitles[$svcIdx] ?? $defaultTitles[1];
+
+        $foundService = (object)[
+            'id'             => 0,
+            'slug'           => $serviceSlug,
+            'title'          => $t['ar'],
+            'title_en'       => $t['en'],
+            'description'    => 'نقدم خدمات احترافية متكاملة بأحدث التقنيات وأعلى معايير الجودة. فريقنا المتخصص جاهز لخدمتكم على مدار الساعة.',
+            'description_en' => 'We provide comprehensive professional services with the latest technology and highest quality standards. Our team is ready to serve you 24/7.',
+            'icon'           => 'fas fa-star',
+            'image'          => '',
+            'price'          => '',
+            'price_text'     => '',
+            'show_on_home'   => 1,
+            'status'         => 'active',
+        ];
+    }
+
+    $data['service'] = $foundService;
+
+    // تحديث بيانات الصفحة
+    $svcTitle = $foundService->title ?? 'تفاصيل الخدمة';
+    $data['page'] = (object)[
+        'id'          => 0,
+        'slug'        => 'service',
+        'title'       => $svcTitle,
+        'title_en'    => $foundService->title_en ?? 'Service Details',
+        'content'     => $foundService->description ?? '',
+        'content_en'  => $foundService->description_en ?? '',
+        'template'    => 'service',
+        'is_home'     => 0,
+    ];
+    $data['title'] = $svcTitle . ' - ' . $theme->name . ' (معاينة)';
+
+    $this->renderTheme($themeSlug, 'service', $data);
+}
+    /**
      * عرض صفحة خدمة
      */
     public function service($slug, $serviceSlug)
@@ -731,9 +813,6 @@ class SiteController extends Controller
         );
 
         if (!$db->error()) {
-            // إرسال إشعار للعميل
-            // sendMail($tenant->contact_email, 'رسالة جديدة', $data['message']);
-            
             $this->jsonSuccess([], 'تم إرسال رسالتك بنجاح');
         }
 

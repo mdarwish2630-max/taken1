@@ -11,10 +11,10 @@
             <i class="fas fa-images ml-2"></i> أعمالنا
         </span>
         <h1 class="text-4xl lg:text-5xl font-extrabold text-white mb-4">
-            <?php echo htmlspecialchars($page['heading'] ?? 'معرض أعمالنا'); ?>
+            <?php echo htmlspecialchars($page->heading ?? 'معرض أعمالنا'); ?>
         </h1>
         <p class="text-lg text-white/70 max-w-2xl mx-auto">
-            <?php echo htmlspecialchars($page['subheading'] ?? 'نماذج من مشاريعنا المكتملة بنجاح'); ?>
+            <?php echo htmlspecialchars($page->subheading ?? 'نماذج من مشاريعنا المكتملة بنجاح'); ?>
         </p>
     </div>
     <div class="absolute bottom-0 left-0 right-0">
@@ -29,21 +29,21 @@
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <?php foreach ($gallery as $idx => $item): ?>
                     <div class="card-hover bg-white rounded-card overflow-hidden group" data-aos="fade-up" data-aos-delay="<?php echo ($idx % 3) * 100; ?>">
-                        <?php if (!empty($item['hero_image'] ?? $item['image'] ?? '')): ?>
+                        <?php if (!empty($item->hero_image ?? $item->image ?? '')): ?>
                             <div class="h-64 overflow-hidden">
-                                <img src="<?php echo htmlspecialchars($item['hero_image'] ?? $item['image']); ?>" alt="<?php echo htmlspecialchars($item['title'] ?? ''); ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                <img src="<?php echo htmlspecialchars($item->hero_image ?? $item->image); ?>" alt="<?php echo htmlspecialchars($item->title ?? ''); ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                             </div>
                         <?php else: ?>
                             <div class="h-64 bg-gradient-to-br from-warm-200 to-warm-300 flex items-center justify-center">
-                                <i class="<?php echo htmlspecialchars($item['icon'] ?? 'fas fa-image'); ?> text-5xl text-primary/30"></i>
+                                <i class="<?php echo htmlspecialchars($item->icon ?? 'fas fa-image'); ?> text-5xl text-primary/30"></i>
                             </div>
                         <?php endif; ?>
                         <div class="p-6">
                             <h3 class="text-lg font-bold text-secondary group-hover:text-primary transition-colors">
-                                <?php echo htmlspecialchars($item['title'] ?? 'مشروع ' . ($idx + 1)); ?>
+                                <?php echo htmlspecialchars($item->title ?? 'مشروع ' . ($idx + 1)); ?>
                             </h3>
-                            <?php if (!empty($item['content'])): ?>
-                                <p class="text-gray-500 text-sm mt-2 line-clamp-2"><?php echo strip_tags($item['content']); ?></p>
+                            <?php if (!empty($item->content)): ?>
+                                <p class="text-gray-500 text-sm mt-2 line-clamp-2"><?php echo strip_tags($item->content); ?></p>
                             <?php endif; ?>
                         </div>
                     </div>

@@ -1,20 +1,3 @@
-<?php
- $toArray = function($v) { return is_object($v) ? (array) $v : $v; };
-if (isset($page) && is_object($page)) $page = (array) $page;
-if (isset($service) && is_object($service)) $service = (array) $service;
-if (isset($tenant) && is_object($tenant)) $tenant = (array) $tenant;
-if (isset($settings) && is_object($settings)) $settings = (array) $settings;
-if (isset($menu) && is_array($menu)) $menu = array_map($toArray, $menu);
-if (isset($services) && is_array($services)) $services = array_map($toArray, $services);
-if (isset($testimonials) && is_array($testimonials)) $testimonials = array_map($toArray, $testimonials);
-if (isset($faqItems) && is_array($faqItems)) $faqItems = array_map($toArray, $faqItems);
-if (isset($faqCategories) && is_array($faqCategories)) $faqCategories = array_map($toArray, $faqCategories);
-if (isset($siteStats) && is_array($siteStats)) $siteStats = array_map($toArray, $siteStats);
-if (isset($siteFeatures) && is_array($siteFeatures)) $siteFeatures = array_map($toArray, $siteFeatures);
-if (isset($partnerItems) && is_array($partnerItems)) $partnerItems = array_map($toArray, $partnerItems);
-if (isset($gallery) && is_array($gallery)) $gallery = array_map($toArray, $gallery);
-if (isset($banners) && is_array($banners)) $banners = array_map($toArray, $banners);
-?>
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -48,7 +31,7 @@ if (isset($banners) && is_array($banners)) $banners = array_map($toArray, $banne
         }
     </script>
     <style>
-        * { font-family: 'Cairo', sans-serif; }
+        * { font-family: 'Cairo', 'sans-serif'; }
         body { background-color: #f8f5f1; }
         .hero-gradient { background: linear-gradient(135deg, #2d2520 0%, #4a3728 50%, #c97b47 100%); }
         .card-hover { transition: all 0.3s ease; }

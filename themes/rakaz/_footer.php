@@ -59,8 +59,14 @@
             </h4>
             <ul class="space-y-3 text-gray-400">
                 <?php foreach ($menu ?? [] as $item): ?>
+                <?php
+                $navHref = $siteBase ?? '/';
+                $slug = strtolower($item->slug ?? '');
+                if ($item->is_home == 1 || empty($slug)) { $navHref = $siteBase ?? '/'; }
+                else { $navHref = ($siteBase ?? '/') . '/' . $slug; }
+                ?>
                 <li>
-                    <a href="<?= url($item->is_home ? '/' : $item->slug) ?>"
+                    <a href="<?= url($navHref) ?>"
                        class="hover:text-copper transition-colors text-sm">
                         <?= $item->title ?>
                     </a>

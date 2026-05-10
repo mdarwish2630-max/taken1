@@ -11,10 +11,10 @@
             <i class="fas fa-building ml-2"></i> من نحن
         </span>
         <h1 class="text-4xl lg:text-5xl font-extrabold text-white mb-4">
-            <?php echo htmlspecialchars($page['heading'] ?? 'عن شركة ركاز'); ?>
+            <?php echo htmlspecialchars($page->heading ?? 'عن شركة ركاز'); ?>
         </h1>
         <p class="text-lg text-white/70 max-w-2xl mx-auto">
-            <?php echo htmlspecialchars($page['subheading'] ?? 'خبرة تتجاوز 15 عاماً في عالم الصيانة'); ?>
+            <?php echo htmlspecialchars($page->subheading ?? 'خبرة تتجاوز 15 عاماً في عالم الصيانة'); ?>
         </p>
     </div>
     <div class="absolute bottom-0 left-0 right-0">
@@ -43,8 +43,8 @@
                 <span class="inline-block bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">قصتنا</span>
                 <h2 class="text-3xl lg:text-4xl font-extrabold text-secondary mb-6">شريكك الموثوق في الصيانة</h2>
                 <div class="space-y-4 text-gray-600 leading-relaxed">
-                    <?php if (!empty($page['content'])): ?>
-                        <?php echo $page['content']; ?>
+                    <?php if (!empty($page->content)): ?>
+                        <?php echo $page->content; ?>
                     <?php else: ?>
                         <p>تأسست شركة ركاز للصيانة عام 2010 بهدف تقديم خدمات صيانة احترافية وموثوقة. نمتلك فريقاً من الفنيين المتخصصين والحاصلين على أعلى الشهادات المهنية.</p>
                         <p>نؤمن بأن الصيانة الجيدة هي أساس الراحة والسلامة في المنزل والمكتب. لذلك نحرص على تقديم خدمات عالية الجودة مع ضمان شامل على جميع أعمالنا.</p>
@@ -85,10 +85,10 @@
                 <?php foreach ($siteStats as $stat): ?>
                     <div class="text-center">
                         <div class="w-14 h-14 mx-auto mb-4 bg-primary/20 rounded-2xl flex items-center justify-center">
-                            <i class="<?php echo htmlspecialchars($stat['icon'] ?? 'fas fa-chart-line'); ?> text-2xl text-accent"></i>
+                            <i class="<?php echo htmlspecialchars($stat->icon ?? 'fas fa-chart-line'); ?> text-2xl text-accent"></i>
                         </div>
-                        <h3 class="text-3xl font-extrabold text-primary mb-1"><?php echo htmlspecialchars($stat['title'] ?? ''); ?></h3>
-                        <p class="text-white/60 text-sm"><?php echo htmlspecialchars($stat['content'] ?? ''); ?></p>
+                        <h3 class="text-3xl font-extrabold text-primary mb-1"><?php echo htmlspecialchars($stat->title ?? ''); ?></h3>
+                        <p class="text-white/60 text-sm"><?php echo htmlspecialchars($stat->content ?? ''); ?></p>
                     </div>
                 <?php endforeach; ?>
             </div>

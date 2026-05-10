@@ -3,7 +3,7 @@
     <div class="max-w-7xl mx-auto px-6 lg:px-16 flex items-center justify-between min-h-[80px]">
 
         <!-- Logo -->
-        <a href="<?= url('/') ?>" class="flex items-center gap-3">
+        <a href="<?= url($siteBase ?? '/') ?>" class="flex items-center gap-3">
             <div class="w-12 h-12 bg-copper text-white flex items-center justify-center text-2xl font-black rounded-rakaz shrink-0">
                 <i class="fas fa-wrench"></i>
             </div>
@@ -18,7 +18,13 @@
         <!-- Desktop Navigation -->
         <div class="hidden lg:flex items-center font-bold text-warm-text">
             <?php foreach ($menu ?? [] as $item): ?>
-                <a href="<?= url($item->is_home ? '/' : $item->slug) ?>"
+                <?php
+                $navHref = $siteBase ?? '/';
+                $slug = strtolower($item->slug ?? '');
+                if ($item->is_home == 1 || empty($slug)) { $navHref = $siteBase ?? '/'; }
+                else { $navHref = ($siteBase ?? '/') . '/' . $slug; }
+                ?>
+                <a href="<?= url($navHref) ?>"
                    class="px-4 py-7 border-b-3 border-transparent hover:border-copper hover:text-copper transition-all duration-300 text-sm tracking-wide">
                     <?= $item->title ?>
                 </a>
@@ -32,7 +38,7 @@
                class="w-10 h-10 bg-green-500 hover:bg-green-600 text-white flex items-center justify-center rounded-full transition-all duration-300">
                 <i class="fab fa-whatsapp text-lg"></i>
             </a>
-            <a href="<?= url('/booking') ?>"
+            <a href="<?= url(($siteBase ?? '/') . '/booking') ?>"
                class="btn-copper px-7 py-2.5 font-bold text-sm">
                 طلب صيانة
             </a>
@@ -50,13 +56,19 @@
     <div id="rakazMobileMenu" class="hidden lg:hidden bg-warm-bg/98 backdrop-blur-xl border-t border-copper/10">
         <div class="max-w-7xl mx-auto px-6 py-6 space-y-3">
             <?php foreach ($menu ?? [] as $item): ?>
-                <a href="<?= url($item->is_home ? '/' : $item->slug) ?>"
+                <?php
+                $navHref = $siteBase ?? '/';
+                $slug = strtolower($item->slug ?? '');
+                if ($item->is_home == 1 || empty($slug)) { $navHref = $siteBase ?? '/'; }
+                else { $navHref = ($siteBase ?? '/') . '/' . $slug; }
+                ?>
+                <a href="<?= url($navHref) ?>"
                    class="block text-warm-text hover:text-copper font-bold transition-colors duration-300 py-2 text-base
                           border-b border-copper/5 last:border-0 mobile-nav-link">
                     <?= $item->title ?>
                 </a>
             <?php endforeach; ?>
-            <a href="<?= url('/booking') ?>"
+            <a href="<?= url(($siteBase ?? '/') . '/booking') ?>"
                class="block text-center btn-copper px-6 py-3 font-bold text-base mt-4">
                 طلب صيانة
             </a>

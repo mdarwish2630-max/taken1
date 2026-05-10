@@ -3,7 +3,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
             <!-- Logo -->
-            <a href="<?php echo $siteBase ?? '/'; ?>" class="flex items-center gap-3">
+            <a href="<?php echo url($siteBase ?? '/'); ?>" class="flex items-center gap-3">
                 <?php if (!empty($site_logo)): ?>
                     <img src="<?php echo htmlspecialchars($site_logo); ?>" alt="<?php echo htmlspecialchars($site_name ?? 'ركاز'); ?>" class="h-12 w-auto">
                 <?php else: ?>
@@ -19,15 +19,19 @@
             <!-- Desktop Navigation -->
             <div class="hidden lg:flex items-center gap-1">
                 <?php
-                // Build navigation explicitly to fix menu link issue
+                // Build navigation from menu data (menu items are objects, not arrays)
                 $navItems = [];
                 if (!empty($menu)) {
                     foreach ($menu as $menuItem) {
-                        $navItems[$menuItem['page_key']] = $menuItem['title'] ?? $menuItem['heading'] ?? '';
+                        $slug = $menuItem->slug ?? '';
+                        $title = $menuItem->title ?? ($menuItem->heading ?? '');
+                        if ($slug) {
+                            $navItems[$slug] = $title;
+                        }
                     }
                 }
-                
-                // Default navigation items (always available)
+
+                // Default navigation items (always available as fallback)
                 $defaultNav = [
                     'home' => 'الرئيسية',
                     'services' => 'خدماتنا',
@@ -36,13 +40,13 @@
                     'faq' => 'الأسئلة الشائعة',
                     'contact' => 'اتصل بنا',
                 ];
-                
+
                 // Merge: use menu data if available, else defaults
                 $finalNav = [];
                 foreach ($defaultNav as $key => $label) {
                     $finalNav[$key] = isset($navItems[$key]) ? $navItems[$key] : $label;
                 }
-                
+
                 foreach ($finalNav as $pageKey => $pageTitle):
                     // Generate correct URL based on page type
                     if ($pageKey === 'home') {
@@ -50,21 +54,21 @@
                     } else {
                         $navUrl = ($siteBase ?? '/') . '/' . $pageKey;
                     }
-                    
-                    // Highlight active page
-                    $isActive = (isset($page) && isset($page['page_key']) && $page['page_key'] === $pageKey) ? true : false;
+
+                    // Highlight active page (page is an object, not array)
+                    $isActive = (isset($page) && isset($page->slug) && $page->slug === $pageKey) ? true : false;
                 ?>
-                    <a href="<?php echo htmlspecialchars($navUrl); ?>"
+                    <a href="<?php echo url($navUrl); ?>"
                        class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
-                              <?php echo $isActive 
-                                  ? 'bg-primary text-white shadow-md' 
+                              <?php echo $isActive
+                                  ? 'bg-primary text-white shadow-md'
                                   : 'text-secondary hover:text-primary hover:bg-warm-100'; ?>">
                         <?php echo htmlspecialchars($pageTitle); ?>
                     </a>
                 <?php endforeach; ?>
-                
+
                 <!-- CTA Button -->
-                <a href="<?php echo ($siteBase ?? '/') . '/booking'; ?>"
+                <a href="<?php echo url(($siteBase ?? '/') . '/booking'); ?>"
                    class="btn-primary text-white px-6 py-2.5 rounded-full text-sm font-semibold mr-2">
                     احجز موعد
                 </a>
@@ -85,17 +89,17 @@
                     } else {
                         $navUrl = ($siteBase ?? '/') . '/' . $pageKey;
                     }
-                    $isActive = (isset($page) && isset($page['page_key']) && $page['page_key'] === $pageKey) ? true : false;
+                    $isActive = (isset($page) && isset($page->slug) && $page->slug === $pageKey) ? true : false;
                 ?>
-                    <a href="<?php echo htmlspecialchars($navUrl); ?>"
+                    <a href="<?php echo url($navUrl); ?>"
                        class="px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-300
-                              <?php echo $isActive 
-                                  ? 'bg-primary text-white' 
+                              <?php echo $isActive
+                                  ? 'bg-primary text-white'
                                   : 'text-secondary hover:bg-warm-100 hover:text-primary'; ?>">
                         <?php echo htmlspecialchars($pageTitle); ?>
                     </a>
                 <?php endforeach; ?>
-                <a href="<?php echo ($siteBase ?? '/') . '/booking'; ?>"
+                <a href="<?php echo url(($siteBase ?? '/') . '/booking'); ?>"
                    class="btn-primary text-white px-6 py-3 rounded-2xl text-sm font-semibold text-center mt-2">
                     احجز موعد
                 </a>

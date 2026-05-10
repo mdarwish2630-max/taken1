@@ -11,10 +11,10 @@
             <i class="fas fa-handshake ml-2"></i> شركاؤنا
         </span>
         <h1 class="text-4xl lg:text-5xl font-extrabold text-white mb-4">
-            <?php echo htmlspecialchars($page['heading'] ?? 'شركاء النجاح'); ?>
+            <?php echo htmlspecialchars($page->heading ?? 'شركاء النجاح'); ?>
         </h1>
         <p class="text-lg text-white/70 max-w-2xl mx-auto">
-            <?php echo htmlspecialchars($page['subheading'] ?? 'نفتخر بشراكتنا مع نخبة من الشركات والمؤسسات الرائدة'); ?>
+            <?php echo htmlspecialchars($page->subheading ?? 'نفتخر بشراكتنا مع نخبة من الشركات والمؤسسات الرائدة'); ?>
         </p>
     </div>
     <div class="absolute bottom-0 left-0 right-0">
@@ -30,9 +30,9 @@
                 <?php foreach ($partnerItems as $idx => $partner): ?>
                     <div class="partner-logo bg-white rounded-card p-8 flex flex-col items-center justify-center text-center border border-warm-200 hover:border-primary/30 transition-all duration-300" data-aos="fade-up" data-aos-delay="<?php echo min($idx * 80, 400); ?>">
                         <div class="w-16 h-16 bg-warm-100 rounded-2xl flex items-center justify-center mb-4">
-                            <i class="<?php echo htmlspecialchars($partner['icon'] ?? 'fas fa-building'); ?> text-3xl text-primary/60"></i>
+                            <i class="<?php echo htmlspecialchars($partner->icon ?? 'fas fa-building'); ?> text-3xl text-primary/60"></i>
                         </div>
-                        <h3 class="text-sm font-bold text-secondary"><?php echo htmlspecialchars($partner['title'] ?? ''); ?></h3>
+                        <h3 class="text-sm font-bold text-secondary"><?php echo htmlspecialchars($partner->title ?? ''); ?></h3>
                     </div>
                 <?php endforeach; ?>
             </div>
