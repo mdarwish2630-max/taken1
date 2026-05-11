@@ -66,12 +66,19 @@ $currentSubscription = $currentSubscription ?? null;
                         <h5 style="margin: 0; font-weight: 700; color: var(--dark);">
                             <?= htmlspecialchars($plan->name) ?>
                         </h5>
+                        <?php
+                            // دعم أسماء أعمدة مختلفة: price_monthly أو price
+                            $planPrice = $plan->price_monthly ?? $plan->price ?? 0;
+                            $planIsFree = ($plan->is_free ?? 0) == 1 || floatval($planPrice) == 0;
+                            $planCurrency = $plan->currency ?? 'SAR';
+                            $planDuration = $plan->duration_days ?? $plan->duration ?? 30;
+                        ?>
                         <div style="text-align: left;">
-                            <?php if ($plan->is_free): ?>
+                            <?php if ($planIsFree): ?>
                                 <span style="font-size: 1.5rem; font-weight: 800; color: #22c55e;"><?= lang('free_plan') ?? 'مجاني' ?></span>
                             <?php else: ?>
-                                <span style="font-size: 1.5rem; font-weight: 800; color: var(--primary);"><?= htmlspecialchars($plan->price) ?></span>
-                                <small style="color: #64748b;"> <?= lang('pricing_currency') ?? '$' ?>/<?= $plan->duration ?? 30 ?> <?= lang('days') ?? 'يوم' ?></small>
+                                <span style="font-size: 1.5rem; font-weight: 800; color: var(--primary);"><?= htmlspecialchars($planPrice) ?></span>
+                                <small style="color: #64748b;"> <?= htmlspecialchars($planCurrency) ?>/<?= $planDuration ?> <?= lang('days') ?? 'يوم' ?></small>
                             <?php endif; ?>
                         </div>
                     </div>

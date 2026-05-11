@@ -348,7 +348,7 @@ CREATE TABLE IF NOT EXISTS `demo_imports` (
 -- =============================================
 
 -- إضافة الثيمات
-INSERT INTO `themes` (`name`, `slug`, `description`, `category`, `preview_image`, `is_active`) VALUES
+INSERT IGNORE INTO `themes` (`name`, `slug`, `description`, `category`, `preview_image`, `is_active`) VALUES
 ('خدمات الصيانة', 'maintenance', 'قالب متخصص لشركات الصيانة والإصلاحات', 'maintenance', 'maintenance-preview.jpg', 1),
 ('خدمات الديكور', 'decor', 'قالب متخصص لشركات الديكور والتصميم الداخلي', 'decor', 'decor-preview.jpg', 1),
 ('خدمات الكهرباء', 'electric', 'قالب متخصص للكهربائيين وشركات الكهرباء', 'electric', 'electric-preview.jpg', 1),
@@ -357,7 +357,7 @@ INSERT INTO `themes` (`name`, `slug`, `description`, `category`, `preview_image`
 ('خدمات عامة', 'general', 'قالب عام مناسب لجميع أنواع الخدمات', 'general', 'general-preview.jpg', 1);
 
 -- إضافة إعدادات النظام
-INSERT INTO `settings` (`setting_key`, `setting_value`, `setting_type`, `description`) VALUES
+INSERT IGNORE INTO `settings` (`setting_key`, `setting_value`, `setting_type`, `description`) VALUES
 ('site_name', 'منصة المواقع', 'string', 'اسم المنصة'),
 ('site_email', 'info@cms-platform.com', 'string', 'بريد المنصة'),
 ('trial_days', '14', 'integer', 'عدد أيام التجربة المجانية'),
@@ -369,7 +369,7 @@ INSERT INTO `settings` (`setting_key`, `setting_value`, `setting_type`, `descrip
 
 -- إضافة مدير النظام الافتراضي
 -- كلمة المرور: admin123 (مشفرة بـ password_hash)
-INSERT INTO `users` (`email`, `password`, `full_name`, `role`, `status`, `email_verified`) VALUES
+INSERT IGNORE INTO `users` (`email`, `password`, `full_name`, `role`, `status`, `email_verified`) VALUES
 ('admin@cms-platform.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'مدير النظام', 'admin', 'active', 1);
 
 -- =============================================
@@ -650,24 +650,24 @@ CREATE TABLE IF NOT EXISTS `site_features` (
 -- إضافة أعمدة إضافية لجدول tenants
 -- =============================================
 -- هذه الأعمدة قد تكون موجودة بالفعل، لذلك نستخدم IF NOT EXISTS عبر إدراج تجاهل الأخطاء
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `plan_id` INT(11) UNSIGNED DEFAULT NULL AFTER `theme_id`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `subscription_plan_id` INT(11) UNSIGNED DEFAULT NULL AFTER `theme_id`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `auto_renew` TINYINT(1) NOT NULL DEFAULT 0 AFTER `trial_ends_at`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `last_payment_date` DATETIME DEFAULT NULL AFTER `auto_renew`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `next_payment_date` DATETIME DEFAULT NULL AFTER `last_payment_date`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `default_language` VARCHAR(10) DEFAULT 'ar' AFTER `settings`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `sections_config` TEXT DEFAULT NULL AFTER `default_language`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `plan_features` TEXT DEFAULT NULL AFTER `sections_config`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_status` enum('none','pending','active','rejected') DEFAULT 'none' AFTER `custom_domain`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_purchased` tinyint(1) DEFAULT 0 AFTER `custom_domain_status`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_verified` TINYINT(1) DEFAULT 0 AFTER `custom_domain_purchased`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_verification_token` VARCHAR(64) NULL AFTER `custom_domain_verified`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `domain_status` ENUM('pending', 'active', 'failed') DEFAULT 'pending' AFTER `custom_domain_verification_token`;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `plan_id` INT(11) UNSIGNED DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `subscription_plan_id` INT(11) UNSIGNED DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `auto_renew` TINYINT(1) NOT NULL DEFAULT 0;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `last_payment_date` DATETIME DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `next_payment_date` DATETIME DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `default_language` VARCHAR(10) DEFAULT 'ar';
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `sections_config` TEXT DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `plan_features` TEXT DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_status` enum('none','pending','active','rejected') DEFAULT 'none';
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_purchased` tinyint(1) DEFAULT 0;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_verified` TINYINT(1) DEFAULT 0;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_verification_token` VARCHAR(64) NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `domain_status` ENUM('pending', 'active', 'failed') DEFAULT 'pending';
 
 -- =============================================
 -- إضافة أعمدة إضافية لجدول subscriptions
 -- =============================================
-ALTER TABLE `subscriptions` ADD COLUMN IF NOT EXISTS `plan_id` INT(11) UNSIGNED DEFAULT NULL AFTER `tenant_id`;
+ALTER TABLE `subscriptions` ADD COLUMN IF NOT EXISTS `plan_id` INT(11) UNSIGNED DEFAULT NULL;
 
 -- =============================================
 -- بيانات تجريبية - خطط الاشتراك

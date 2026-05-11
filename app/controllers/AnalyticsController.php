@@ -57,6 +57,77 @@ class AnalyticsController extends Controller
     }
 
     /**
+     * تفاصيل الإحصائيات (API JSON)
+     */
+    public function details()
+    {
+        $tenant = Auth::tenant();
+        $days = (int)$this->input('days', 7);
+        $days = min(max($days, 1), 365);
+
+        $stats = $this->analyticsModel->getSiteStats($tenant->id, $days);
+        $dailyViews = $this->analyticsModel->getDailyViews($tenant->id, $days);
+        $topPages = $this->analyticsModel->getTopPages($tenant->id, 20, $days);
+        $trafficSources = $this->analyticsModel->getTrafficSources($tenant->id, $days);
+        $deviceStats = $this->analyticsModel->getDeviceStats($tenant->id, $days);
+
+        $this->jsonSuccess([
+            'stats' => $stats,
+            'daily_views' => $dailyViews,
+            'top_pages' => $topPages,
+            'traffic_sources' => $trafficSources,
+            'device_stats' => $deviceStats,
+            'days' => $days
+        ]);
+    }
+
+    /**
+     * تصدير الإحصائيات (CSV)
+     */
+    public function export()
+    {
+        $tenant = Auth::tenant();
+        $days = (int)$this->input('days', 30);
+        $days = min(max($days, 1), 365);
+        $format = $this->input('format', 'csv');
+
+        $dailyViews = $this->analyticsModel->getDailyViews($tenant->id, $days);
+        $topPages = $this->analyticsModel->getTopPages($tenant->id, 50, $days);
+
+        if ($format === 'json') {
+            header('Content-Type: application/json; charset=utf-8');
+            header('Content-Disposition: attachment; filename="analytics-' . $days . '-days.json"');
+            echo json_encode([
+                'export_date' => date('Y-m-d H:i:s'),
+                'period_days' => $days,
+                'daily_views' => $dailyViews,
+                'top_pages' => $topPages
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        // CSV افتراضي
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="analytics-' . $days . '-days.csv"');
+        echo "\xEF\xBB\xBF"; // BOM للتوافق مع Excel
+
+        // صف المشاهدات اليومية
+        echo "التاريخ,المشاهدات,الزوار الفريدين\n";
+        foreach ($dailyViews as $row) {
+            echo "{$row->view_date},{$row->views},{$row->visitors}\n";
+        }
+
+        echo "\nالصفحة,المشاهدات\n";
+        foreach ($topPages as $row) {
+            $pageTitle = str_replace('"', '""', $row->page_title ?? $row->page_url);
+            $pageUrl = str_replace('"', '""', $row->page_url);
+            echo "\"{$pageTitle}\",{$row->views}\n";
+        }
+
+        exit;
+    }
+
+    /**
      * تتبع زيارة (API للواجهة الأمامية)
      */
     public function track()

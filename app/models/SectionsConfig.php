@@ -48,7 +48,7 @@ class SectionsConfig
         $row = $this->db->query(
             "SELECT is_enabled FROM sections_config WHERE tenant_id = ? AND section_key = ?",
             [$tenantId, $sectionKey]
-        )->row();
+        )->first();
 
         if (!$row) return true; // إذا لم يكن موجود، اعتبره مفعلاً
         return (bool) $row->is_enabled;
@@ -62,7 +62,7 @@ class SectionsConfig
         return $this->db->query(
             "UPDATE sections_config SET is_enabled = ? WHERE tenant_id = ? AND section_key = ?",
             [$enabled ? 1 : 0, $tenantId, $sectionKey]
-        )->affectedRows() > 0;
+        )->count() > 0;
     }
 
     /**
@@ -73,7 +73,7 @@ class SectionsConfig
         return $this->db->query(
             "UPDATE sections_config SET display_order = ? WHERE tenant_id = ? AND section_key = ?",
             [$order, $tenantId, $sectionKey]
-        )->affectedRows() > 0;
+        )->count() > 0;
     }
 
     /**

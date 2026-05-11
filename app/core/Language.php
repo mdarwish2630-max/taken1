@@ -217,8 +217,11 @@ class Language
 /**
  * دالة مساعدة للترجمة
  */
-function lang($key, $default = '', $params = [])
+function lang($key = null, $default = '', $params = [])
 {
+    if ($key === null) {
+        return Language::current();
+    }
     return Language::get($key, $default, $params);
 }
 

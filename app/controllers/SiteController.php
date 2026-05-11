@@ -813,6 +813,19 @@ public function previewDemoService($themeSlug, $serviceSlug)
         );
 
         if (!$db->error()) {
+            // إرسال إشعار داخلي لصاحب الموقع
+            try {
+                require_once ROOT_PATH . '/app/models/Notification.php';
+                $notification = new Notification();
+                if ($tenant->user_id) {
+                    $notification->notifyNewMessage(
+                        $tenant->user_id,
+                        $data['name'],
+                        '/dashboard/messages'
+                    );
+                }
+            } catch (\Exception $e) {}
+
             $this->jsonSuccess([], 'تم إرسال رسالتك بنجاح');
         }
 

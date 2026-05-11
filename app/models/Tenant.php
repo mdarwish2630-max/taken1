@@ -501,6 +501,7 @@ class Tenant extends Model
         
         return $this->update($tenantId, [
             'plan_id' => $planId,
+            'subscription_plan_id' => $planId,
             'plan_features' => json_encode($features),
             'subscription_status' => 'trial',
             'trial_ends_at' => $trialEndsAt

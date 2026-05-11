@@ -32,20 +32,20 @@ $pendingRequest = $pendingRequest ?? null;
                     <?= lang('pending_request') ?? 'لديك طلب معلق' ?>
                 </h5>
                 <p style="margin: 0; color: #78716c; font-size: 0.9rem;">
-                    <?php if ($pendingRequest->request_type === 'upgrade'): ?>
+                    <?php if (($pendingRequest->request_type ?? '') === 'upgrade'): ?>
                         <?= lang('pending_upgrade_msg') ?? 'طلب ترقية إلى خطة' ?>
                         <strong><?= htmlspecialchars($pendingRequest->plan_name ?? '') ?></strong>
-                        <?php if ($pendingRequest->notes): ?>
+                        <?php if (!empty($pendingRequest->notes)): ?>
                             <br><small><?= lang('notes') ?? 'ملاحظات' ?>: <?= htmlspecialchars($pendingRequest->notes) ?></small>
                         <?php endif; ?>
                     <?php else: ?>
                         <?= lang('pending_new_msg') ?? 'طلب اشتراك جديد بخطة' ?>
                         <strong><?= htmlspecialchars($pendingRequest->plan_name ?? '') ?></strong>
-                        <?php if ($pendingRequest->notes): ?>
+                        <?php if (!empty($pendingRequest->notes)): ?>
                             <br><small><?= lang('notes') ?? 'ملاحظات' ?>: <?= htmlspecialchars($pendingRequest->notes) ?></small>
                         <?php endif; ?>
                     <?php endif; ?>
-                    <br><small style="color: #a8a29e;"><?= lang('request_date') ?? 'تاريخ الطلب' ?>: <?= date('Y-m-d H:i', strtotime($pendingRequest->created_at)) ?></small>
+                    <br><small style="color: #a8a29e;"><?= lang('request_date') ?? 'تاريخ الطلب' ?>: <?= !empty($pendingRequest->created_at) ? date('Y-m-d H:i', strtotime($pendingRequest->created_at)) : '-' ?></small>
                 </p>
             </div>
             <span class="badge" style="background: #fbbf24; color: #78350f; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600;">

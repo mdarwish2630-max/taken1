@@ -1,8 +1,9 @@
 <?php
 /**
- * Subscription Controller
- * متحكم الاشتراكات - مع نظام طلبات الأدمن
+ * CMS Platform - Subscription Controller
+ * متحكم الاشتراكات - إدارة خطط الاشتراك والترقية
  */
+
 class SubscriptionController extends Controller
 {
     private $planModel;
@@ -22,14 +23,13 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * عرض صفحة الاشتراك الرئيسية (Overview)
+     * عرض صفحة الاشتراك الرئيسية
      */
     public function overview()
     {
         $tenant = Auth::tenant();
 
-        // إحصائيات الاستخدام
-        $stats = (object) [];
+        $stats = (object)[];
         try {
             $db = Database::getInstance();
             $stats->services_count = $db->query("SELECT COUNT(*) as c FROM services WHERE tenant_id = ?", [$tenant->id])->first()->c ?? 0;
@@ -42,12 +42,25 @@ class SubscriptionController extends Controller
 
         $currentSubscription = $this->getCurrentSubscription($tenant->id);
         $currentPlan = null;
-        if ($currentSubscription) {
+        if ($currentSubscription && !empty($currentSubscription->plan_id)) {
             $currentPlan = $this->planModel->find($currentSubscription->plan_id);
         }
 
-        // التحقق من وجود طلب معلق
-        $pendingRequest = $this->getPendingRequest($tenant->id);
+        // التحقق من وجود طلب اشتراك معلق (فقط طلبات تغيير الخطة)
+        $pendingRequest = null;
+        try {
+            $db = Database::getInstance();
+            $pendingCount = $db->query(
+                "SELECT COUNT(*) as c FROM subscription_requests WHERE tenant_id = ? AND status = 'pending'",
+                [$tenant->id]
+            )->first();
+
+            if ($pendingCount && intval($pendingCount->c) > 0) {
+                $pendingRequest = $this->getPendingRequest($tenant->id);
+            }
+        } catch (\Exception $e) {
+            $pendingRequest = null;
+        }
 
         $this->view('dashboard/subscription', [
             'title' => lang('subscription') ?? 'الاشتراك',
@@ -65,32 +78,41 @@ class SubscriptionController extends Controller
     public function plans()
     {
         $tenant = Auth::tenant();
-        $plans = $this->planModel->getActivePlans();
-        $currentSubscription = $this->getCurrentSubscription($tenant->id);
+
+        $db = Database::getInstance();
+        $plans = $db->query(
+            "SELECT * FROM subscription_plans WHERE is_active = 1 ORDER BY price_monthly ASC"
+        )->results();
+
+        // التحقق من وجود طلب اشتراك معلق
+        $pendingRequest = $this->getPendingRequest($tenant->id);
+        if ($pendingRequest) {
+            Session::error(lang('pending_request_exists') ?? 'لديك طلب معلق بالفعل، انتظر مراجعة الإدارة');
+            $this->redirect('/dashboard/subscription');
+        }
 
         $this->view('dashboard/subscription-plans', [
             'title' => lang('subscription_plans') ?? 'خطط الاشتراك',
             'tenant' => $tenant,
-            'plans' => $plans,
-            'currentPlan' => $currentSubscription
+            'plans' => $plans
         ]);
     }
 
     /**
-     * اختيار خطة - التوجيه لصفحة الدفع
+     * اختيار خطة اشتراك
      */
     public function selectPlan($planId)
     {
         $this->verifyCsrf();
         $tenant = Auth::tenant();
-        $plan = $this->planModel->find($planId);
 
+        $plan = $this->planModel->find($planId);
         if (!$plan) {
             Session::error(lang('plan_not_found') ?? 'الخطة غير موجودة');
             $this->redirect('/dashboard/subscription-plans');
         }
 
-        // التحقق من وجود طلب معلق
+        // التحقق من وجود طلب اشتراك معلق
         $pendingRequest = $this->getPendingRequest($tenant->id);
         if ($pendingRequest) {
             Session::error(lang('pending_request_exists') ?? 'لديك طلب معلق بالفعل، انتظر مراجعة الإدارة');
@@ -119,12 +141,17 @@ class SubscriptionController extends Controller
         $currentSubscription = $this->getCurrentSubscription($tenant->id);
         $requestType = 'new';
         if ($currentSubscription) {
-            if ($currentSubscription->plan_id == $planId) {
+            if (!empty($currentSubscription->plan_id) && $currentSubscription->plan_id == $planId) {
                 $requestType = 'renew';
-            } elseif (isset($plan->price) && isset($currentSubscription->price) && $plan->price > $currentSubscription->price) {
-                $requestType = 'upgrade';
-            } else {
-                $requestType = 'new';
+ } else {
+                // مقارنة السعر: دعم price_monthly و price
+                $newPrice = floatval($plan->price_monthly ?? $plan->price ?? 0);
+                $curPrice = floatval($currentSubscription->price ?? $currentSubscription->amount ?? 0);
+                if ($newPrice > $curPrice) {
+                    $requestType = 'upgrade';
+                } else {
+                    $requestType = 'new';
+                }
             }
         }
 
@@ -159,7 +186,7 @@ class SubscriptionController extends Controller
             $this->redirect('/dashboard/subscription-plans');
         }
 
-        // التحقق من وجود طلب معلق
+        // التحقق من وجود طلب اشتراك معلق
         $pendingRequest = $this->getPendingRequest($tenant->id);
         if ($pendingRequest) {
             Session::error(lang('pending_request_exists') ?? 'لديك طلب معلق بالفعل');
@@ -169,7 +196,7 @@ class SubscriptionController extends Controller
         // تحديد نوع الطلب تلقائياً
         $currentSubscription = $this->getCurrentSubscription($tenant->id);
         if ($currentSubscription && $requestType === 'new') {
-            if ($currentSubscription->plan_id == $planId) {
+            if (!empty($currentSubscription->plan_id) && $currentSubscription->plan_id == $planId) {
                 $requestType = 'renew';
             } else {
                 $requestType = 'upgrade';
@@ -178,50 +205,30 @@ class SubscriptionController extends Controller
 
         $db = Database::getInstance();
 
+        // التحقق من وجود العمود request_type في الجدول
+        $hasRequestType = $this->columnExists('subscription_requests', 'request_type');
+
         // إنشاء طلب اشتراك جديد بحالة "معلق"
-        $db->query(
-            "INSERT INTO subscription_requests 
-            (tenant_id, plan_id, request_type, status, notes, created_at) 
-            VALUES (?, ?, ?, 'pending', ?, NOW())",
-            [$tenant->id, $planId, $requestType, $notes]
-        );
+        if ($hasRequestType) {
+            $db->query(
+                "INSERT INTO subscription_requests 
+                (tenant_id, plan_id, request_type, status, notes, created_at) 
+                VALUES (?, ?, ?, 'pending', ?, NOW())",
+                [$tenant->id, $planId, $requestType, $notes]
+            );
+        } else {
+            $db->query(
+                "INSERT INTO subscription_requests 
+                (tenant_id, plan_id, status, notes, created_at) 
+                VALUES (?, ?, 'pending', ?, NOW())",
+                [$tenant->id, $planId, $notes]
+            );
+        }
 
         unset($_SESSION['selected_plan_id']);
 
-        if ($requestType === 'upgrade') {
-            Session::success(lang('upgrade_request_sent') ?? 'تم إرسال طلب الترقية بنجاح، سيتم مراجعته من قبل الإدارة');
-        } elseif ($requestType === 'renew') {
-            Session::success(lang('renew_request_sent') ?? 'تم إرسال طلب التجديد بنجاح، سيتم مراجعته من قبل الإدارة');
-        } else {
-            Session::success(lang('subscription_request_sent') ?? 'تم إرسال طلب الاشتراك بنجاح، سيتم مراجعته من قبل الإدارة');
-        }
-
+        Session::success(lang('request_submitted') ?? 'تم إرسال طلبك بنجاح، سيتم مراجعته من قبل الإدارة');
         $this->redirect('/dashboard/subscription');
-    }
-
-    /**
-     * تجديد الاشتراك الحالي
-     */
-    public function renew()
-    {
-        $this->verifyCsrf();
-        $tenant = Auth::tenant();
-        $current = $this->getCurrentSubscription($tenant->id);
-
-        if (!$current) {
-            Session::error(lang('no_active_subscription') ?? 'لا يوجد اشتراك نشط للتجديد');
-            $this->redirect('/dashboard/subscription');
-        }
-
-        // التحقق من وجود طلب معلق
-        $pendingRequest = $this->getPendingRequest($tenant->id);
-        if ($pendingRequest) {
-            Session::error(lang('pending_request_exists') ?? 'لديك طلب معلق بالفعل');
-            $this->redirect('/dashboard/subscription');
-        }
-
-        $_SESSION['selected_plan_id'] = $current->plan_id;
-        $this->redirect('/dashboard/subscription/payment');
     }
 
     /**
@@ -252,37 +259,22 @@ class SubscriptionController extends Controller
 
         $db = Database::getInstance();
         $plans = $db->query(
-            "SELECT * FROM subscription_plans WHERE is_active = 1 ORDER BY price ASC"
+            "SELECT * FROM subscription_plans WHERE is_active = 1 ORDER BY price_monthly ASC"
         )->results();
 
-        // عرض الخطط الأعلى سعراً فقط
-        $upgradePlans = [];
-        if ($current) {
-            $currentPlan = $this->planModel->find($current->plan_id);
-            $currentPrice = $currentPlan->price ?? 0;
-            foreach ($plans as $p) {
-                if ($p->id != $current->plan_id && (!$p->is_free) && $p->price > $currentPrice) {
-                    $upgradePlans[] = $p;
-                }
-            }
-        } else {
-            foreach ($plans as $p) {
-                if (!$p->is_free) {
-                    $upgradePlans[] = $p;
-                }
-            }
+        // التحقق من وجود طلب اشتراك معلق
+        $pendingRequest = $this->getPendingRequest($tenant->id);
+        if ($pendingRequest) {
+            Session::error(lang('pending_request_exists') ?? 'لديك طلب معلق بالفعل');
+            $this->redirect('/dashboard/subscription');
         }
 
-        $this->view('dashboard/subscription-upgrade', [
-            'title' => lang('upgrade_plan') ?? 'ترقية الخطة',
-            'tenant' => $tenant,
-            'currentPlan' => $current,
-            'plans' => $upgradePlans
-        ]);
+        $_SESSION['selected_plan_id'] = $current->plan_id ?? null;
+        $this->redirect('/dashboard/subscription/payment');
     }
 
     /**
-     * عرض الفواتير / سجل الاشتراكات
+     * عرض الفواتير وسجل الطلبات
      */
     public function invoices()
     {
@@ -291,24 +283,48 @@ class SubscriptionController extends Controller
         $db = Database::getInstance();
 
         // سجل الاشتراكات
-        $subscriptions = $db->query(
-            "SELECT s.*, sp.name as plan_name, sp.price as plan_price
-             FROM subscriptions s
-             JOIN subscription_plans sp ON s.plan_id = sp.id
-             WHERE s.tenant_id = ?
-             ORDER BY s.created_at DESC",
-            [$tenant->id]
-        )->results();
+        $subscriptions = [];
+        try {
+            $subscriptions = $db->query(
+                "SELECT s.id, s.tenant_id, s.plan_id, s.plan_name, s.amount, s.currency,
+                        s.start_date, s.end_date, s.status, s.created_at,
+                        sp.name as plan_name, sp.price as plan_price
+                 FROM subscriptions s
+                 LEFT JOIN subscription_plans sp ON s.plan_id = sp.id
+                 WHERE s.tenant_id = ?
+                 ORDER BY s.created_at DESC",
+                [$tenant->id]
+            )->results();
+        } catch (\Exception $e) {}
 
-        // سجل الطلبات
-        $requests = $db->query(
-            "SELECT sr.*, sp.name as plan_name
-             FROM subscription_requests sr
-             JOIN subscription_plans sp ON sr.plan_id = sp.id
-             WHERE sr.tenant_id = ?
-             ORDER BY sr.created_at DESC",
-            [$tenant->id]
-        )->results();
+        // سجل طلبات الاشتراك (فقط طلبات تغيير الخطة)
+        $requests = [];
+        $hasRequestType = $this->columnExists('subscription_requests', 'request_type');
+        try {
+            if ($hasRequestType) {
+                $requests = $db->query(
+                    "SELECT sr.id, sr.tenant_id, sr.plan_id, sr.request_type, sr.status,
+                            sr.notes, sr.admin_notes, sr.created_at,
+                            sp.name as plan_name
+                     FROM subscription_requests sr
+                     LEFT JOIN subscription_plans sp ON sr.plan_id = sp.id
+                     WHERE sr.tenant_id = ?
+                     ORDER BY sr.created_at DESC",
+                    [$tenant->id]
+                )->results();
+            } else {
+                $requests = $db->query(
+                    "SELECT sr.id, sr.tenant_id, sr.plan_id, sr.status,
+                            sr.notes, sr.admin_notes, sr.created_at,
+                            sp.name as plan_name
+                     FROM subscription_requests sr
+                     LEFT JOIN subscription_plans sp ON sr.plan_id = sp.id
+                     WHERE sr.tenant_id = ?
+                     ORDER BY sr.created_at DESC",
+                    [$tenant->id]
+                )->results();
+            }
+        } catch (\Exception $e) {}
 
         $this->view('dashboard/invoices', [
             'title' => lang('invoices') ?? 'الفواتير والطلبات',
@@ -319,6 +335,24 @@ class SubscriptionController extends Controller
     }
 
     /**
+     * التحقق من وجود عمود في جدول
+     */
+    private function columnExists($table, $column)
+    {
+        try {
+            $db = Database::getInstance();
+            $result = $db->query(
+                "SELECT COUNT(*) as c FROM information_schema.COLUMNS 
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?",
+                [$table, $column]
+            )->first();
+            return $result && $result->c > 0;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
      * الحصول على الاشتراك النشط الحالي
      */
     private function getCurrentSubscription($tenantId)
@@ -326,11 +360,13 @@ class SubscriptionController extends Controller
         try {
             $db = Database::getInstance();
             return $db->query(
-                "SELECT s.*, sp.name as plan_name, sp.price, sp.duration, sp.features,
+                "SELECT s.id, s.tenant_id, s.plan_id, s.plan_name, s.amount, s.currency,
+                        s.start_date, s.end_date, s.status, s.created_at,
+                        sp.name as plan_name, sp.price, sp.duration, sp.features,
                         sp.max_services, sp.max_gallery, sp.max_pages, sp.max_banners,
                         sp.allow_custom_domain, sp.is_free
                  FROM subscriptions s
-                 JOIN subscription_plans sp ON s.plan_id = sp.id
+                 LEFT JOIN subscription_plans sp ON s.plan_id = sp.id
                  WHERE s.tenant_id = ? AND s.status = 'active'
                  ORDER BY s.created_at DESC LIMIT 1",
                 [$tenantId]
@@ -341,20 +377,63 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * الحصول على طلب معلق
+     * الحصول على طلب اشتراك معلق
+     * مهم: هذا يتحقق فقط من طلبات تغيير الخطة (subscription_requests)
+     * وليس من مشتريات الخدمات (tenant_purchases) - هالاثنين أنظمة منفصلة
      */
     private function getPendingRequest($tenantId)
     {
         try {
             $db = Database::getInstance();
-            return $db->query(
-                "SELECT sr.*, sp.name as plan_name, sp.price as plan_price
-                 FROM subscription_requests sr
-                 JOIN subscription_plans sp ON sr.plan_id = sp.id
-                 WHERE sr.tenant_id = ? AND sr.status = 'pending'
-                 ORDER BY sr.created_at DESC LIMIT 1",
+
+            // التحقق من وجود الجدول
+            $tableCheck = $db->query("SELECT COUNT(*) as c FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'subscription_requests'")->first();
+            if (!$tableCheck || $tableCheck->c == 0) {
+                return null; // الجدول مو موجود
+            }
+
+            // فحص مباشر: هل في طلبات pending لهذا المستأجر؟
+            $countCheck = $db->query(
+                "SELECT COUNT(*) as c FROM subscription_requests WHERE tenant_id = ? AND status = 'pending'",
                 [$tenantId]
             )->first();
+
+            if (!$countCheck || $countCheck->c == 0) {
+                return null; // ما في طلبات معلقة
+            }
+
+            // التحقق من وجود العمود request_type
+            $hasRequestType = $this->columnExists('subscription_requests', 'request_type');
+
+            if ($hasRequestType) {
+                $result = $db->query(
+                    "SELECT sr.id, sr.tenant_id, sr.plan_id, sr.request_type, sr.status,
+                            sr.notes, sr.admin_notes, sr.reviewed_by, sr.reviewed_at,
+                            sr.created_at, sp.name as plan_name, sp.price as plan_price
+                     FROM subscription_requests sr
+                     LEFT JOIN subscription_plans sp ON sr.plan_id = sp.id
+                     WHERE sr.tenant_id = ? AND sr.status = 'pending'
+                     ORDER BY sr.created_at DESC LIMIT 1",
+                    [$tenantId]
+                )->first();
+            } else {
+                $result = $db->query(
+                    "SELECT sr.id, sr.tenant_id, sr.plan_id, sr.status,
+                            sr.notes, sr.admin_notes, sr.reviewed_by, sr.reviewed_at,
+                            sr.created_at, sp.name as plan_name, sp.price as plan_price
+                     FROM subscription_requests sr
+                     LEFT JOIN subscription_plans sp ON sr.plan_id = sp.id
+                     WHERE sr.tenant_id = ? AND sr.status = 'pending'
+                     ORDER BY sr.created_at DESC LIMIT 1",
+                    [$tenantId]
+                )->first();
+            }
+
+            // التأكد إن النتيجة تحتوي على id حقيقي
+            if ($result && !empty($result->id)) {
+                return $result;
+            }
+            return null;
         } catch (\Exception $e) {
             return null;
         }

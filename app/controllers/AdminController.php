@@ -1715,56 +1715,184 @@ class AdminController extends Controller
 
     /**
      * عرض طلبات الاشتراك والترقية
+     * — إصلاح شامل: استعلام بسيط أولاً + إثراء البيانات بالـ JOIN مع fallback —
      */
     public function subscriptionRequests()
     {
         $db = Database::getInstance();
         $statusFilter = $_GET['status'] ?? '';
+        $requests = [];
+        $debugMsg = '';
 
-        $sql = "SELECT sr.*, sp.name as plan_name, sp.price as plan_price,
-                u.full_name as user_name, u.email as user_email,
-                t.site_name, t.slug as tenant_slug
-                FROM subscription_requests sr
-                JOIN subscription_plans sp ON sr.plan_id = sp.id
-                JOIN tenants t ON sr.tenant_id = t.id
-                JOIN users u ON t.user_id = u.id";
-
-        $params = [];
-        if ($statusFilter && in_array($statusFilter, ['pending', 'approved', 'rejected', 'cancelled'])) {
-            $sql .= " WHERE sr.status = ?";
-            $params[] = $statusFilter;
+        // === الخطوة 1: التحقق من وجود الجدول ===
+        try {
+            $tableCheck = $db->query(
+                "SELECT COUNT(*) as c FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'subscription_requests'"
+            )->first();
+            if (!$tableCheck || $tableCheck->c == 0) {
+                $debugMsg = 'جدول subscription_requests غير موجود. شغّل ملف SQL لإنشائه.';
+                $this->view('admin/subscription-requests', [
+                    'title' => 'طلبات الاشتراك',
+                    'requests' => [],
+                    'statusFilter' => $statusFilter,
+                    'debugMsg' => $debugMsg,
+                    'totalInTable' => 0
+                ]);
+                return;
+            }
+        } catch (\Exception $e) {
+            $debugMsg = 'خطأ في التحقق من الجدول: ' . $e->getMessage();
         }
 
-        $sql .= " ORDER BY sr.created_at DESC";
+        // === الخطوة 2: جلب كل الطلبات ببساطة (بدون JOIN) ===
+        // هذا الاستعلام مضمون يشغّل لأنه يقرأ من جدول واحد فقط
+        try {
+            $whereClause = "";
+            $params = [];
+            if ($statusFilter && in_array($statusFilter, ['pending', 'approved', 'rejected', 'cancelled'])) {
+                $whereClause = " WHERE status = ?";
+                $params[] = $statusFilter;
+            }
 
-        $requests = $db->query($sql, $params)->results();
+            $requests = $db->query(
+                "SELECT * FROM subscription_requests{$whereClause} ORDER BY id DESC",
+                $params
+            )->results();
+
+            if ($requests === null) {
+                $requests = [];
+            }
+        } catch (\Exception $e) {
+            $debugMsg = "خطأ في جلب الطلبات: " . $e->getMessage();
+            $requests = [];
+        }
+
+        // === الخطوة 3: إثراء البيانات — جلب أسماء الخطط والمستخدمين والمواقع ===
+        // نجمع IDs اللي نحتاجها ثم نسأل عنهم دفعة واحدة
+        $tenantIds = array_unique(array_filter(array_map(function($r) { return $r->tenant_id ?? null; }, $requests)));
+        $planIds = array_unique(array_filter(array_map(function($r) { return $r->plan_id ?? null; }, $requests)));
+
+        // جلب بيانات المواقع (tenants)
+        $tenantsMap = [];
+        if (!empty($tenantIds)) {
+            try {
+                $placeholders = implode(',', array_fill(0, count($tenantIds), '?'));
+                $tenants = $db->query(
+                    "SELECT id, site_name, user_id, slug FROM tenants WHERE id IN ($placeholders)",
+                    array_values($tenantIds)
+                )->results();
+                foreach ($tenants as $t) {
+                    $tenantsMap[$t->id] = $t;
+                }
+            } catch (\Exception $e) {}
+        }
+
+        // جلب بيانات المستخدمين (users)
+        $userIds = array_unique(array_filter(array_map(function($t) { return $t->user_id ?? null; }, $tenantsMap)));
+        $usersMap = [];
+        if (!empty($userIds)) {
+            try {
+                $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+                $users = $db->query(
+                    "SELECT id, full_name, email FROM users WHERE id IN ($placeholders)",
+                    array_values($userIds)
+                )->results();
+                foreach ($users as $u) {
+                    $usersMap[$u->id] = $u;
+                }
+            } catch (\Exception $e) {}
+        }
+
+        // جلب بيانات الخطط (subscription_plans)
+        $plansMap = [];
+        if (!empty($planIds)) {
+            try {
+                $placeholders = implode(',', array_fill(0, count($planIds), '?'));
+                $plans = $db->query(
+                    "SELECT id, name, price_monthly, price, currency FROM subscription_plans WHERE id IN ($placeholders)",
+                    array_values($planIds)
+                )->results();
+                foreach ($plans as $p) {
+                    $plansMap[$p->id] = $p;
+                }
+            } catch (\Exception $e) {}
+        }
+
+        // === الخطوة 4: دمج البيانات في كل طلب ===
+        foreach ($requests as $req) {
+            $req->plan_name = null;
+            $req->plan_price = null;
+            $req->user_name = null;
+            $req->user_email = null;
+            $req->site_name = null;
+            $req->tenant_slug = null;
+
+            // بيانات الخطة
+            if (isset($req->plan_id) && isset($plansMap[$req->plan_id])) {
+                $plan = $plansMap[$req->plan_id];
+                $req->plan_name = $plan->name ?? null;
+                $req->plan_price = $plan->price_monthly ?? $plan->price ?? null;
+            }
+
+            // بيانات الموقع
+            if (isset($req->tenant_id) && isset($tenantsMap[$req->tenant_id])) {
+                $tenant = $tenantsMap[$req->tenant_id];
+                $req->site_name = $tenant->site_name ?? null;
+                $req->tenant_slug = $tenant->slug ?? null;
+
+                // بيانات المستخدم
+                if (isset($tenant->user_id) && isset($usersMap[$tenant->user_id])) {
+                    $user = $usersMap[$tenant->user_id];
+                    $req->user_name = $user->full_name ?? null;
+                    $req->user_email = $user->email ?? null;
+                }
+            }
+
+            // التأكد من وجود request_type (قد لا يكون موجود في قاعدة البيانات القديمة)
+            if (!isset($req->request_type)) {
+                $req->request_type = 'new';
+            }
+        }
 
         $this->view('admin/subscription-requests', [
             'title' => 'طلبات الاشتراك',
             'requests' => $requests,
-            'statusFilter' => $statusFilter
+            'statusFilter' => $statusFilter,
+            'debugMsg' => $debugMsg,
+            'totalInTable' => count($requests)
         ]);
     }
 
     /**
      * قبول طلب اشتراك / ترقية
-     * — تم إصلاحه: أسماء أعمدة صحيحة + استخدام جدول tenants بدل subscriptions —
+     * — إصلاح شامل: كشف ديناميكي للأعمدة + fallback للجداول —
      */
-
     public function approveSubscriptionRequest($requestId)
     {
         $db = Database::getInstance();
         $requestId = intval($requestId);
 
+        if ($requestId <= 0) {
+            $_SESSION['error'] = 'معرف الطلب غير صالح';
+            $this->redirect('/admin/subscription-requests');
+            return;
+        }
+
         try {
-            $sql = "SELECT sr.*, sp.name as plan_name, sp.price_monthly, sp.price_yearly, sp.currency,
-                           sp.max_pages, sp.max_services, sp.max_gallery, sp.max_banners,
-                           sp.custom_domain, sp.remove_branding, sp.analytics_access,
-                           sp.priority_support, sp.features as plan_features,
-                           t.business_name as tenant_business_name
+            // كشف الأعمدة المتاحة ديناميكياً
+            $hasRequestType = $this->adminColumnExists('subscription_requests', 'request_type');
+
+            // بناء استعلام SELECT ديناميكي
+            $selectCols = "sr.id, sr.tenant_id, sr.plan_id, sr.status, sr.notes, sr.created_at";
+            if ($hasRequestType) $selectCols .= ", sr.request_type";
+
+            // جلب الطلب + بيانات الخطة + بيانات المستأجر (باستخدام LEFT JOIN)
+            $sql = "SELECT $selectCols,
+                           sp.name as plan_name, sp.price_monthly, sp.price_yearly, sp.currency,
+                           t.site_name
                     FROM subscription_requests sr
-                    INNER JOIN subscription_plans sp ON sr.plan_id = sp.id
-                    INNER JOIN tenants t ON sr.tenant_id = t.id
+                    LEFT JOIN subscription_plans sp ON sr.plan_id = sp.id
+                    LEFT JOIN tenants t ON sr.tenant_id = t.id
                     WHERE sr.id = ? AND sr.status = 'pending'";
 
             $result = $db->query($sql, [$requestId]);
@@ -1776,74 +1904,134 @@ class AdminController extends Controller
                 return;
             }
 
-            $amount = $request->price_monthly;
+            $planName = $request->plan_name ?? 'خطة غير محددة';
+            $amount = $request->price_monthly ?? 0;
             $startDate = date('Y-m-d');
             $endDate = date('Y-m-d', strtotime('+30 days'));
 
-            $subSql = "INSERT INTO subscriptions (tenant_id, plan_id, request_id, plan_name, amount,
-                         currency, start_date, end_date, status, payment_method, payment_reference, created_at)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, NOW())";
-
-            $subResult = $db->query($subSql, [
-                $request->tenant_id,
-                $request->plan_id,
-                $request->id,
-                $request->plan_name,
-                $amount,
-                $request->currency,
-                $startDate,
-                $endDate,
-                $request->payment_method ?? 'manual',
-                $request->payment_reference ?? ''
-            ]);
-
-            if (!$subResult) {
-                $_SESSION['error'] = 'حدث خطأ أثناء إنشاء الاشتراك';
-                $this->redirect('/admin/subscription-requests');
-                return;
+            // محاولة إنشاء سجل في جدول subscriptions (إن وُجد)
+            $subscriptionsTableExists = $this->adminTableExists('subscriptions');
+            if ($subscriptionsTableExists) {
+                try {
+                    $subSql = "INSERT INTO subscriptions (tenant_id, plan_id, request_id, plan_name, amount,
+                                 currency, start_date, end_date, status, payment_method, payment_reference, created_at)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, NOW())";
+                    $db->query($subSql, [
+                        $request->tenant_id,
+                        $request->plan_id,
+                        $request->id,
+                        $planName,
+                        $amount,
+                        $request->currency ?? 'SAR',
+                        $startDate,
+                        $endDate,
+                        $request->payment_method ?? 'manual',
+                        $request->payment_reference ?? ''
+                    ]);
+                } catch (\Exception $e) {
+                    error_log("تحذير: لم يتم إنشاء سجل subscriptions: " . $e->getMessage());
+                    // نكمل حتى لو فشل إنشاء السجل في subscriptions
+                }
             }
 
-            $updateSql = "UPDATE subscription_requests
-                          SET status = 'approved',
-                              reviewed_at = NOW(),
-                              reviewed_by = ?,
-                              admin_notes = ?
-                          WHERE id = ?";
+            // تحديث حالة الطلب
+            $hasReviewedAt = $this->adminColumnExists('subscription_requests', 'reviewed_at');
+            $hasReviewedBy = $this->adminColumnExists('subscription_requests', 'reviewed_by');
 
-            $adminId = $_SESSION['user_id'] ?? 1;
-            $adminNotes = trim((string)($_POST['admin_notes'] ?? 'تمت الموافقة'));
-            $db->query($updateSql, [$adminId, $adminNotes, $requestId]);
+            if ($hasReviewedAt && $hasReviewedBy) {
+                $updateSql = "UPDATE subscription_requests
+                              SET status = 'approved',
+                                  reviewed_at = NOW(),
+                                  reviewed_by = ?,
+                                  admin_notes = ?
+                              WHERE id = ?";
+                $adminId = $_SESSION['user_id'] ?? 1;
+                $adminNotes = trim((string)($_POST['admin_notes'] ?? 'تمت الموافقة'));
+                $db->query($updateSql, [$adminId, $adminNotes, $requestId]);
+            } else {
+                $hasAdminNotes = $this->adminColumnExists('subscription_requests', 'admin_notes');
+                if ($hasAdminNotes) {
+                    $updateSql = "UPDATE subscription_requests SET status = 'approved', admin_notes = ? WHERE id = ?";
+                    $adminNotes = trim((string)($_POST['admin_notes'] ?? 'تمت الموافقة'));
+                    $db->query($updateSql, [$adminNotes, $requestId]);
+                } else {
+                    $db->query("UPDATE subscription_requests SET status = 'approved' WHERE id = ?", [$requestId]);
+                }
+            }
 
-            $tenantUpdateSql = "UPDATE tenants
-                                SET subscription_status = 'active',
-                                    current_plan = ?
-                                WHERE id = ?";
-            $db->query($tenantUpdateSql, [$request->plan_name, $request->tenant_id]);
+            // تحديث بيانات المستأجر (الخطوة الأهم)
+            $hasCurrentPlan = $this->adminColumnExists('tenants', 'current_plan');
+            $hasSubStatus = $this->adminColumnExists('tenants', 'subscription_status');
+
+            $tenantSetClauses = [];
+            $tenantParams = [];
+            if ($hasSubStatus) {
+                $tenantSetClauses[] = "subscription_status = 'active'";
+            }
+            if ($hasCurrentPlan) {
+                $tenantSetClauses[] = "current_plan = ?";
+                $tenantParams[] = $planName;
+            }
+            if (!empty($tenantSetClauses)) {
+                $tenantParams[] = $request->tenant_id;
+                $db->query(
+                    "UPDATE tenants SET " . implode(', ', $tenantSetClauses) . " WHERE id = ?",
+                    $tenantParams
+                );
+            }
 
             $_SESSION['success'] = 'تم الموافقة على الاشتراك وتفعيله بنجاح';
+
+            // إرسال إشعار داخلي للعميل
+            try {
+                require_once ROOT_PATH . '/app/models/Notification.php';
+                $notification = new Notification();
+                $tenantData = $db->query("SELECT user_id FROM tenants WHERE id = ?", [$request->tenant_id])->first();
+                if ($tenantData && $tenantData->user_id) {
+                    $notification->notifySubscriptionApproved(
+                        $tenantData->user_id,
+                        $planName,
+                        '/dashboard/subscription'
+                    );
+                }
+            } catch (\Exception $e) {
+                error_log("تحذير: لم يتم إرسال الإشعار: " . $e->getMessage());
+            }
+
             $this->redirect('/admin/subscription-requests');
 
         } catch (Exception $e) {
-            error_log("خطأ في الموافقة: " . $e->getMessage());
-            $_SESSION['error'] = 'حدث خطأ: ' . $e->getMessage();
+            error_log("خطأ في الموافقة على الاشتراك: " . $e->getMessage());
+            $_SESSION['error'] = 'حدث خطأ أثناء الموافقة: ' . $e->getMessage();
             $this->redirect('/admin/subscription-requests');
         }
     }
 
     /**
      * رفض طلب اشتراك / ترقية
-     * — تم إصلاحه: إزالة sr.status واستخدام status مباشرة —
+     * — إصلاح شامل: كشف ديناميكي للأعمدة + LEFT JOIN —
      */
-
     public function rejectSubscriptionRequest($requestId)
     {
         $db = Database::getInstance();
         $requestId = intval($requestId);
 
+        if ($requestId <= 0) {
+            $_SESSION['error'] = 'معرف الطلب غير صالح';
+            $this->redirect('/admin/subscription-requests');
+            return;
+        }
+
         try {
-            $sql = "SELECT sr.*, t.business_name
+            // كشف الأعمدة
+            $hasRequestType = $this->adminColumnExists('subscription_requests', 'request_type');
+
+            $selectCols = "sr.id, sr.tenant_id, sr.plan_id, sr.status, sr.notes, sr.created_at";
+            if ($hasRequestType) $selectCols .= ", sr.request_type";
+
+            $sql = "SELECT $selectCols, t.site_name
                     FROM subscription_requests sr
-                    INNER JOIN tenants t ON sr.tenant_id = t.id
+                    LEFT JOIN tenants t ON sr.tenant_id = t.id
                     WHERE sr.id = ? AND sr.status = 'pending'";
 
             $result = $db->query($sql, [$requestId]);
@@ -1855,24 +2043,92 @@ class AdminController extends Controller
                 return;
             }
 
-            $updateSql = "UPDATE subscription_requests
-                          SET status = 'rejected',
-                              reviewed_at = NOW(),
-                              reviewed_by = ?,
-                              admin_notes = ?
-                          WHERE id = ?";
+            // تحديث حالة الطلب مع كشف الأعمدة
+            $hasReviewedAt = $this->adminColumnExists('subscription_requests', 'reviewed_at');
+            $hasReviewedBy = $this->adminColumnExists('subscription_requests', 'reviewed_by');
 
-            $adminId = $_SESSION['user_id'] ?? 1;
-            $adminNotes = trim((string)($_POST['admin_notes'] ?? 'تم رفض الطلب'));
-            $db->query($updateSql, [$adminId, $adminNotes, $requestId]);
+            if ($hasReviewedAt && $hasReviewedBy) {
+                $updateSql = "UPDATE subscription_requests
+                              SET status = 'rejected',
+                                  reviewed_at = NOW(),
+                                  reviewed_by = ?,
+                                  admin_notes = ?
+                              WHERE id = ?";
+                $adminId = $_SESSION['user_id'] ?? 1;
+                $adminNotes = trim((string)($_POST['admin_notes'] ?? 'تم رفض الطلب'));
+                $db->query($updateSql, [$adminId, $adminNotes, $requestId]);
+            } else {
+                $hasAdminNotes = $this->adminColumnExists('subscription_requests', 'admin_notes');
+                if ($hasAdminNotes) {
+                    $updateSql = "UPDATE subscription_requests SET status = 'rejected', admin_notes = ? WHERE id = ?";
+                    $adminNotes = trim((string)($_POST['admin_notes'] ?? 'تم رفض الطلب'));
+                    $db->query($updateSql, [$adminNotes, $requestId]);
+                } else {
+                    $db->query("UPDATE subscription_requests SET status = 'rejected' WHERE id = ?", [$requestId]);
+                }
+            }
 
             $_SESSION['success'] = 'تم رفض طلب الاشتراك';
+
+            // إرسال إشعار داخلي للعميل
+            try {
+                require_once ROOT_PATH . '/app/models/Notification.php';
+                $notification = new Notification();
+                $tenantData = $db->query("SELECT user_id FROM tenants WHERE id = ?", [$request->tenant_id])->first();
+                if ($tenantData && $tenantData->user_id) {
+                    $adminNotes = trim((string)($_POST['admin_notes'] ?? ''));
+                    $notification->notifySubscriptionRejected(
+                        $tenantData->user_id,
+                        'غير محددة',
+                        $adminNotes ?: null,
+                        '/dashboard/subscription'
+                    );
+                }
+            } catch (\Exception $e) {
+                error_log("تحذير: لم يتم إرسال الإشعار: " . $e->getMessage());
+            }
+
             $this->redirect('/admin/subscription-requests');
 
         } catch (Exception $e) {
-            error_log("خطأ في الرفض: " . $e->getMessage());
-            $_SESSION['error'] = 'حدث خطأ: ' . $e->getMessage();
+            error_log("خطأ في رفض الاشتراك: " . $e->getMessage());
+            $_SESSION['error'] = 'حدث خطأ أثناء الرفض: ' . $e->getMessage();
             $this->redirect('/admin/subscription-requests');
+        }
+    }
+
+    /**
+     * التحقق من وجود عمود في جدول (للإدارة)
+     */
+    private function adminColumnExists($table, $column)
+    {
+        try {
+            $db = Database::getInstance();
+            $result = $db->query(
+                "SELECT COUNT(*) as c FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?",
+                [$table, $column]
+            )->first();
+            return $result && $result->c > 0;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * التحقق من وجود جدول (للإدارة)
+     */
+    private function adminTableExists($tableName)
+    {
+        try {
+            $db = Database::getInstance();
+            $result = $db->query(
+                "SELECT COUNT(*) as c FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?",
+                [$tableName]
+            )->first();
+            return $result && $result->c > 0;
+        } catch (\Exception $e) {
+            return false;
         }
     }
 

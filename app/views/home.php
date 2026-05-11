@@ -1,32 +1,139 @@
 <?php
 /**
- * TakweenWeb - Professional Landing Page
- * صفحة الهبوط الاحترافية - متصلة بقواعد البيانات
+ * TakweenWeb - Professional Landing Page (SEO-Optimized)
+ * صفحة الهبوط الاحترافية - متوافقة مع جوجل SEO
  * 
  * المتغيرات المطلوبة من الكنترولر:
  * $settings  - إعدادات الموقع (site_settings)
- * $plans     - خطط الاشتراك النشطة (subscription_plans)
  * $testimonials - شهادات العملاء (site_testimonials)
  * $features  - مميزات المنصة (site_features)
+ * $blogPosts - آخر 3 مقالات مدونة المنصة (platform_blog_posts)
  */
 
 $lang = Language::current();
 $dir  = Language::direction();
 $year = date('Y');
+
+$siteUrl = defined('BASE_URL') ? BASE_URL : (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
+$siteName = defined('SITE_NAME') ? SITE_NAME : 'TakweenWeb';
+$fullTitle = (!empty($settings->meta_title) ? htmlspecialchars($settings->meta_title) : htmlspecialchars($siteName)) . ' - ' . ($lang === 'en' ? 'Professional Website Builder' : 'إنشاء مواقع احترافية');
+$metaDesc = !empty($settings->meta_description) ? htmlspecialchars($settings->meta_description) : ($lang === 'en' ? 'Create your professional website easily with TakweenWeb. Choose templates, customize, and publish in minutes.' : 'أنشئ موقعك الاحترافي بسهولة مع تكوين ويب. اختر قالبك، خصصه، وانشر موقعك خلال دقائق.');
+$metaKeywords = !empty($settings->meta_keywords) ? htmlspecialchars($settings->meta_keywords) : ($lang === 'en' ? 'website builder, create website, professional templates, Arabic website, CMS' : 'إنشاء موقع, منصة مواقع, قوالب احترافية, موقع عربي, تكوين ويب');
 ?>
 <!DOCTYPE html>
 <html lang="<?= $lang ?>" dir="<?= $dir ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= defined('SITE_NAME') ? SITE_NAME : 'منصة المواقع' ?> - إنشاء مواقع احترافية</title>
-    <?php if (!empty($settings->meta_description)): ?>
-    <meta name="description" content="<?= htmlspecialchars($settings->meta_description) ?>">
-    <?php endif; ?>
+    <title><?= $fullTitle ?></title>
+    <meta name="description" content="<?= $metaDesc ?>">
+    <meta name="keywords" content="<?= $metaKeywords ?>">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="author" content="<?= htmlspecialchars($siteName) ?>">
+    <meta name="theme-color" content="#6366f1">
+
     <?php if (!empty($settings->favicon)): ?>
-    <link rel="icon" href="<?= htmlspecialchars($settings->favicon) ?>">
+    <link rel="icon" type="image/png" href="<?= htmlspecialchars($settings->favicon) ?>">
     <?php endif; ?>
 
+    <!-- Canonical URL -->
+    <link rel="canonical" href="<?= $siteUrl ?>">
+
+    <!-- Hreflang for multilingual SEO -->
+    <link rel="alternate" hreflang="ar" href="<?= $siteUrl ?>/lang/ar">
+    <link rel="alternate" hreflang="en" href="<?= $siteUrl ?>/lang/en">
+    <link rel="alternate" hreflang="x-default" href="<?= $siteUrl ?>">
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="<?= $fullTitle ?>">
+    <meta property="og:description" content="<?= $metaDesc ?>">
+    <meta property="og:url" content="<?= $siteUrl ?>">
+    <meta property="og:site_name" content="<?= htmlspecialchars($siteName) ?>">
+    <?php if (!empty($settings->logo)): ?>
+    <meta property="og:image" content="<?= htmlspecialchars($settings->logo) ?>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <?php endif; ?>
+    <meta property="og:locale" content="<?= $lang === 'ar' ? 'ar_SA' : 'en_US' ?>">
+    <meta property="og:locale:alternate" content="<?= $lang === 'ar' ? 'en_US' : 'ar_SA' ?>">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= $fullTitle ?>">
+    <meta name="twitter:description" content="<?= $metaDesc ?>">
+    <?php if (!empty($settings->logo)): ?>
+    <meta name="twitter:image" content="<?= htmlspecialchars($settings->logo) ?>">
+    <?php endif; ?>
+
+    <!-- JSON-LD: WebSite + Organization + BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebSite",
+                "@id": <?= json_encode($siteUrl . '/#website') ?>,
+                "name": <?= json_encode($siteName) ?>,
+                "url": <?= json_encode($siteUrl) ?>,
+                "description": <?= json_encode($metaDesc) ?>,
+                "inLanguage": ["ar-SA", "en-US"],
+                "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": <?= json_encode($siteUrl . '/blog?q={search_term_string}') ?>,
+                    "query-input": "required name=search_term_string"
+                }
+            },
+            {
+                "@type": "Organization",
+                "@id": <?= json_encode($siteUrl . '/#organization') ?>,
+                "name": <?= json_encode($siteName) ?>,
+                "url": <?= json_encode($siteUrl) ?>,
+                "logo": {
+                    "@type": "ImageObject",
+                    "url": <?= json_encode(!empty($settings->logo) ? $settings->logo : '') ?>
+                },
+                "sameAs": [
+                    <?php if (!empty($settings->twitter)): ?><?= json_encode($settings->twitter) ?><?php endif; ?>,
+                    <?php if (!empty($settings->facebook)): ?><?= json_encode($settings->facebook) ?><?php endif; ?>,
+                    <?php if (!empty($settings->instagram)): ?><?= json_encode($settings->instagram) ?><?php endif; ?>,
+                    <?php if (!empty($settings->linkedin)): ?><?= json_encode($settings->linkedin) ?><?php endif; ?>
+                ]
+            },
+            {
+                "@type": "WebPage",
+                "@id": <?= json_encode($siteUrl . '/#webpage') ?>,
+                "url": <?= json_encode($siteUrl) ?>,
+                "name": <?= json_encode($fullTitle) ?>,
+                "isPartOf": { "@id": <?= json_encode($siteUrl . '/#website') ?> },
+                "about": { "@id": <?= json_encode($siteUrl . '/#organization') ?> },
+                "inLanguage": <?= json_encode($lang === 'ar' ? 'ar-SA' : 'en-US') ?>,
+                "breadcrumb": { "@id": <?= json_encode($siteUrl . '/#breadcrumb') ?> }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "@id": <?= json_encode($siteUrl . '/#breadcrumb') ?>,
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": <?= json_encode($lang === 'en' ? 'Home' : 'الرئيسية') ?>,
+                        "item": <?= json_encode($siteUrl) ?>
+                    }
+                ]
+            }
+        ]
+    }
+    </script>
+
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -72,7 +179,7 @@ $year = date('Y');
         }
 
         a { text-decoration: none; color: inherit; }
-        img { max-width: 100%; }
+        img { max-width: 100%; height: auto; }
         ul { list-style: none; }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
@@ -101,7 +208,7 @@ $year = date('Y');
         }
         .navbar.scrolled .logo-link { color: var(--primary-dark); }
         .navbar .logo-link i { font-size: 1.5rem; }
-        .navbar .logo-link img { height: 36px; }
+        .navbar .logo-link img { height: 36px; width: auto; }
 
         .nav-menu { display: flex; align-items: center; gap: 6px; }
         .nav-menu .nav-link {
@@ -292,59 +399,48 @@ $year = date('Y');
         .step h3 { font-size: 1.02rem; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
         .step p { color: var(--gray-500); font-size: 0.85rem; line-height: 1.6; max-width: 200px; margin: 0 auto; }
 
-        /* ==================== PRICING ==================== */
-        .pricing-section { background: var(--white); }
-        .pricing-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
-            align-items: center;
+        /* ==================== BLOG ==================== */
+        .blog-section { background: var(--white); }
+        .blog-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
         }
-        .plan-card {
-            background: var(--white); border: 2px solid var(--gray-200);
-            border-radius: var(--radius-xl); padding: 40px 28px;
-            text-align: center; transition: var(--transition);
-            position: relative; overflow: hidden;
+        .blog-card {
+            background: var(--white); border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg); overflow: hidden;
+            transition: var(--transition);
         }
-        .plan-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-xl); }
-        .plan-card.popular {
-            border-color: transparent;
-            background: linear-gradient(160deg, var(--primary-dark), #7c3aed);
-            color: var(--white); transform: scale(1.04);
-            box-shadow: 0 20px 50px rgba(99,102,241,0.3);
+        .blog-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-xl); border-color: transparent; }
+        .blog-card-img {
+            width: 100%; height: 200px; object-fit: cover;
+            background: var(--gray-100);
         }
-        .plan-card.popular:hover { transform: scale(1.04) translateY(-6px); }
-
-        .popular-tag {
-            position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
-            background: var(--warning); color: var(--dark);
-            padding: 4px 16px; border-radius: 50px;
-            font-size: 0.72rem; font-weight: 700;
-        }
-        .plan-label {
-            display: inline-block; padding: 5px 16px; border-radius: 50px;
-            font-size: 0.78rem; font-weight: 600; margin-bottom: 14px;
+        .blog-card-body { padding: 24px; }
+        .blog-card-cat {
+            display: inline-block; padding: 4px 12px; border-radius: 50px;
+            font-size: 0.72rem; font-weight: 600; margin-bottom: 12px;
             background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(6,182,212,0.08));
             color: var(--primary);
         }
-        .plan-card.popular .plan-label { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); }
-        .plan-name { font-size: 1.45rem; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
-        .plan-card.popular .plan-name { color: var(--white); }
-        .plan-price { font-size: 2.6rem; font-weight: 700; color: var(--dark); line-height: 1; margin-bottom: 6px; }
-        .plan-card.popular .plan-price { color: var(--white); }
-        .plan-price small { font-size: 0.88rem; font-weight: 400; color: var(--gray-400); }
-        .plan-card.popular .plan-price small { color: rgba(255,255,255,0.6); }
-        .plan-desc { color: var(--gray-500); font-size: 0.85rem; margin-bottom: 24px; }
-        .plan-card.popular .plan-desc { color: rgba(255,255,255,0.75); }
-
-        .plan-features { text-align: <?= $dir === 'rtl' ? 'right' : 'left' ?>; margin-bottom: 28px; }
-        .plan-features li {
-            padding: 7px 0; font-size: 0.88rem; color: var(--gray-600);
-            display: flex; align-items: center; gap: 10px;
+        .blog-card-title {
+            font-size: 1.1rem; font-weight: 700; color: var(--dark);
+            margin-bottom: 8px; line-height: 1.5;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
-        .plan-card.popular .plan-features li { color: rgba(255,255,255,0.88); }
-        .plan-features li i { color: var(--success); font-size: 0.82rem; width: 18px; text-align: center; }
-        .plan-card.popular .plan-features li i { color: #34d399; }
-        .plan-card .btn { width: 100%; justify-content: center; }
-        .plan-card.popular .btn { background: var(--white); color: var(--primary-dark); box-shadow: var(--shadow); }
+        .blog-card-title a:hover { color: var(--primary); }
+        .blog-card-excerpt {
+            font-size: 0.88rem; color: var(--gray-500); line-height: 1.7;
+            margin-bottom: 16px;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .blog-card-meta {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.8rem; color: var(--gray-400);
+        }
+        .blog-card-link {
+            color: var(--primary); font-weight: 600; font-size: 0.85rem;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .blog-card-link:hover { gap: 10px; }
 
         /* ==================== TESTIMONIALS ==================== */
         .testimonials-section { background: var(--gray-50); }
@@ -426,7 +522,7 @@ $year = date('Y');
             display: flex; align-items: center; gap: 10px;
             font-size: 1.3rem; font-weight: 700; color: var(--white); margin-bottom: 12px;
         }
-        .footer-brand .f-logo img { height: 30px; }
+        .footer-brand .f-logo img { height: 30px; width: auto; }
         .footer-brand p { font-size: 0.88rem; line-height: 1.75; max-width: 300px; }
         .footer-col h4 { color: var(--white); font-size: 0.95rem; font-weight: 600; margin-bottom: 14px; }
         .footer-col li { margin-bottom: 8px; }
@@ -457,6 +553,7 @@ $year = date('Y');
         /* ==================== RESPONSIVE ==================== */
         @media (max-width: 1024px) {
             .features-grid, .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
+            .blog-grid { grid-template-columns: repeat(2, 1fr); }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .footer-top { grid-template-columns: 1fr 1fr; }
             .steps-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
@@ -478,9 +575,7 @@ $year = date('Y');
             .nav-menu .nav-link:hover { color: var(--primary); background: var(--gray-50); }
             .hero h1 { font-size: 2.2rem; }
             .hero .hero-desc { font-size: 1rem; }
-            .features-grid, .testimonials-grid, .pricing-grid { grid-template-columns: 1fr; }
-            .plan-card.popular { transform: none; }
-            .plan-card.popular:hover { transform: translateY(-6px); }
+            .features-grid, .testimonials-grid, .blog-grid { grid-template-columns: 1fr; }
             .steps-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
             .stat-val { font-size: 2rem; }
@@ -501,62 +596,67 @@ $year = date('Y');
 <body>
 
     <!-- NAVBAR -->
-    <nav class="navbar" id="navbar">
+    <header>
+    <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
         <div class="container">
             <div class="nav-inner">
-                <a href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>" class="logo-link">
+                <a href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>" class="logo-link" aria-label="<?= htmlspecialchars($siteName) ?> - <?= $lang === 'en' ? 'Home' : 'الرئيسية' ?>">
                     <?php if (!empty($settings->logo)): ?>
-                        <img src="<?= htmlspecialchars($settings->logo) ?>" alt="Logo">
+                        <img src="<?= htmlspecialchars($settings->logo) ?>" alt="<?= htmlspecialchars($siteName) ?>" width="36" height="36">
                     <?php else: ?>
-                        <i class="fas fa-cube"></i>
+                        <i class="fas fa-cube" aria-hidden="true"></i>
                     <?php endif; ?>
-                    <?= defined('SITE_NAME') ? SITE_NAME : 'منصة المواقع' ?>
+                    <span><?= htmlspecialchars($siteName) ?></span>
                 </a>
 
-                <button class="mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navMenu"><i class="fas fa-bars" aria-hidden="true"></i></button>
 
-                <div class="nav-menu" id="navMenu">
-                    <div class="lang-switch">
-                        <a href="<?= url('/lang/ar') ?>" class="lang-btn <?= $lang === 'ar' ? 'active' : '' ?>">عربي</a>
-                        <a href="<?= url('/lang/en') ?>" class="lang-btn <?= $lang === 'en' ? 'active' : '' ?>">EN</a>
+                <div class="nav-menu" id="navMenu" role="menubar">
+                    <div class="lang-switch" role="group" aria-label="<?= $lang === 'en' ? 'Language selection' : 'اختيار اللغة' ?>">
+                        <a href="<?= url('/lang/ar') ?>" class="lang-btn <?= $lang === 'ar' ? 'active' : '' ?>" lang="ar" hreflang="ar">عربي</a>
+                        <a href="<?= url('/lang/en') ?>" class="lang-btn <?= $lang === 'en' ? 'active' : '' ?>" lang="en" hreflang="en">EN</a>
                     </div>
-                    <a href="#features" class="nav-link">المميزات</a>
-                    <a href="#pricing" class="nav-link">الأسعار</a>
-                    <a href="#testimonials" class="nav-link">آراء العملاء</a>
+                    <a href="#features" class="nav-link" role="menuitem"><?= $lang === 'en' ? 'Features' : 'المميزات' ?></a>
+                    <a href="#how" class="nav-link" role="menuitem"><?= $lang === 'en' ? 'How It Works' : 'كيف يعمل' ?></a>
+                    <a href="<?= url('/blog') ?>" class="nav-link" role="menuitem"><?= $lang === 'en' ? 'Blog' : 'المدونة' ?></a>
+                    <a href="#testimonials" class="nav-link" role="menuitem"><?= $lang === 'en' ? 'Testimonials' : 'آراء العملاء' ?></a>
                     <?php if (function_exists('auth') && auth()): ?>
-                        <a href="<?= url('/dashboard') ?>" class="nav-link">لوحة التحكم</a>
-                        <a href="<?= url('/logout') ?>" class="btn btn-outline">تسجيل الخروج</a>
+                        <a href="<?= url('/dashboard') ?>" class="nav-link" role="menuitem"><?= $lang === 'en' ? 'Dashboard' : 'لوحة التحكم' ?></a>
+                        <a href="<?= url('/logout') ?>" class="btn btn-outline" role="menuitem"><?= $lang === 'en' ? 'Logout' : 'تسجيل الخروج' ?></a>
                     <?php else: ?>
-                        <a href="<?= url('/login') ?>" class="nav-link">تسجيل الدخول</a>
-                        <a href="<?= url('/register') ?>" class="btn btn-primary">ابدأ مجاناً</a>
+                        <a href="<?= url('/login') ?>" class="nav-link" role="menuitem"><?= $lang === 'en' ? 'Login' : 'تسجيل الدخول' ?></a>
+                        <a href="<?= url('/register') ?>" class="btn btn-primary" role="menuitem"><?= $lang === 'en' ? 'Start Free' : 'ابدأ مجاناً' ?></a>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
     </nav>
+    </header>
+
+    <main id="main-content">
 
     <!-- HERO -->
-    <section class="hero">
-        <div class="hero-orbs">
+    <section class="hero" aria-label="<?= $lang === 'en' ? 'Welcome section' : 'قسم الترحيب' ?>">
+        <div class="hero-orbs" aria-hidden="true">
             <div class="orb"></div><div class="orb"></div><div class="orb"></div>
         </div>
         <div class="hero-content">
             <div class="hero-chip">
-                <i class="fas fa-star"></i>
-                <?= !empty($settings->hero_title) ? '' : 'منصة إنشاء مواقع احترافية' ?>
+                <i class="fas fa-star" aria-hidden="true"></i>
+                <span><?= !empty($settings->hero_title) ? htmlspecialchars($lang === 'en' ? 'Professional Website Builder Platform' : 'منصة إنشاء مواقع احترافية') : ($lang === 'en' ? 'Professional Website Builder Platform' : 'منصة إنشاء مواقع احترافية') ?></span>
             </div>
             <h1>
-                <?= !empty($settings->hero_title) ? htmlspecialchars($settings->hero_title) : 'أنشئ موقعك <span class="grad">الاحترافي</span> اليوم' ?>
+                <?= !empty($settings->hero_title) ? htmlspecialchars($settings->hero_title) : ($lang === 'en' ? 'Create Your <span class="grad">Professional</span> Website Today' : 'أنشئ موقعك <span class="grad">الاحترافي</span> اليوم') ?>
             </h1>
             <p class="hero-desc">
-                <?= !empty($settings->hero_subtitle) ? htmlspecialchars($settings->hero_subtitle) : 'منصة سهلة ومرنة لإنشاء مواقع احترافية بدون حاجة لخبرة تقنية. اختر قالبك، خصصه، وانشر موقعك خلال دقائق.' ?>
+                <?= !empty($settings->hero_subtitle) ? htmlspecialchars($settings->hero_subtitle) : ($lang === 'en' ? 'An easy and flexible platform for creating professional websites without technical skills. Choose a template, customize it, and publish your site in minutes.' : 'منصة سهلة ومرنة لإنشاء مواقع احترافية بدون حاجة لخبرة تقنية. اختر قالبك، خصصه، وانشر موقعك خلال دقائق.') ?>
             </p>
             <div class="hero-actions">
                 <?php if (function_exists('auth') && auth()): ?>
-                    <a href="<?= url('/dashboard') ?>" class="btn btn-white btn-lg"><i class="fas fa-tachometer-alt"></i> لوحة التحكم</a>
+                    <a href="<?= url('/dashboard') ?>" class="btn btn-white btn-lg"><i class="fas fa-tachometer-alt" aria-hidden="true"></i> <?= $lang === 'en' ? 'Dashboard' : 'لوحة التحكم' ?></a>
                 <?php else: ?>
-                    <a href="<?= url('/register') ?>" class="btn btn-white btn-lg"><i class="fas fa-rocket"></i> ابدأ مجاناً</a>
-                    <a href="<?= url('/login') ?>" class="btn btn-outline-w btn-lg"><i class="fas fa-play-circle"></i> شاهد العرض</a>
+                    <a href="<?= url('/register') ?>" class="btn btn-white btn-lg"><i class="fas fa-rocket" aria-hidden="true"></i> <?= $lang === 'en' ? 'Start Free' : 'ابدأ مجاناً' ?></a>
+                    <a href="#how" class="btn btn-outline-w btn-lg"><i class="fas fa-play-circle" aria-hidden="true"></i> <?= $lang === 'en' ? 'How It Works' : 'كيف يعمل' ?></a>
                 <?php endif; ?>
             </div>
         </div>
@@ -564,12 +664,12 @@ $year = date('Y');
 
     <!-- FEATURES -->
     <?php if (!empty($settings->show_features) || !isset($settings->show_features)): ?>
-    <section class="section features-section" id="features">
+    <section class="section features-section" id="features" role="region" aria-labelledby="features-heading">
         <div class="container">
             <div class="section-head">
-                <div class="section-chip"><i class="fas fa-star"></i> <?= !empty($settings->features_title) ? htmlspecialchars($settings->features_title) : 'لماذا تختارنا؟' ?></div>
-                <h2 class="section-title">كل ما تحتاجه في مكان واحد</h2>
-                <p class="section-sub">أدوات متكاملة لبناء موقعك الإلكتروني بكل سهولة واحترافية</p>
+                <div class="section-chip"><i class="fas fa-star" aria-hidden="true"></i> <?= !empty($settings->features_title) ? htmlspecialchars($settings->features_title) : ($lang === 'en' ? 'Why Choose Us?' : 'لماذا تختارنا؟') ?></div>
+                <h2 class="section-title" id="features-heading"><?= $lang === 'en' ? 'Everything You Need in One Place' : 'كل ما تحتاجه في مكان واحد' ?></h2>
+                <p class="section-sub"><?= $lang === 'en' ? 'Integrated tools to build your website with ease and professionalism' : 'أدوات متكاملة لبناء موقعك الإلكتروني بكل سهولة واحترافية' ?></p>
             </div>
             <div class="features-grid">
                 <?php if (!empty($features)): ?>
@@ -578,45 +678,45 @@ $year = date('Y');
                         $ci = 0;
                         foreach ($features as $f):
                     ?>
-                        <div class="feat-card reveal">
+                        <article class="feat-card reveal">
                             <div class="feat-icon <?= $colors[$ci % 3] ?>">
-                                <i class="<?= htmlspecialchars($f->display_title ?? ($f->icon ?? 'fas fa-star')) ?>"></i>
+                                <i class="<?= htmlspecialchars($f->display_title ?? ($f->icon ?? 'fas fa-star')) ?>" aria-hidden="true"></i>
                             </div>
                             <h3><?= htmlspecialchars($f->title ?? '') ?></h3>
                             <p><?= htmlspecialchars($f->display_description ?? ($f->description ?? '')) ?></p>
-                        </div>
+                        </article>
                         <?php $ci++; endforeach; ?>
                 <?php else: ?>
-                    <div class="feat-card reveal">
-                        <div class="feat-icon i1"><i class="fas fa-palette"></i></div>
-                        <h3>قوالب احترافية</h3>
-                        <p>اختر من بين مجموعة واسعة من القوالب المتنوعة المصممة لكل مجال</p>
-                    </div>
-                    <div class="feat-card reveal">
-                        <div class="feat-icon i2"><i class="fas fa-mobile-alt"></i></div>
-                        <h3>تصميم متجاوب</h3>
-                        <p>مواقع متوافقة مع جميع الأجهزة والشاشات بشكل تلقائي</p>
-                    </div>
-                    <div class="feat-card reveal">
-                        <div class="feat-icon i3"><i class="fas fa-globe"></i></div>
-                        <h3>نطاق مخصص</h3>
-                        <p>احصل على نطاق خاص بموقعك يعكس هوية عملك</p>
-                    </div>
-                    <div class="feat-card reveal">
-                        <div class="feat-icon i2"><i class="fas fa-paint-brush"></i></div>
-                        <h3>ألوان مخصصة</h3>
-                        <p>خصص ألوان موقعك لتناسب هوية علامتك التجارية</p>
-                    </div>
-                    <div class="feat-card reveal">
-                        <div class="feat-icon i1"><i class="fas fa-language"></i></div>
-                        <h3>ثنائي اللغة</h3>
-                        <p>دعم كامل للعربية والإنجليزية مع تبديل سهل</p>
-                    </div>
-                    <div class="feat-card reveal">
-                        <div class="feat-icon i3"><i class="fas fa-headset"></i></div>
-                        <h3>دعم فني متواصل</h3>
-                        <p>فريق دعم متخصص جاهز لمساعدتك على مدار الساعة</p>
-                    </div>
+                    <article class="feat-card reveal">
+                        <div class="feat-icon i1"><i class="fas fa-palette" aria-hidden="true"></i></div>
+                        <h3><?= $lang === 'en' ? 'Professional Templates' : 'قوالب احترافية' ?></h3>
+                        <p><?= $lang === 'en' ? 'Choose from a wide range of diverse, professionally designed templates' : 'اختر من بين مجموعة واسعة من القوالب المتنوعة المصممة لكل مجال' ?></p>
+                    </article>
+                    <article class="feat-card reveal">
+                        <div class="feat-icon i2"><i class="fas fa-mobile-alt" aria-hidden="true"></i></div>
+                        <h3><?= $lang === 'en' ? 'Responsive Design' : 'تصميم متجاوب' ?></h3>
+                        <p><?= $lang === 'en' ? 'Websites that automatically adapt to all devices and screens' : 'مواقع متوافقة مع جميع الأجهزة والشاشات بشكل تلقائي' ?></p>
+                    </article>
+                    <article class="feat-card reveal">
+                        <div class="feat-icon i3"><i class="fas fa-globe" aria-hidden="true"></i></div>
+                        <h3><?= $lang === 'en' ? 'Custom Domain' : 'نطاق مخصص' ?></h3>
+                        <p><?= $lang === 'en' ? 'Get a unique domain for your website that reflects your brand' : 'احصل على نطاق خاص بموقعك يعكس هوية عملك' ?></p>
+                    </article>
+                    <article class="feat-card reveal">
+                        <div class="feat-icon i2"><i class="fas fa-paint-brush" aria-hidden="true"></i></div>
+                        <h3><?= $lang === 'en' ? 'Custom Colors' : 'ألوان مخصصة' ?></h3>
+                        <p><?= $lang === 'en' ? 'Customize your site colors to match your brand identity' : 'خصص ألوان موقعك لتناسب هوية علامتك التجارية' ?></p>
+                    </article>
+                    <article class="feat-card reveal">
+                        <div class="feat-icon i1"><i class="fas fa-language" aria-hidden="true"></i></div>
+                        <h3><?= $lang === 'en' ? 'Bilingual' : 'ثنائي اللغة' ?></h3>
+                        <p><?= $lang === 'en' ? 'Full Arabic and English support with easy switching' : 'دعم كامل للعربية والإنجليزية مع تبديل سهل' ?></p>
+                    </article>
+                    <article class="feat-card reveal">
+                        <div class="feat-icon i3"><i class="fas fa-headset" aria-hidden="true"></i></div>
+                        <h3><?= $lang === 'en' ? 'Continuous Support' : 'دعم فني متواصل' ?></h3>
+                        <p><?= $lang === 'en' ? 'A specialized support team ready to help you around the clock' : 'فريق دعم متخصص جاهز لمساعدتك على مدار الساعة' ?></p>
+                    </article>
                 <?php endif; ?>
             </div>
         </div>
@@ -624,194 +724,144 @@ $year = date('Y');
     <?php endif; ?>
 
     <!-- HOW IT WORKS -->
-    <section class="section how-section" id="how">
+    <section class="section how-section" id="how" role="region" aria-labelledby="how-heading">
         <div class="container">
             <div class="section-head">
-                <div class="section-chip"><i class="fas fa-route"></i> كيف يعمل؟</div>
-                <h2 class="section-title">ابدأ في أربع خطوات بسيطة</h2>
+                <div class="section-chip"><i class="fas fa-route" aria-hidden="true"></i> <?= $lang === 'en' ? 'How It Works' : 'كيف يعمل؟' ?></div>
+                <h2 class="section-title" id="how-heading"><?= $lang === 'en' ? 'Get Started in 4 Simple Steps' : 'ابدأ في أربع خطوات بسيطة' ?></h2>
             </div>
             <div class="steps-grid">
                 <div class="step reveal">
-                    <div class="step-num">1</div>
-                    <h3>سجّل حسابك</h3>
-                    <p>أنشئ حسابك المجاني في أقل من دقيقة</p>
+                    <div class="step-num" aria-hidden="true">1</div>
+                    <h3><?= $lang === 'en' ? 'Create Account' : 'سجّل حسابك' ?></h3>
+                    <p><?= $lang === 'en' ? 'Create your free account in under a minute' : 'أنشئ حسابك المجاني في أقل من دقيقة' ?></p>
                 </div>
                 <div class="step reveal">
-                    <div class="step-num">2</div>
-                    <h3>اختر قالبك</h3>
-                    <p>اختر من بين قوالب احترافية متعددة المجالات</p>
+                    <div class="step-num" aria-hidden="true">2</div>
+                    <h3><?= $lang === 'en' ? 'Choose Template' : 'اختر قالبك' ?></h3>
+                    <p><?= $lang === 'en' ? 'Choose from professionally designed templates for various fields' : 'اختر من بين قوالب احترافية متعددة المجالات' ?></p>
                 </div>
                 <div class="step reveal">
-                    <div class="step-num">3</div>
-                    <h3>خصّص موقعك</h3>
-                    <p>أضف محتواك وخصّص الألوان والنصوص والصور</p>
+                    <div class="step-num" aria-hidden="true">3</div>
+                    <h3><?= $lang === 'en' ? 'Customize' : 'خصّص موقعك' ?></h3>
+                    <p><?= $lang === 'en' ? 'Add your content and customize colors, text, and images' : 'أضف محتواك وخصّص الألوان والنصوص والصور' ?></p>
                 </div>
                 <div class="step reveal">
-                    <div class="step-num">4</div>
-                    <h3>انشر موقعك</h3>
-                    <p>انشر موقعك وابدأ بجذب العملاء فوراً</p>
+                    <div class="step-num" aria-hidden="true">4</div>
+                    <h3><?= $lang === 'en' ? 'Publish' : 'انشر موقعك' ?></h3>
+                    <p><?= $lang === 'en' ? 'Publish your site and start attracting customers' : 'انشر موقعك وابدأ بجذب العملاء فوراً' ?></p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- PRICING -->
-    <?php if (!empty($settings->show_pricing_section) || !isset($settings->show_pricing_section)): ?>
-    <section class="section pricing-section" id="pricing">
+    <!-- BLOG -->
+    <section class="section blog-section" id="blog" role="region" aria-labelledby="blog-heading">
         <div class="container">
             <div class="section-head">
-                <div class="section-chip"><i class="fas fa-tags"></i> <?= !empty($settings->pricing_title) ? htmlspecialchars($settings->pricing_title) : 'خطط الأسعار' ?></div>
-                <h2 class="section-title"><?= !empty($settings->pricing_subtitle) ? htmlspecialchars($settings->pricing_subtitle) : 'اختر الخطة المناسبة لاحتياجاتك' ?></h2>
-                <p class="section-sub">خطط مرنة تناسب جميع الاحتياجات مع إمكانية الترقية في أي وقت</p>
+                <div class="section-chip"><i class="fas fa-newspaper" aria-hidden="true"></i> <?= $lang === 'en' ? 'Blog' : 'المدونة' ?></div>
+                <h2 class="section-title" id="blog-heading"><?= $lang === 'en' ? 'Latest Articles & News' : 'أحدث المقالات والأخبار' ?></h2>
+                <p class="section-sub"><?= $lang === 'en' ? 'Tips, tutorials, and updates to help you build better websites' : 'نصائح ودروس وتحديثات تساعدك في بناء موقع أفضل' ?></p>
             </div>
-            <div class="pricing-grid">
-                <?php if (!empty($plans)): ?>
-                    <?php foreach ($plans as $plan):
-                        $isPop = !empty($plan->is_popular);
-                        $isFree = !empty($plan->is_free);
-                        $feats = !empty($plan->features) ? json_decode($plan->features, true) : [];
-                        $cur = defined('CURRENCY') ? CURRENCY : 'SAR';
-                    ?>
-                        <div class="plan-card <?= $isPop ? 'popular' : '' ?> reveal">
-                            <?php if ($isPop): ?><div class="popular-tag">الأكثر شعبية</div><?php endif; ?>
-
-                            <div class="plan-label"><?= $isFree ? 'تجريبي' : ($plan->slug === 'enterprise' ? 'مؤسسات' : 'احترافي') ?></div>
-                            <h3 class="plan-name"><?= htmlspecialchars($plan->name) ?></h3>
-
-                            <?php if ($isFree): ?>
-                                <div class="plan-price">مجاني</div>
-                            <?php else: ?>
-                                <div class="plan-price"><?= htmlspecialchars($plan->price_monthly ?? 0) ?> <small><?= $cur ?> / شهرياً</small></div>
-                            <?php endif; ?>
-
-                            <p class="plan-desc"><?= htmlspecialchars($plan->description ?? '') ?></p>
-
-                            <ul class="plan-features">
-                                <?php if (!empty($feats) && is_array($feats)): ?>
-                                    <?php foreach ($feats as $f): ?>
-                                        <?php if (!empty(trim($f))): ?>
-                                        <li><i class="fas fa-check-circle"></i> <?= htmlspecialchars($f) ?></li>
-                                        <?php endif; ?>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <li><i class="fas fa-check-circle"></i> <?= (int)($plan->max_services ?? 3) ?> خدمات</li>
-                                    <?php if (!empty($plan->custom_domain)): ?><li><i class="fas fa-check-circle"></i> نطاق مخصص</li><?php endif; ?>
-                                    <?php if (!empty($plan->priority_support)): ?><li><i class="fas fa-check-circle"></i> دعم مميز</li><?php endif; ?>
-                                    <?php if (!empty($plan->analytics_access)): ?><li><i class="fas fa-check-circle"></i> إحصائيات متقدمة</li><?php endif; ?>
-                                    <?php if (!empty($plan->remove_branding)): ?><li><i class="fas fa-check-circle"></i> إزالة العلامة التجارية</li><?php endif; ?>
-                                <?php endif; ?>
-                            </ul>
-
-                            <?php if ($isFree): ?>
-                                <a href="<?= url('/register') ?>" class="btn btn-outline">ابدأ التجربة</a>
-                            <?php else: ?>
-                                <a href="<?= url('/register') ?>" class="btn <?= $isPop ? 'btn-lg' : 'btn-outline' ?>">اشترك الآن</a>
-                            <?php endif; ?>
+            <?php if (!empty($blogPosts)): ?>
+            <div class="blog-grid">
+                <?php foreach ($blogPosts as $post): ?>
+                <article class="blog-card reveal">
+                    <?php if (!empty($post->featured_image)): ?>
+                    <img src="<?= htmlspecialchars($post->featured_image) ?>" alt="<?= htmlspecialchars($post->title) ?>" class="blog-card-img" loading="lazy" width="400" height="200">
+                    <?php else: ?>
+                    <div class="blog-card-img" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-size:2rem;" role="img" aria-label="<?= $lang === 'en' ? 'Blog article' : 'مقال مدونة' ?>"><i class="fas fa-newspaper" aria-hidden="true"></i></div>
+                    <?php endif; ?>
+                    <div class="blog-card-body">
+                        <?php if (!empty($post->category)): ?>
+                        <span class="blog-card-cat"><?= htmlspecialchars($post->category) ?></span>
+                        <?php endif; ?>
+                        <h3 class="blog-card-title">
+                            <a href="<?= url('/blog/' . $post->slug) ?>"><?= htmlspecialchars($post->title) ?></a>
+                        </h3>
+                        <p class="blog-card-excerpt"><?= htmlspecialchars($post->excerpt ?? mb_substr(strip_tags($post->content), 0, 120) . '...') ?></p>
+                        <div class="blog-card-meta">
+                            <time datetime="<?= date('c', strtotime($post->published_at ?? $post->created_at)) ?>"><i class="far fa-calendar-alt" aria-hidden="true"></i> <?= date('Y/m/d', strtotime($post->published_at ?? $post->created_at)) ?></time>
+                            <a href="<?= url('/blog/' . $post->slug) ?>" class="blog-card-link"><?= $lang === 'en' ? 'Read More' : 'اقرأ المزيد' ?> <i class="fas fa-arrow-left" aria-hidden="true"></i></a>
                         </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="plan-card reveal">
-                        <div class="plan-label">تجريبي</div>
-                        <h3 class="plan-name">فترة تجريبية</h3>
-                        <div class="plan-price">مجاني</div>
-                        <p class="plan-desc">جرب المنصة مجاناً لمدة محدودة</p>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check-circle"></i> قالب واحد</li>
-                            <li><i class="fas fa-check-circle"></i> مساحة تخزين محدودة</li>
-                            <li><i class="fas fa-check-circle"></i> دعم بالبريد الإلكتروني</li>
-                        </ul>
-                        <a href="<?= url('/register') ?>" class="btn btn-outline">ابدأ التجربة</a>
                     </div>
-                    <div class="plan-card popular reveal">
-                        <div class="popular-tag">الأكثر شعبية</div>
-                        <div class="plan-label" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.9)">احترافي</div>
-                        <h3 class="plan-name">الخطة الاحترافية</h3>
-                        <div class="plan-price">99 <small>ريال / شهرياً</small></div>
-                        <p class="plan-desc">كل ما تحتاجه لموقعك الاحترافي</p>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check-circle"></i> جميع القوالب</li>
-                            <li><i class="fas fa-check-circle"></i> مساحة تخزين غير محدودة</li>
-                            <li><i class="fas fa-check-circle"></i> دعم فني على مدار الساعة</li>
-                            <li><i class="fas fa-check-circle"></i> نطاق خاص مجاني</li>
-                            <li><i class="fas fa-check-circle"></i> تقارير وإحصائيات متقدمة</li>
-                        </ul>
-                        <a href="<?= url('/register') ?>" class="btn btn-lg">اشترك الآن</a>
-                    </div>
-                    <div class="plan-card reveal">
-                        <div class="plan-label">مؤسسات</div>
-                        <h3 class="plan-name">خطة المؤسسات</h3>
-                        <div class="plan-price">199 <small>ريال / شهرياً</small></div>
-                        <p class="plan-desc">حلول متقدمة للشركات والمؤسسات</p>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check-circle"></i> كل مميزات الخطة الاحترافية</li>
-                            <li><i class="fas fa-check-circle"></i> قوالب مخصصة حسب الطلب</li>
-                            <li><i class="fas fa-check-circle"></i> مدير حساب مخصص</li>
-                            <li><i class="fas fa-check-circle"></i> SLA مضمون 99.9%</li>
-                            <li><i class="fas fa-check-circle"></i> API متقدم للربط</li>
-                        </ul>
-                        <a href="<?= url('/register') ?>" class="btn btn-outline">تواصل مع المبيعات</a>
-                    </div>
-                <?php endif; ?>
+                </article>
+                <?php endforeach; ?>
             </div>
+            <div style="text-align:center;margin-top:40px;">
+                <a href="<?= url('/blog') ?>" class="btn btn-outline"><?= $lang === 'en' ? 'View All Articles' : 'عرض جميع المقالات' ?> <i class="fas fa-arrow-left" aria-hidden="true"></i></a>
+            </div>
+            <?php else: ?>
+            <p style="text-align:center;color:var(--gray-400);"><?= $lang === 'en' ? 'No articles yet. Stay tuned!' : 'لا توجد مقالات بعد. ترقبوا الجديد!' ?></p>
+            <?php endif; ?>
         </div>
     </section>
-    <?php endif; ?>
 
     <!-- TESTIMONIALS -->
     <?php if (!empty($settings->show_testimonials) || !isset($settings->show_testimonials)): ?>
-    <section class="section testimonials-section" id="testimonials">
+    <section class="section testimonials-section" id="testimonials" role="region" aria-labelledby="testimonials-heading">
         <div class="container">
             <div class="section-head">
-                <div class="section-chip"><i class="fas fa-quote-right"></i> <?= !empty($settings->testimonials_title) ? htmlspecialchars($settings->testimonials_title) : 'آراء العملاء' ?></div>
-                <h2 class="section-title">ماذا يقول عملاؤنا عنّا</h2>
+                <div class="section-chip"><i class="fas fa-quote-right" aria-hidden="true"></i> <?= !empty($settings->testimonials_title) ? htmlspecialchars($settings->testimonials_title) : ($lang === 'en' ? 'Testimonials' : 'آراء العملاء') ?></div>
+                <h2 class="section-title" id="testimonials-heading"><?= $lang === 'en' ? 'What Our Clients Say About Us' : 'ماذا يقول عملاؤنا عنّا' ?></h2>
             </div>
             <div class="testimonials-grid">
                 <?php if (!empty($testimonials)): ?>
                     <?php foreach ($testimonials as $t): ?>
-                        <div class="testi-card reveal">
-                            <div class="testi-stars">
-                                <?php for ($i = 0; $i < ($t->rating ?? 5); $i++): ?><i class="fas fa-star"></i><?php endfor; ?>
-                                <?php if (($t->rating ?? 5) < 5): ?><i class="fas fa-star-half-alt"></i><?php endif; ?>
+                        <article class="testi-card reveal" itemscope itemtype="https://schema.org/Review">
+                            <div class="testi-stars" aria-label="<?= $t->rating ?? 5 ?>/5 <?= $lang === 'en' ? 'stars' : 'نجوم' ?>">
+                                <meta itemprop="reviewRating" content="<?= $t->rating ?? 5 ?>">
+                                <?php for ($i = 0; $i < ($t->rating ?? 5); $i++): ?><i class="fas fa-star" aria-hidden="true"></i><?php endfor; ?>
+                                <?php if (($t->rating ?? 5) < 5): ?><i class="fas fa-star-half-alt" aria-hidden="true"></i><?php endif; ?>
                             </div>
-                            <p class="testi-text"><?= htmlspecialchars($t->content ?? '') ?></p>
+                            <p class="testi-text" itemprop="reviewBody"><?= htmlspecialchars($t->content ?? '') ?></p>
                             <div class="testi-author">
                                 <?php if (!empty($t->client_image)): ?>
-                                    <div class="testi-avatar"><img src="<?= htmlspecialchars($t->client_image) ?>" alt=""></div>
+                                    <div class="testi-avatar"><img src="<?= htmlspecialchars($t->client_image) ?>" alt="<?= htmlspecialchars($t->client_name ?? '') ?>" width="44" height="44" itemprop="image"></div>
                                 <?php else: ?>
-                                    <div class="testi-avatar"><?= mb_substr($t->client_name ?? '?', 0, 1) ?></div>
+                                    <div class="testi-avatar" aria-hidden="true"><?= mb_substr($t->client_name ?? '?', 0, 1) ?></div>
                                 <?php endif; ?>
                                 <div>
-                                    <div class="testi-name"><?= htmlspecialchars($t->client_name ?? '') ?></div>
+                                    <div class="testi-name" itemprop="author"><?= htmlspecialchars($t->client_name ?? '') ?></div>
                                     <div class="testi-role"><?= htmlspecialchars($t->client_title ?? ($t->client_company ?? '')) ?></div>
                                 </div>
                             </div>
-                        </div>
+                        </article>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <div class="testi-card reveal">
-                        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                        <p class="testi-text">منصة رائعة وسهلة الاستخدام، استطعت إنشاء موقعي خلال ساعات فقط. القوالب احترافية والتخصيص ممتع جداً.</p>
-                        <div class="testi-author">
-                            <div class="testi-avatar">أ</div>
-                            <div><div class="testi-name">أحمد محمد</div><div class="testi-role">صاحب شركة مقاولات</div></div>
+                    <article class="testi-card reveal" itemscope itemtype="https://schema.org/Review">
+                        <div class="testi-stars" aria-label="5/5 <?= $lang === 'en' ? 'stars' : 'نجوم' ?>">
+                            <meta itemprop="reviewRating" content="5">
+                            <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
                         </div>
-                    </div>
-                    <div class="testi-card reveal">
-                        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                        <p class="testi-text">الدعم الفني ممتاز والاستجابة سريعة. أنصح بهذه المنصة لكل من يريد موقعاً احترافياً بأسعار معقولة.</p>
+                        <p class="testi-text" itemprop="reviewBody"><?= $lang === 'en' ? 'An amazing and easy-to-use platform. I was able to create my website in just hours. The templates are professional and customization is fun.' : 'منصة رائعة وسهلة الاستخدام، استطعت إنشاء موقعي خلال ساعات فقط. القوالب احترافية والتخصيص ممتع جداً.' ?></p>
                         <div class="testi-author">
-                            <div class="testi-avatar">س</div>
-                            <div><div class="testi-name">سارة العتيبي</div><div class="testi-role">مصممة ديكور</div></div>
+                            <div class="testi-avatar" aria-hidden="true"><?= $lang === 'en' ? 'A' : 'أ' ?></div>
+                            <div><div class="testi-name" itemprop="author"><?= $lang === 'en' ? 'Ahmed Mohammed' : 'أحمد محمد' ?></div><div class="testi-role"><?= $lang === 'en' ? 'Construction Company Owner' : 'صاحب شركة مقاولات' ?></div></div>
                         </div>
-                    </div>
-                    <div class="testi-card reveal">
-                        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                        <p class="testi-text">أفضل منصة عربية لإنشاء المواقع. واجهة سهلة وقوالب متنوعة تناسب جميع المجالات.</p>
+                    </article>
+                    <article class="testi-card reveal" itemscope itemtype="https://schema.org/Review">
+                        <div class="testi-stars" aria-label="5/5 <?= $lang === 'en' ? 'stars' : 'نجوم' ?>">
+                            <meta itemprop="reviewRating" content="5">
+                            <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star-half-alt" aria-hidden="true"></i>
+                        </div>
+                        <p class="testi-text" itemprop="reviewBody"><?= $lang === 'en' ? 'Excellent technical support and fast response. I recommend this platform for anyone who wants a professional website at reasonable prices.' : 'الدعم الفني ممتاز والاستجابة سريعة. أنصح بهذه المنصة لكل من يريد موقعاً احترافياً بأسعار معقولة.' ?></p>
                         <div class="testi-author">
-                            <div class="testi-avatar">خ</div>
-                            <div><div class="testi-name">خالد الشمري</div><div class="testi-role">مقدم خدمات كهربائية</div></div>
+                            <div class="testi-avatar" aria-hidden="true"><?= $lang === 'en' ? 'S' : 'س' ?></div>
+                            <div><div class="testi-name" itemprop="author"><?= $lang === 'en' ? 'Sarah Al-Otaibi' : 'سارة العتيبي' ?></div><div class="testi-role"><?= $lang === 'en' ? 'Interior Designer' : 'مصممة ديكور' ?></div></div>
                         </div>
-                    </div>
+                    </article>
+                    <article class="testi-card reveal" itemscope itemtype="https://schema.org/Review">
+                        <div class="testi-stars" aria-label="5/5 <?= $lang === 'en' ? 'stars' : 'نجوم' ?>">
+                            <meta itemprop="reviewRating" content="5">
+                            <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star-half-alt" aria-hidden="true"></i>
+                        </div>
+                        <p class="testi-text" itemprop="reviewBody"><?= $lang === 'en' ? 'The best Arabic platform for creating websites. Easy interface and diverse templates suitable for all fields.' : 'أفضل منصة عربية لإنشاء المواقع. واجهة سهلة وقوالب متنوعة تناسب جميع المجالات.' ?></p>
+                        <div class="testi-author">
+                            <div class="testi-avatar" aria-hidden="true"><?= $lang === 'en' ? 'K' : 'خ' ?></div>
+                            <div><div class="testi-name" itemprop="author"><?= $lang === 'en' ? 'Khaled Al-Shamri' : 'خالد الشمري' ?></div><div class="testi-role"><?= $lang === 'en' ? 'Electrical Services' : 'مقدم خدمات كهربائية' ?></div></div>
+                        </div>
+                    </article>
                 <?php endif; ?>
             </div>
         </div>
@@ -819,85 +869,88 @@ $year = date('Y');
     <?php endif; ?>
 
     <!-- STATS -->
-    <section class="stats-section">
+    <section class="stats-section" aria-label="<?= $lang === 'en' ? 'Platform statistics' : 'إحصائيات المنصة' ?>">
         <div class="container">
             <div class="stats-grid">
                 <div class="stat">
                     <div class="stat-val"><span>500+</span></div>
-                    <div class="stat-lbl">موقع تم إنشاؤه</div>
+                    <div class="stat-lbl"><?= $lang === 'en' ? 'Websites Created' : 'موقع تم إنشاؤه' ?></div>
                 </div>
                 <div class="stat">
                     <div class="stat-val"><span>6</span></div>
-                    <div class="stat-lbl">قوالب احترافية</div>
+                    <div class="stat-lbl"><?= $lang === 'en' ? 'Professional Templates' : 'قوالب احترافية' ?></div>
                 </div>
                 <div class="stat">
                     <div class="stat-val"><span>99.9%</span></div>
-                    <div class="stat-lbl">وقت التشغيل</div>
+                    <div class="stat-lbl"><?= $lang === 'en' ? 'Uptime' : 'وقت التشغيل' ?></div>
                 </div>
                 <div class="stat">
                     <div class="stat-val"><span>24/7</span></div>
-                    <div class="stat-lbl">دعم فني</div>
+                    <div class="stat-lbl"><?= $lang === 'en' ? 'Support' : 'دعم فني' ?></div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- CTA -->
-    <section class="cta-section">
+    <section class="cta-section" aria-label="<?= $lang === 'en' ? 'Call to action' : 'دعوة للتسجيل' ?>">
         <div class="cta-inner">
-            <h2>جاهز تبدأ رحلتك الرقمية؟</h2>
-            <p>انضم لأكثر من 500 مستخدم استفادوا من منصتنا لإنشاء مواقعهم الاحترافية</p>
-            <a href="<?= url('/register') ?>" class="btn btn-white btn-lg"><i class="fas fa-rocket"></i> ابدأ الآن مجاناً</a>
+            <h2><?= $lang === 'en' ? 'Ready to Start Your Digital Journey?' : 'جاهز تبدأ رحلتك الرقمية؟' ?></h2>
+            <p><?= $lang === 'en' ? 'Join over 500 users who benefited from our platform to create their professional websites' : 'انضم لأكثر من 500 مستخدم استفادوا من منصتنا لإنشاء مواقعهم الاحترافية' ?></p>
+            <a href="<?= url('/register') ?>" class="btn btn-white btn-lg"><i class="fas fa-rocket" aria-hidden="true"></i> <?= $lang === 'en' ? 'Start Now Free' : 'ابدأ الآن مجاناً' ?></a>
         </div>
     </section>
 
+    </main>
+
     <!-- FOOTER -->
-    <footer class="footer">
+    <footer class="footer" role="contentinfo">
         <div class="container">
             <div class="footer-top">
                 <div class="footer-brand">
                     <div class="f-logo">
                         <?php if (!empty($settings->logo)): ?>
-                            <img src="<?= htmlspecialchars($settings->logo) ?>" alt="Logo">
+                            <img src="<?= htmlspecialchars($settings->logo) ?>" alt="<?= htmlspecialchars($siteName) ?>" width="30" height="30">
                         <?php else: ?>
-                            <i class="fas fa-cube"></i>
+                            <i class="fas fa-cube" aria-hidden="true"></i>
                         <?php endif; ?>
-                        <?= defined('SITE_NAME') ? SITE_NAME : 'منصة المواقع' ?>
+                        <?= htmlspecialchars($siteName) ?>
                     </div>
-                    <p><?= !empty($settings->footer_text) ? htmlspecialchars($settings->footer_text) : 'منصة احترافية لإنشاء مواقع إلكترونية متكاملة بسهولة وسرعة.' ?></p>
+                    <p><?= !empty($settings->footer_text) ? htmlspecialchars($settings->footer_text) : ($lang === 'en' ? 'A professional platform for creating complete websites easily and quickly.' : 'منصة احترافية لإنشاء مواقع إلكترونية متكاملة بسهولة وسرعة.') ?></p>
                 </div>
-                <div class="footer-col">
-                    <h4>روابط سريعة</h4>
+                <nav class="footer-col" aria-label="<?= $lang === 'en' ? 'Quick links' : 'روابط سريعة' ?>">
+                    <h4><?= $lang === 'en' ? 'Quick Links' : 'روابط سريعة' ?></h4>
                     <ul>
-                        <li><a href="<?= url('/') ?>">الرئيسية</a></li>
-                        <li><a href="#features">المميزات</a></li>
-                        <li><a href="#pricing">الأسعار</a></li>
-                        <li><a href="#testimonials">آراء العملاء</a></li>
+                        <li><a href="<?= url('/') ?>"><?= $lang === 'en' ? 'Home' : 'الرئيسية' ?></a></li>
+                        <li><a href="#features"><?= $lang === 'en' ? 'Features' : 'المميزات' ?></a></li>
+                        <li><a href="#how"><?= $lang === 'en' ? 'How It Works' : 'كيف يعمل' ?></a></li>
+                        <li><a href="<?= url('/blog') ?>"><?= $lang === 'en' ? 'Blog' : 'المدونة' ?></a></li>
+                        <li><a href="#testimonials"><?= $lang === 'en' ? 'Testimonials' : 'آراء العملاء' ?></a></li>
                     </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>المساعدة</h4>
+                </nav>
+                <nav class="footer-col" aria-label="<?= $lang === 'en' ? 'Help & Legal' : 'المساعدة والقانونية' ?>">
+                    <h4><?= $lang === 'en' ? 'Help' : 'المساعدة' ?></h4>
                     <ul>
                         <?php if (!empty($settings->contact_email)): ?>
-                            <li><a href="mailto:<?= htmlspecialchars($settings->contact_email) ?>">اتصل بنا</a></li>
+                        <li><a href="mailto:<?= htmlspecialchars($settings->contact_email) ?>"><?= $lang === 'en' ? 'Contact Us' : 'اتصل بنا' ?></a></li>
                         <?php else: ?>
-                            <li><a href="#">اتصل بنا</a></li>
+                        <li><a href="#"> <?= $lang === 'en' ? 'Contact Us' : 'اتصل بنا' ?></a></li>
                         <?php endif; ?>
-                        <li><a href="#">الأسئلة الشائعة</a></li>
-                        <li><a href="#">الشروط والأحكام</a></li>
-                        <li><a href="#">سياسة الخصوصية</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#"><?= $lang === 'en' ? 'Terms' : 'الشروط والأحكام' ?></a></li>
+                        <li><a href="#">Privacy Policy</a></li>
                     </ul>
-                </div>
+                </nav>
             </div>
             <div class="footer-bottom">
-                <p>&copy; <?= $year ?> <?= defined('SITE_NAME') ? SITE_NAME : 'منصة المواقع' ?> - <?= !empty($settings->copyright_text) ? htmlspecialchars($settings->copyright_text) : 'جميع الحقوق محفوظة' ?></p>
-                <div class="footer-socials">
-                    <?php if (!empty($settings->twitter)): ?><a href="<?= htmlspecialchars($settings->twitter) ?>" target="_blank"><i class="fab fa-x-twitter"></i></a><?php endif; ?>
-                    <?php if (!empty($settings->facebook)): ?><a href="<?= htmlspecialchars($settings->facebook) ?>" target="_blank"><i class="fab fa-facebook-f"></i></a><?php endif; ?>
-                    <?php if (!empty($settings->instagram)): ?><a href="<?= htmlspecialchars($settings->instagram) ?>" target="_blank"><i class="fab fa-instagram"></i></a><?php endif; ?>
-                    <?php if (!empty($settings->contact_whatsapp)): ?><a href="https://wa.me/<?= preg_replace('/[^0-9+]/', '', $settings->contact_whatsapp) ?>" target="_blank"><i class="fab fa-whatsapp"></i></a><?php endif; ?>
-                    <?php if (!empty($settings->linkedin)): ?><a href="<?= htmlspecialchars($settings->linkedin) ?>" target="_blank"><i class="fab fa-linkedin-in"></i></a><?php endif; ?>
-                    <?php if (!empty($settings->youtube)): ?><a href="<?= htmlspecialchars($settings->youtube) ?>" target="_blank"><i class="fab fa-youtube"></i></a><?php endif; ?>
+                <p>&copy; <?= $year ?> <?= htmlspecialchars($siteName) ?> - <?= !empty($settings->copyright_text) ? htmlspecialchars($settings->copyright_text) : ($lang === 'en' ? 'All rights reserved' : 'جميع الحقوق محفوظة') ?></p>
+                <div class="footer-socials" aria-label="<?= $lang === 'en' ? 'Social media links' : 'روابط التواصل الاجتماعي' ?>">
+                    <?php if (!empty($settings->twitter)): ?><a href="<?= htmlspecialchars($settings->twitter) ?>" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><i class="fab fa-x-twitter" aria-hidden="true"></i></a><?php endif; ?>
+                    <?php if (!empty($settings->facebook)): ?><a href="<?= htmlspecialchars($settings->facebook) ?>" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a><?php endif; ?>
+                    <?php if (!empty($settings->instagram)): ?><a href="<?= htmlspecialchars($settings->instagram) ?>" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a><?php endif; ?>
+                    <?php if (!empty($settings->contact_whatsapp)): ?><a href="https://wa.me/<?= preg_replace('/[^0-9+]/', '', $settings->contact_whatsapp) ?>" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a><?php endif; ?>
+                    <?php if (!empty($settings->linkedin)): ?><a href="<?= htmlspecialchars($settings->linkedin) ?>" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a><?php endif; ?>
+                    <?php if (!empty($settings->youtube)): ?><a href="<?= htmlspecialchars($settings->youtube) ?>" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a><?php endif; ?>
                 </div>
             </div>
         </div>
@@ -915,13 +968,19 @@ $year = date('Y');
         var toggle = document.getElementById('mobileToggle');
         var menu = document.getElementById('navMenu');
         if (toggle && menu) {
-            toggle.addEventListener('click', function() { menu.classList.toggle('active'); });
+            toggle.addEventListener('click', function() {
+                var isOpen = menu.classList.toggle('active');
+                toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
             menu.querySelectorAll('a').forEach(function(a) {
-                a.addEventListener('click', function() { menu.classList.remove('active'); });
+                a.addEventListener('click', function() {
+                    menu.classList.remove('active');
+                    toggle.setAttribute('aria-expanded', 'false');
+                });
             });
         }
 
-        // Scroll reveal
+        // Scroll reveal with IntersectionObserver
         if ('IntersectionObserver' in window) {
             var obs = new IntersectionObserver(function(entries) {
                 entries.forEach(function(e) {

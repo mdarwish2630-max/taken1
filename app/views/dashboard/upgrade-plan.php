@@ -6,9 +6,10 @@
 
 $tenant = $tenant ?? Auth::tenant();
 $currentPlan = null;
-if ($tenant && $tenant->subscription_plan_id) {
+$planId = $tenant->subscription_plan_id ?? $tenant->plan_id ?? null;
+if ($tenant && $planId) {
     $planModel = new SubscriptionPlan();
-    $currentPlan = $planModel->find($tenant->subscription_plan_id);
+    $currentPlan = $planModel->find($planId);
 }
 $plans = $plans ?? [];
 ?>

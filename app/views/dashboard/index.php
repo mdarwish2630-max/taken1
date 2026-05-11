@@ -174,10 +174,13 @@
                     <i class="fas fa-eye"></i>
                     <?= lang('preview') ?>
                 </a>
-                <a href="<?= url('/dashboard/publish') ?>" class="btn btn-success btn-sm">
-                    <i class="fas fa-globe"></i>
-                    <?= lang('publish') ?>
-                </a>
+                <form method="POST" action="<?= url('/dashboard/publish') ?>" style="display:inline;">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="fas fa-globe"></i>
+                        <?= lang('publish') ?>
+                    </button>
+                </form>
             </div>
         </div>
     </div>

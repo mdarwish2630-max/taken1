@@ -7,6 +7,10 @@
 // ==================== الصفحات الرئيسية ====================
 Router::get('/', 'SiteController@index');
 
+// ==================== Platform Blog - Public ====================
+Router::get('/blog', 'PlatformBlogController@index');
+Router::get('/blog/{slug}', 'PlatformBlogController@show');
+
 // ==================== تغيير اللغة ====================
 Router::get('/lang/{lang}', 'LanguageController@change');
 Router::get('/lang/current', 'LanguageController@current');
@@ -71,7 +75,7 @@ Router::group(['middleware' => 'customer'], function() {
     // طلب القالب المدفوع (قالب واحد مجاني - توجيه للإعدادات)
     Router::post('/dashboard/themes/request-paid', 'DashboardController@requestPaidTheme');
     Router::get('/dashboard/subscription', 'SubscriptionController@overview');
-    Router::get('/dashboard/publish', 'DashboardController@publish');
+    Router::post('/dashboard/publish', 'DashboardController@publish');
     
     // متجر الخدمات المدفوعة
     Router::get('/dashboard/services-store', 'ServicesStoreController@index');
@@ -163,6 +167,8 @@ Router::group(['middleware' => 'customer'], function() {
 
     // Analytics
     Router::get('/dashboard/analytics', 'AnalyticsController@index');
+    Router::get('/dashboard/analytics/details', 'AnalyticsController@details');
+    Router::get('/dashboard/analytics/export', 'AnalyticsController@export');
 
     // Theme
     Router::get('/dashboard/theme', 'ThemeController@index');
@@ -194,7 +200,24 @@ Router::group(['middleware' => 'customer'], function() {
     Router::post('/dashboard/forms/edit/{id}', 'FormController@update');
     Router::post('/dashboard/forms/delete/{id}', 'FormController@delete');
     Router::get('/dashboard/forms/submissions/{id}', 'FormController@submissions');
+
+    // Notifications API
+    Router::get('/dashboard/notifications', 'NotificationController@list');
+    Router::get('/dashboard/notifications/unread', 'NotificationController@unreadCount');
+    Router::post('/dashboard/notifications/read/{id}', 'NotificationController@markRead');
+    Router::post('/dashboard/notifications/read-all', 'NotificationController@markAllRead');
+    Router::post('/dashboard/notifications/delete/{id}', 'NotificationController@delete');
 });
+
+// ==================== مسارات عامة (بدون مصادقة) ====================
+// تتبع الإحصائيات (API عام)
+Router::post('/api/analytics/track', 'AnalyticsController@track');
+
+// استقبال بيانات النماذج (عام)
+Router::post('/forms/submit', 'FormController@submit');
+
+// تضمين النماذج (عام)
+Router::get('/forms/embed/{slug}', 'FormController@embed');
 
 // ==================== لوحة تحكم المدير ====================
 Router::group(['middleware' => 'admin'], function() {
@@ -281,6 +304,14 @@ Router::group(['middleware' => 'admin'], function() {
     Router::get('/admin/email-settings', 'AdminController@emailSettings');
     Router::post('/admin/email-settings', 'AdminController@updateEmailSettings');
     Router::post('/admin/email-settings/test', 'AdminController@testEmailSettings');
+    
+    // إدارة مدونة المنصة
+    Router::get('/admin/blog', 'PlatformBlogController@adminIndex');
+    Router::get('/admin/blog/create', 'PlatformBlogController@adminCreate');
+    Router::post('/admin/blog/create', 'PlatformBlogController@adminStore');
+    Router::get('/admin/blog/edit/{id}', 'PlatformBlogController@adminEdit');
+    Router::post('/admin/blog/edit/{id}', 'PlatformBlogController@adminUpdate');
+    Router::post('/admin/blog/delete/{id}', 'PlatformBlogController@adminDelete');
 });
 
 // ==================== معاينة القوالب (Theme Preview) ====================

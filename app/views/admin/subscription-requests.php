@@ -2,11 +2,22 @@
 /**
  * Admin Subscription Requests Page
  * صفحة إدارة طلبات الاشتراك والترقية - لوحة تحكم المدير
+ * — إصلاح شامل: عرض البيانات الصحيحة مع fallback لكل قيمة —
  */
 
 $requests = $requests ?? [];
 $statusFilter = $statusFilter ?? '';
+$debugMsg = $debugMsg ?? '';
+$totalInTable = $totalInTable ?? 0;
 ?>
+
+<!-- رسالة تنبيه للتصحيح -->
+<?php if (!empty($debugMsg)): ?>
+<div class="alert alert-warning mb-4" style="border-radius: 8px;">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <strong>تنبيه:</strong> <?= htmlspecialchars($debugMsg) ?>
+</div>
+<?php endif; ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
     <h4 class="mb-0" style="font-weight: 700;">
@@ -14,6 +25,9 @@ $statusFilter = $statusFilter ?? '';
         <?= lang('subscription_requests') ?? 'طلبات الاشتراك والترقية' ?>
     </h4>
     <div class="d-flex gap-2">
+        <a href="<?= url('/admin/purchases') ?>" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-shopping-cart me-1"></i><?= lang('purchases') ?? 'مشتريات الخدمات' ?>
+        </a>
         <a href="<?= url('/admin/subscriptions') ?>" class="btn btn-outline-secondary btn-sm">
             <i class="fas fa-list me-1"></i><?= lang('all_subscriptions') ?? 'كل الاشتراكات' ?>
         </a>
@@ -45,7 +59,8 @@ $statusFilter = $statusFilter ?? '';
 <div class="card">
     <div class="card-body text-center py-5">
         <i class="fas fa-inbox fa-3x text-muted mb-3" style="display: block;"></i>
-        <h5 style="color: #64748b;"><?= lang('no_requests') ?? 'لا توجد طلبات' ?></h5>
+        <h5 style="color: #64748b;"><?= lang('no_requests') ?? 'لا توجد طلبات اشتراك' ?></h5>
+        <p class="text-muted small mt-2">عندما يقوم عميل باختيار خطة وإرسال طلب اشتراك، ستظهر هنا</p>
     </div>
 </div>
 <?php else: ?>
@@ -66,26 +81,64 @@ $statusFilter = $statusFilter ?? '';
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($requests as $req): ?>
+                <?php foreach ($requests as $i => $req):
+                    // استخراج البيانات مع fallback لكل قيمة
+                    $reqId = $req->id ?? 0;
+                    $reqType = $req->request_type ?? 'new';
+                    $reqStatus = $req->status ?? '';
+                    $reqCreatedAt = $req->created_at ?? '';
+                    $reqNotes = $req->notes ?? '';
+                    $reqAdminNotes = $req->admin_notes ?? '';
+                    $reqReviewedAt = $req->reviewed_at ?? '';
+                    $tenantId = $req->tenant_id ?? '';
+                    $planId = $req->plan_id ?? '';
+                    $userName = $req->user_name ?? '';
+                    $userEmail = $req->user_email ?? '';
+                    $siteName = $req->site_name ?? '';
+                    $planName = $req->plan_name ?? '';
+                    $planPrice = $req->plan_price ?? null;
+                ?>
                 <tr>
-                    <td><?= $req->id ?></td>
+                    <td><strong><?= htmlspecialchars($reqId) ?></strong></td>
                     <td>
-                        <strong><?= htmlspecialchars($req->user_name ?? '') ?></strong>
-                        <br><small style="color: #64748b;"><?= htmlspecialchars($req->user_email ?? '') ?></small>
-                    </td>
-                    <td><?= htmlspecialchars($req->site_name ?? '') ?></td>
-                    <td>
-                        <strong><?= htmlspecialchars($req->plan_name ?? '') ?></strong>
-                        <?php if (isset($req->plan_price)): ?>
-                        <br><small style="color: #64748b;"><?= htmlspecialchars($req->plan_price) ?> <?= lang('pricing_currency') ?? '$' ?></small>
+                        <?php if (!empty($userName)): ?>
+                            <strong><?= htmlspecialchars($userName) ?></strong>
+                            <?php if (!empty($userEmail)): ?>
+                                <br><small style="color: #64748b;"><?= htmlspecialchars($userEmail) ?></small>
+                            <?php endif; ?>
+                        <?php elseif (!empty($tenantId)): ?>
+                            <span class="text-muted small">مستأجر #<?= htmlspecialchars($tenantId) ?></span>
+                        <?php else: ?>
+                            <span class="text-muted">-</span>
                         <?php endif; ?>
                     </td>
                     <td>
-                        <?php if ($req->request_type === 'upgrade'): ?>
+                        <?php if (!empty($siteName)): ?>
+                            <?= htmlspecialchars($siteName) ?>
+                        <?php elseif (!empty($tenantId)): ?>
+                            <span class="text-muted small">موقع #<?= htmlspecialchars($tenantId) ?></span>
+                        <?php else: ?>
+                            <span class="text-muted">-</span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if (!empty($planName)): ?>
+                            <strong><?= htmlspecialchars($planName) ?></strong>
+                            <?php if (!empty($planPrice) && floatval($planPrice) > 0): ?>
+                            <br><small style="color: #64748b;"><?= htmlspecialchars($planPrice) ?> <?= lang('pricing_currency') ?? 'ر.س' ?>/شهر</small>
+                            <?php endif; ?>
+                        <?php elseif (!empty($planId)): ?>
+                            <span class="text-muted small">خطة #<?= htmlspecialchars($planId) ?></span>
+                        <?php else: ?>
+                            <span class="text-muted">-</span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if ($reqType === 'upgrade'): ?>
                             <span class="badge" style="background: #dbeafe; color: #1d4ed8;">
                                 <i class="fas fa-arrow-up me-1"></i><?= lang('upgrade') ?? 'ترقية' ?>
                             </span>
-                        <?php elseif ($req->request_type === 'renew'): ?>
+                        <?php elseif ($reqType === 'renew'): ?>
                             <span class="badge" style="background: #d1fae5; color: #065f46;">
                                 <i class="fas fa-redo me-1"></i><?= lang('renew') ?? 'تجديد' ?>
                             </span>
@@ -96,50 +149,60 @@ $statusFilter = $statusFilter ?? '';
                         <?php endif; ?>
                     </td>
                     <td>
-                        <?php if ($req->status === 'pending'): ?>
+                        <?php if ($reqStatus === 'pending'): ?>
                             <span class="badge bg-warning text-dark">
                                 <i class="fas fa-clock me-1"></i><?= lang('pending') ?? 'معلق' ?>
                             </span>
-                        <?php elseif ($req->status === 'approved'): ?>
+                        <?php elseif ($reqStatus === 'approved'): ?>
                             <span class="badge bg-success">
                                 <i class="fas fa-check me-1"></i><?= lang('approved') ?? 'مقبول' ?>
                             </span>
-                        <?php elseif ($req->status === 'rejected'): ?>
+                        <?php elseif ($reqStatus === 'rejected'): ?>
                             <span class="badge bg-danger">
                                 <i class="fas fa-times me-1"></i><?= lang('rejected') ?? 'مرفوض' ?>
                             </span>
+                        <?php elseif ($reqStatus === 'cancelled'): ?>
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-ban me-1"></i>ملغى
+                            </span>
+                        <?php elseif (!empty($reqStatus)): ?>
+                            <span class="badge bg-secondary"><?= htmlspecialchars($reqStatus) ?></span>
                         <?php else: ?>
-                            <span class="badge bg-secondary"><?= lang('cancelled') ?? 'ملغى' ?></span>
+                            <span class="text-muted">-</span>
                         <?php endif; ?>
                     </td>
                     <td style="font-size: 0.85rem; color: #64748b; white-space: nowrap;">
-                        <?= date('Y-m-d', strtotime($req->created_at)) ?>
-                        <br><small><?= date('H:i', strtotime($req->created_at)) ?></small>
+                        <?php if (!empty($reqCreatedAt)): ?>
+                            <?= date('Y-m-d', strtotime($reqCreatedAt)) ?>
+                            <br><small><?= date('H:i', strtotime($reqCreatedAt)) ?></small>
+                        <?php else: ?>
+                            -
+                        <?php endif; ?>
                     </td>
                     <td style="max-width: 150px;">
-                        <small><?= htmlspecialchars($req->notes ?? '-') ?></small>
-                        <?php if ($req->admin_notes): ?>
-                            <br><span class="badge bg-light text-dark" style="font-size: 0.7rem;"><?= htmlspecialchars($req->admin_notes) ?></span>
+                        <small><?= htmlspecialchars(!empty($reqNotes) ? $reqNotes : '-') ?></small>
+                        <?php if (!empty($reqAdminNotes)): ?>
+                            <br><span class="badge bg-light text-dark" style="font-size: 0.7rem;"><?= htmlspecialchars($reqAdminNotes) ?></span>
                         <?php endif; ?>
                     </td>
                     <td>
-                        <?php if ($req->status === 'pending'): ?>
+                        <?php if ($reqStatus === 'pending' && !empty($reqId)): ?>
                         <div class="d-flex gap-1">
-                            <form method="POST" action="<?= url('/admin/subscription-requests/approve/' . $req->id) ?>" onsubmit="return confirm('<?= lang('confirm_approve') ?? 'هل تريد قبول هذا الطلب؟' ?>')">
+                            <form method="POST" action="<?= url('/admin/subscription-requests/approve/' . $reqId) ?>" onsubmit="return confirm('هل تريد قبول هذا الطلب؟')">
                                 <?= csrf_field() ?>
-                                <button type="submit" class="btn btn-sm btn-success" title="<?= lang('approve') ?? 'قبول' ?>">
+                                <button type="submit" class="btn btn-sm btn-success" title="قبول">
                                     <i class="fas fa-check"></i>
                                 </button>
                             </form>
-                            <form method="POST" action="<?= url('/admin/subscription-requests/reject/' . $req->id) ?>" onsubmit="return showRejectForm(<?= $req->id ?>)">
+                            <form method="POST" action="<?= url('/admin/subscription-requests/reject/' . $reqId) ?>" onsubmit="return confirm('هل تريد رفض هذا الطلب؟')">
                                 <?= csrf_field() ?>
-                                <button type="submit" class="btn btn-sm btn-danger" title="<?= lang('reject') ?? 'رفض' ?>">
+                                <button type="submit" class="btn btn-sm btn-danger" title="رفض">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </form>
                         </div>
-                        <?php elseif ($req->reviewed_at): ?>
-                        <small style="color: #94a3b8;"><?= date('Y-m-d H:i', strtotime($req->reviewed_at)) ?></small>
+                        <?php elseif (!empty($reqReviewedAt) && !empty($reqId)): ?>
+                        <small style="color: #94a3b8;"><?= date('Y-m-d H:i', strtotime($reqReviewedAt)) ?></small>
                         <?php endif; ?>
                     </td>
                 </tr>

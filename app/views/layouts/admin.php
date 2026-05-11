@@ -406,6 +406,11 @@ $user = Auth::user();
                     <span><?= lang('sites') ?? 'المواقع' ?></span>
                 </a>
 
+                <a href="<?= url('/admin/blog') ?>" class="nav-item <?= Router::is('/admin/blog') ? 'active' : '' ?>">
+                    <i class="fas fa-newspaper"></i>
+                    <span>المدونة</span>
+                </a>
+
                 <a href="<?= url('/admin/subscriptions') ?>" class="nav-item <?= Router::is('/admin/subscriptions') ? 'active' : '' ?>">
                     <i class="fas fa-credit-card"></i>
                     <span><?= lang('subscriptions') ?? 'الاشتراكات' ?></span>

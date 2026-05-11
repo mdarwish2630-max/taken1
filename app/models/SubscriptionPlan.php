@@ -175,10 +175,13 @@ class SubscriptionPlan extends Model
         $tenantModel = new Tenant();
         $tenant = $tenantModel->find($tenantId);
         
-        if (!$tenant || !$tenant->subscription_plan_id) {
+        // دعم العمودين: subscription_plan_id و plan_id
+        $planId = $tenant->subscription_plan_id ?? $tenant->plan_id ?? null;
+        
+        if (!$tenant || !$planId) {
             $features = $this->getDefaultFeatures();
         } else {
-            $features = $this->getFeatures($tenant->subscription_plan_id);
+            $features = $this->getFeatures($planId);
         }
         
         $limitField = 'max_' . $resource;
@@ -240,10 +243,13 @@ class SubscriptionPlan extends Model
         $tenantModel = new Tenant();
         $tenant = $tenantModel->find($tenantId);
         
-        if (!$tenant || !$tenant->subscription_plan_id) {
+        // دعم العمودين: subscription_plan_id و plan_id
+        $planId = $tenant->subscription_plan_id ?? $tenant->plan_id ?? null;
+        
+        if (!$tenant || !$planId) {
             $features = $this->getDefaultFeatures();
         } else {
-            $features = $this->getFeatures($tenant->subscription_plan_id);
+            $features = $this->getFeatures($planId);
         }
         
         $featureField = 'has_' . $feature;

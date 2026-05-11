@@ -348,11 +348,11 @@ CREATE TABLE IF NOT EXISTS `demo_imports` (
 -- =============================================
 
 -- إضافة القالب الوحيد (نوفا)
-INSERT INTO `themes` (`name`, `name_en`, `slug`, `description`, `description_en`, `category`, `preview_image`, `is_active`, `is_premium`, `is_paid`, `price`, `sort_order`, `version`) VALUES
+INSERT IGNORE INTO `themes` (`name`, `name_en`, `slug`, `description`, `description_en`, `category`, `preview_image`, `is_active`, `is_premium`, `is_paid`, `price`, `sort_order`, `version`) VALUES
 ('نوفا - احترافي', 'Nova - Professional', 'nova', 'قالب عصري واحترافي متوافق مع جميع الأجهزة', 'Modern and professional template, fully responsive', 'general', 'themes/previews/nova-preview.png', 1, 0, 0, 0.00, 1, '2.0');
 
 -- إضافة إعدادات النظام
-INSERT INTO `settings` (`setting_key`, `setting_value`, `setting_type`, `description`) VALUES
+INSERT IGNORE INTO `settings` (`setting_key`, `setting_value`, `setting_type`, `description`) VALUES
 ('site_name', 'منصة المواقع', 'string', 'اسم المنصة'),
 ('site_email', 'info@cms-platform.com', 'string', 'بريد المنصة'),
 ('trial_days', '14', 'integer', 'عدد أيام التجربة المجانية'),
@@ -364,7 +364,7 @@ INSERT INTO `settings` (`setting_key`, `setting_value`, `setting_type`, `descrip
 
 -- إضافة مدير النظام الافتراضي
 -- كلمة المرور: admin123 (مشفرة بـ password_hash)
-INSERT INTO `users` (`email`, `password`, `full_name`, `role`, `status`, `email_verified`) VALUES
+INSERT IGNORE INTO `users` (`email`, `password`, `full_name`, `role`, `status`, `email_verified`) VALUES
 ('admin@cms-platform.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'مدير النظام', 'admin', 'active', 1);
 
 -- =============================================
@@ -645,24 +645,232 @@ CREATE TABLE IF NOT EXISTS `site_features` (
 -- إضافة أعمدة إضافية لجدول tenants
 -- =============================================
 -- هذه الأعمدة قد تكون موجودة بالفعل، لذلك نستخدم IF NOT EXISTS عبر إدراج تجاهل الأخطاء
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `plan_id` INT(11) UNSIGNED DEFAULT NULL AFTER `theme_id`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `subscription_plan_id` INT(11) UNSIGNED DEFAULT NULL AFTER `theme_id`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `auto_renew` TINYINT(1) NOT NULL DEFAULT 0 AFTER `trial_ends_at`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `last_payment_date` DATETIME DEFAULT NULL AFTER `auto_renew`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `next_payment_date` DATETIME DEFAULT NULL AFTER `last_payment_date`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `default_language` VARCHAR(10) DEFAULT 'ar' AFTER `settings`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `sections_config` TEXT DEFAULT NULL AFTER `default_language`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `plan_features` TEXT DEFAULT NULL AFTER `sections_config`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_status` enum('none','pending','active','rejected') DEFAULT 'none' AFTER `custom_domain`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_purchased` tinyint(1) DEFAULT 0 AFTER `custom_domain_status`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_verified` TINYINT(1) DEFAULT 0 AFTER `custom_domain_purchased`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_verification_token` VARCHAR(64) NULL AFTER `custom_domain_verified`;
-ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `domain_status` ENUM('pending', 'active', 'failed') DEFAULT 'pending' AFTER `custom_domain_verification_token`;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `plan_id` INT(11) UNSIGNED DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `subscription_plan_id` INT(11) UNSIGNED DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `auto_renew` TINYINT(1) NOT NULL DEFAULT 0;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `last_payment_date` DATETIME DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `next_payment_date` DATETIME DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `default_language` VARCHAR(10) DEFAULT 'ar';
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `sections_config` TEXT DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `plan_features` TEXT DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_status` enum('none','pending','active','rejected') DEFAULT 'none';
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_purchased` tinyint(1) DEFAULT 0;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_verified` TINYINT(1) DEFAULT 0;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `custom_domain_verification_token` VARCHAR(64) NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `domain_status` ENUM('pending', 'active', 'failed') DEFAULT 'pending';
+
+-- أعمدة إضافية للغات ثنائية
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `site_name_en` VARCHAR(255) DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `meta_description_en` TEXT DEFAULT NULL;
+
+-- أعمدة CTA
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `cta_title` VARCHAR(255) DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `cta_title_en` VARCHAR(255) DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `cta_text` TEXT DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `cta_text_en` TEXT DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `cta_button_text` VARCHAR(255) DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `cta_button_text_en` VARCHAR(255) DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `cta_button_link` VARCHAR(255) DEFAULT NULL;
+ALTER TABLE `tenants` ADD COLUMN IF NOT EXISTS `cta_is_active` TINYINT(1) DEFAULT 0;
 
 -- =============================================
 -- إضافة أعمدة إضافية لجدول subscriptions
 -- =============================================
-ALTER TABLE `subscriptions` ADD COLUMN IF NOT EXISTS `plan_id` INT(11) UNSIGNED DEFAULT NULL AFTER `tenant_id`;
+ALTER TABLE `subscriptions` ADD COLUMN IF NOT EXISTS `plan_id` INT(11) UNSIGNED DEFAULT NULL;
+ALTER TABLE `subscriptions` ADD COLUMN IF NOT EXISTS `request_id` INT(11) UNSIGNED DEFAULT NULL;
+
+-- =============================================
+-- إضافة أعمدة phase2 لجدول subscription_plans
+-- =============================================
+ALTER TABLE `subscription_plans` ADD COLUMN IF NOT EXISTS `price_monthly` DECIMAL(10,2) NOT NULL DEFAULT 0;
+ALTER TABLE `subscription_plans` ADD COLUMN IF NOT EXISTS `price_yearly` DECIMAL(10,2) DEFAULT NULL;
+ALTER TABLE `subscription_plans` ADD COLUMN IF NOT EXISTS `features` TEXT DEFAULT NULL COMMENT 'JSON array of features';
+ALTER TABLE `subscription_plans` ADD COLUMN IF NOT EXISTS `custom_domain` TINYINT(1) DEFAULT 0;
+ALTER TABLE `subscription_plans` ADD COLUMN IF NOT EXISTS `remove_branding` TINYINT(1) DEFAULT 0;
+ALTER TABLE `subscription_plans` ADD COLUMN IF NOT EXISTS `analytics_access` TINYINT(1) DEFAULT 0;
+ALTER TABLE `subscription_plans` ADD COLUMN IF NOT EXISTS `priority_support` TINYINT(1) DEFAULT 0;
+ALTER TABLE `subscription_plans` ADD COLUMN IF NOT EXISTS `display_order` INT(11) NOT NULL DEFAULT 0;
+ALTER TABLE `subscription_plans` ADD COLUMN IF NOT EXISTS `max_forms` INT(11) NOT NULL DEFAULT 0;
+
+-- =============================================
+-- 25. ANALYTICS TABLE - الإحصائيات
+-- =============================================
+CREATE TABLE IF NOT EXISTS `analytics` (
+    `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `tenant_id` INT(11) UNSIGNED NOT NULL,
+    `visitor_id` VARCHAR(64) DEFAULT NULL COMMENT 'Anonymous visitor identifier',
+    `session_id` VARCHAR(64) DEFAULT NULL,
+    `page_url` VARCHAR(500) NOT NULL,
+    `page_title` VARCHAR(255) DEFAULT NULL,
+    `referrer` VARCHAR(500) DEFAULT NULL,
+    `user_agent` VARCHAR(500) DEFAULT NULL,
+    `ip_address` VARCHAR(45) DEFAULT NULL,
+    `country` VARCHAR(100) DEFAULT NULL,
+    `city` VARCHAR(100) DEFAULT NULL,
+    `device_type` ENUM('desktop', 'tablet', 'mobile') DEFAULT 'desktop',
+    `browser` VARCHAR(100) DEFAULT NULL,
+    `os` VARCHAR(100) DEFAULT NULL,
+    `time_spent` INT(11) DEFAULT 0 COMMENT 'Seconds spent on page',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `tenant_id` (`tenant_id`),
+    KEY `visitor_id` (`visitor_id`),
+    KEY `session_id` (`session_id`),
+    KEY `created_at` (`created_at`),
+    CONSTRAINT `analytics_tenant_fk` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- 26. PAGE_VIEWS TABLE - مشاهدات الصفحات (ملخص يومي)
+-- =============================================
+CREATE TABLE IF NOT EXISTS `page_views` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `tenant_id` INT(11) UNSIGNED NOT NULL,
+    `page_slug` VARCHAR(255) NOT NULL,
+    `view_date` DATE NOT NULL,
+    `views` INT(11) UNSIGNED NOT NULL DEFAULT 1,
+    `unique_visitors` INT(11) UNSIGNED NOT NULL DEFAULT 1,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `tenant_page_date` (`tenant_id`, `page_slug`, `view_date`),
+    KEY `tenant_id` (`tenant_id`),
+    CONSTRAINT `page_views_tenant_fk` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- 27. NOTIFICATIONS TABLE - الإشعارات
+-- =============================================
+CREATE TABLE IF NOT EXISTS `notifications` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT(11) UNSIGNED NOT NULL,
+    `type` VARCHAR(50) NOT NULL COMMENT 'subscription, payment, system, message, etc.',
+    `title` VARCHAR(255) NOT NULL,
+    `message` TEXT DEFAULT NULL,
+    `data` TEXT DEFAULT NULL COMMENT 'JSON additional data',
+    `link` VARCHAR(500) DEFAULT NULL COMMENT 'رابط لصفحة متعلقة',
+    `is_read` TINYINT(1) NOT NULL DEFAULT 0,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `user_id` (`user_id`),
+    KEY `is_read` (`is_read`),
+    CONSTRAINT `notifications_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- 28. SUBSCRIPTION_REQUESTS TABLE - طلبات الاشتراك
+-- =============================================
+CREATE TABLE IF NOT EXISTS `subscription_requests` (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `tenant_id` INT(11) NOT NULL,
+    `plan_id` INT(11) NOT NULL,
+    `request_type` ENUM('new','upgrade','renew') NOT NULL DEFAULT 'new' COMMENT 'نوع الطلب',
+    `status` ENUM('pending','approved','rejected','cancelled') NOT NULL DEFAULT 'pending',
+    `notes` TEXT DEFAULT NULL COMMENT 'ملاحظات المستخدم',
+    `admin_notes` TEXT DEFAULT NULL COMMENT 'ملاحظات الأدمن',
+    `reviewed_by` INT(11) DEFAULT NULL,
+    `reviewed_at` DATETIME DEFAULT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_tenant_status` (`tenant_id`, `status`),
+    KEY `idx_status` (`status`),
+    KEY `idx_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- 29. BLOG_CATEGORIES TABLE - تصنيفات المدونة
+-- =============================================
+CREATE TABLE IF NOT EXISTS `blog_categories` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `tenant_id` INT(11) UNSIGNED NOT NULL,
+    `name` VARCHAR(100) NOT NULL,
+    `slug` VARCHAR(100) NOT NULL,
+    `description` TEXT DEFAULT NULL,
+    `display_order` INT(11) NOT NULL DEFAULT 0,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `tenant_id` (`tenant_id`),
+    CONSTRAINT `blog_categories_tenant_fk` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- 30. SECTIONS_CONFIG TABLE - أقسام الموقع
+-- =============================================
+CREATE TABLE IF NOT EXISTS `sections_config` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `tenant_id` INT(11) UNSIGNED NOT NULL,
+    `section_key` VARCHAR(50) NOT NULL,
+    `section_label_ar` VARCHAR(100) DEFAULT NULL,
+    `section_label_en` VARCHAR(100) DEFAULT NULL,
+    `is_enabled` TINYINT(1) NOT NULL DEFAULT 1,
+    `display_order` INT(11) NOT NULL DEFAULT 0,
+    `section_icon` VARCHAR(50) DEFAULT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `tenant_section` (`tenant_id`, `section_key`),
+    KEY `tenant_id` (`tenant_id`),
+    CONSTRAINT `sections_config_tenant_fk` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- 31. DOMAIN_HISTORY TABLE - سجل تغييرات النطاق
+-- =============================================
+CREATE TABLE IF NOT EXISTS `domain_history` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `tenant_id` INT(11) UNSIGNED NOT NULL,
+    `domain_type` ENUM('subdomain', 'custom') NOT NULL,
+    `old_value` VARCHAR(255) DEFAULT NULL,
+    `new_value` VARCHAR(255) NOT NULL,
+    `changed_by` INT(11) UNSIGNED DEFAULT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `tenant_id` (`tenant_id`),
+    CONSTRAINT `domain_history_tenant_fk` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- إضافة أعمدة ثنائية اللغة لبقية الجداول
+-- =============================================
+ALTER TABLE `services` ADD COLUMN IF NOT EXISTS `title_en` VARCHAR(255) DEFAULT NULL;
+ALTER TABLE `services` ADD COLUMN IF NOT EXISTS `description_en` TEXT DEFAULT NULL;
+
+ALTER TABLE `pages` ADD COLUMN IF NOT EXISTS `title_en` VARCHAR(255) DEFAULT NULL;
+ALTER TABLE `pages` ADD COLUMN IF NOT EXISTS `content_en` LONGTEXT DEFAULT NULL;
+
+ALTER TABLE `banners` ADD COLUMN IF NOT EXISTS `title_en` VARCHAR(255) DEFAULT NULL;
+ALTER TABLE `banners` ADD COLUMN IF NOT EXISTS `subtitle_en` VARCHAR(255) DEFAULT NULL;
+
+ALTER TABLE `site_settings` ADD COLUMN IF NOT EXISTS `hero_title_en` VARCHAR(255) DEFAULT NULL;
+ALTER TABLE `site_settings` ADD COLUMN IF NOT EXISTS `hero_subtitle_en` TEXT DEFAULT NULL;
+ALTER TABLE `site_settings` ADD COLUMN IF NOT EXISTS `hero_button_text_en` VARCHAR(255) DEFAULT NULL;
+
+-- =============================================
+-- إضافة أعمدة إضافية لجدول theme_settings (من phase2)
+-- =============================================
+ALTER TABLE `theme_settings` ADD COLUMN IF NOT EXISTS `font_size_base` VARCHAR(10) DEFAULT '16px';
+ALTER TABLE `theme_settings` ADD COLUMN IF NOT EXISTS `footer_style` ENUM('default', 'minimal', 'expanded') DEFAULT 'default';
+ALTER TABLE `theme_settings` ADD COLUMN IF NOT EXISTS `header_logo_height` VARCHAR(10) DEFAULT '50px';
+ALTER TABLE `theme_settings` ADD COLUMN IF NOT EXISTS `footer_logo_height` VARCHAR(10) DEFAULT '40px';
+ALTER TABLE `theme_settings` ADD COLUMN IF NOT EXISTS `button_style` ENUM('rounded', 'square', 'pill') DEFAULT 'rounded';
+ALTER TABLE `theme_settings` ADD COLUMN IF NOT EXISTS `card_style` ENUM('shadow', 'border', 'flat') DEFAULT 'shadow';
+ALTER TABLE `theme_settings` ADD COLUMN IF NOT EXISTS `animation_enabled` TINYINT(1) DEFAULT 1;
+
+-- =============================================
+-- إضافة أعمدة إضافية لجدول seo_settings (من phase2)
+-- =============================================
+ALTER TABLE `seo_settings` ADD COLUMN IF NOT EXISTS `google_tag_manager_id` VARCHAR(50) DEFAULT NULL;
+ALTER TABLE `seo_settings` ADD COLUMN IF NOT EXISTS `facebook_pixel_id` VARCHAR(100) DEFAULT NULL;
+ALTER TABLE `seo_settings` ADD COLUMN IF NOT EXISTS `google_site_verification` VARCHAR(255) DEFAULT NULL;
+ALTER TABLE `seo_settings` ADD COLUMN IF NOT EXISTS `bing_site_verification` VARCHAR(255) DEFAULT NULL;
+ALTER TABLE `seo_settings` ADD COLUMN IF NOT EXISTS `twitter_card_type` ENUM('summary', 'summary_large_image') DEFAULT 'summary_large_image';
+
+-- =============================================
+-- إضافة أعمدة للأعمدة الإضافية لجدول custom_forms
+-- =============================================
+ALTER TABLE `custom_forms` ADD COLUMN IF NOT EXISTS `email_recipients` TEXT DEFAULT NULL COMMENT 'JSON array of emails';
+
+-- =============================================
+-- مزامنة price_monthly في خطط الاشتراك
+-- =============================================
+UPDATE `subscription_plans` SET `price_monthly` = `price` WHERE `price_monthly` = 0 AND `price` > 0;
 
 -- =============================================
 -- بيانات تجريبية - خطط الاشتراك

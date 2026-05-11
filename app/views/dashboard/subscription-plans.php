@@ -29,13 +29,12 @@ $currentPlanId = $currentPlan->plan_id ?? null;
 <?php else: ?>
 <div class="row">
     <?php foreach ($plans as $plan):
-        // دعم أسماء أعمدة مختلفة (name / plan_name)
+        // دعم أسماء أعمدة مختلفة
         $planName = $plan->name ?? $plan->plan_name ?? '';
         $planDesc = $plan->description ?? $plan->plan_description ?? '';
-        $planPrice = $plan->price ?? 0;
-        $planFree = $plan->is_free ?? ($planPrice == 0 ? 1 : 0);
+        $planPrice = $plan->price_monthly ?? $plan->price ?? 0;
+        $planFree = ($planPrice == 0 || ($plan->is_free ?? 0) == 1) ? 1 : 0;
         $planId = $plan->id ?? 0;
-        $planDuration = $plan->duration ?? 30;
         $planPopular = $plan->is_popular ?? 0;
     ?>
     <div class="col-md-4 mb-4">
@@ -60,10 +59,10 @@ $currentPlanId = $currentPlan->plan_id ?? null;
 
                 <div class="mb-4">
                     <?php if ($planFree): ?>
-                        <span class="display-5 fw-bold"><?= lang('free_plan') ?></span>
+                        <span class="display-5 fw-bold"><?= lang('free_plan') ?? 'مجاني' ?></span>
                     <?php else: ?>
                         <span class="display-5 fw-bold"><?= htmlspecialchars($planPrice) ?></span>
-                        <small class="text-muted"><?= lang('pricing_currency') ?>/<?= $planDuration ?> <?= lang('days') ?></small>
+                        <small class="text-muted"><?= htmlspecialchars($plan->currency ?? 'SAR') ?>/<?= lang('month') ?? 'شهر' ?></small>
                     <?php endif; ?>
                 </div>
 
