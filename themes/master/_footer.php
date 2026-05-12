@@ -18,7 +18,7 @@ $year = date('Y');
         <div>
             <div class="flex items-center gap-3 mb-5">
                 <?php if (!empty($tenant->logo)): ?>
-                    <img src="<?= upload($tenant->logo) ?>" alt="<?= $siteName ?>" class="w-12 h-12 rounded-2xl object-cover">
+                    <img src="<?= function_exists('upload') ? upload($tenant->logo) : $tenant->logo ?>" alt="<?= $siteName ?>" class="w-12 h-12 rounded-2xl object-cover">
                 <?php else: ?>
                     <div class="w-12 h-12 rounded-2xl bg-cyan-500 flex items-center justify-center font-black text-black text-xl"><?= $logoLetter ?></div>
                 <?php endif; ?>

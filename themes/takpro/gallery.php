@@ -54,7 +54,7 @@ require_once __DIR__ . '/_navbar.php';
                 <?php foreach ($allGallery as $i => $item): ?>
                     <?php
                         $imgTitle = $lang === 'en' && !empty($item->title_en) ? $item->title_en : ($item->title ?? '');
-                        $imgSrc = !empty($item->image) ? upload($item->image) : ($defaultImages[$i % count($defaultImages)]['src'] ?? '');
+                        $imgSrc = !empty($item->image) ? function_exists('upload') ? upload($item->image) : $item->image : ($defaultImages[$i % count($defaultImages)]['src'] ?? '');
                     ?>
                     <div class="group relative rounded-xl overflow-hidden h-64 fade-up" style="transition-delay:<?= ($i * 0.05) ?>s">
                         <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($imgTitle) ?>"

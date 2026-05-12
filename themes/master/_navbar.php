@@ -14,7 +14,7 @@ $logoLetter = mb_substr($tenant->site_name ?? 'M', 0, 1);
         <!-- Logo -->
         <a href="<?= url($siteBase) ?>" class="flex items-center gap-3 group">
             <?php if (!empty($tenant->logo)): ?>
-                <img src="<?= upload($tenant->logo) ?>" alt="<?= $siteName ?>" class="w-11 h-11 rounded-2xl object-cover shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 transition">
+                <img src="<?= function_exists('upload') ? upload($tenant->logo) : $tenant->logo ?>" alt="<?= $siteName ?>" class="w-11 h-11 rounded-2xl object-cover shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 transition">
             <?php else: ?>
                 <div class="w-11 h-11 rounded-2xl bg-cyan-500 flex items-center justify-center font-black text-xl text-black shadow-lg shadow-cyan-500/40 group-hover:scale-105 transition"><?= $logoLetter ?></div>
             <?php endif; ?>

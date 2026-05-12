@@ -28,7 +28,7 @@ if (!empty($services)) {
 if ($currentService) {
     $svcTitle = $lang === 'en' && !empty($currentService->title_en) ? $currentService->title_en : ($currentService->title ?? $svcTitle);
     $svcDesc  = $lang === 'en' && !empty($currentService->description_en) ? $currentService->description_en : ($currentService->description ?? '');
-    $svcImage = !empty($currentService->image) ? upload($currentService->image) : '';
+    $svcImage = !empty($currentService->image) ? function_exists('upload') ? upload($currentService->image) : $currentService->image : '';
     $svcPrice = !empty($currentService->price) ? $currentService->price : '';
     $svcIcon  = $currentService->icon ?? 'fas fa-star';
 }

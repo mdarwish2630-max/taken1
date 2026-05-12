@@ -101,7 +101,7 @@ require_once __DIR__ . '/_navbar.php';
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             <?php foreach ($partnerItems as $i => $partner):
                 $partnerName = $lang === 'en' && !empty($partner->name_en) ? $partner->name_en : ($partner->name ?? '');
-                $partnerLogo = !empty($partner->logo) ? upload($partner->logo) : '';
+                $partnerLogo = !empty($partner->logo) ? function_exists('upload') ? upload($partner->logo) : $partner->logo : '';
                 $partnerSite = $partner->website ?? '';
                 $letter = mb_substr($partnerName, 0, 1);
             ?>

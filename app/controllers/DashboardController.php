@@ -392,16 +392,16 @@ class DashboardController extends Controller
         $data = [
             'tenant_id' => $tenant->id,
             'title' => $this->input('title'),
-            'description' => $this->input('description'),
-            'content' => $this->input('content'),
+            'description' => $this->rawInput('description'),
+            'content' => $this->rawInput('content'),
             'icon' => $this->input('icon'),
             'price' => $this->input('price') ?: null,
             'price_text' => $this->input('price_text'),
             'show_on_home' => $this->input('show_on_home') ? 1 : 0,
             'status' => $this->input('status') ?: 'active',
             'title_en' => $this->input('title_en') ?: null,
-            'description_en' => $this->input('description_en') ?: null,
-            'content_en' => $this->input('content_en') ?: null
+            'description_en' => $this->rawInput('description_en'),
+            'content_en' => $this->rawInput('content_en')
         ];
 
         // رفع الصورة
@@ -458,16 +458,16 @@ class DashboardController extends Controller
 
         $data = [
             'title' => $this->input('title'),
-            'description' => $this->input('description'),
-            'content' => $this->input('content'),
+            'description' => $this->rawInput('description'),
+            'content' => $this->rawInput('content'),
             'icon' => $this->input('icon'),
             'price' => $this->input('price') ?: null,
             'price_text' => $this->input('price_text'),
             'show_on_home' => $this->input('show_on_home') ? 1 : 0,
             'status' => $this->input('status') ?: 'active',
             'title_en' => $this->input('title_en') ?: null,
-            'description_en' => $this->input('description_en') ?: null,
-            'content_en' => $this->input('content_en') ?: null
+            'description_en' => $this->rawInput('description_en'),
+            'content_en' => $this->rawInput('content_en')
         ];
 
         // رفع صورة جديدة
@@ -641,14 +641,15 @@ class DashboardController extends Controller
 
         // معالجة رفع صورة جديدة
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $imageHandler = new \App\Helpers\ImageHandler();
-            $imageResult = $imageHandler->upload($_FILES['image'], 'banners');
+            require_once ROOT_PATH . '/app/helpers/ImageHandler.php';
+            $imageHandler = new ImageHandler();
+            $imageResult = $imageHandler->upload($_FILES['image'], $tenant->id . '/banners');
             if ($imageResult['success']) {
                 // حذف الصورة القديمة
                 if (!empty($banner->image)) {
                     $imageHandler->delete($banner->image);
                 }
-                $data['image'] = $imageResult['filename'];
+                $data['image'] = $imageResult['full_path'];
             }
         }
 
@@ -801,7 +802,7 @@ class DashboardController extends Controller
             'tenant_id' => $tenant->id,
             'client_name' => $this->input('client_name'),
             'client_title' => $this->input('client_title'),
-            'content' => $this->input('content'),
+            'content' => $this->rawInput('content'),
             'rating' => $this->input('rating') ?: 5,
             'show_on_home' => $this->input('show_on_home') ? 1 : 0,
             'status' => 'active',

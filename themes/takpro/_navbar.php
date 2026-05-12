@@ -26,7 +26,7 @@ $displaySiteName = ($lang ?? 'ar') === 'en' ? $siteNameEn : $siteName;
             <!-- Logo Area -->
             <a href="<?= url($siteBase) ?>" class="h-full bg-dark-light text-white px-7 flex items-center gap-3 min-w-[210px] group">
                 <?php if (!empty($tenant->logo)): ?>
-                    <img src="<?= upload($tenant->logo) ?>" alt="<?= $displaySiteName ?>" class="w-10 h-10 rounded-xl object-cover group-hover:scale-105 transition">
+                    <img src="<?= function_exists('upload') ? upload($tenant->logo) : $tenant->logo ?>" alt="<?= $displaySiteName ?>" class="w-10 h-10 rounded-xl object-cover group-hover:scale-105 transition">
                 <?php else: ?>
                     <span class="text-3xl">&#10024;</span>
                 <?php endif; ?>

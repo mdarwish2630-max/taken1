@@ -63,7 +63,7 @@ define('CURRENCY', 'SAR');
 
 // إعدادات الثيمات
 define('THEMES_PATH', ROOT_PATH . '/themes');
-define('DEFAULT_THEME', 'nova');
+define('DEFAULT_THEME', 'cleanpro');
 
 // إعدادات المنطقة الزمنية
 date_default_timezone_set('Asia/Riyadh');
@@ -72,7 +72,7 @@ date_default_timezone_set('Asia/Riyadh');
 // [FIX-01] تعطيل DEBUG_MODE في بيئة الإنتاج
 // يجب تغيير هذا إلى false عند النشر
 // =============================================
-define('DEBUG_MODE', true);
+define('DEBUG_MODE', false);
 
 if (DEBUG_MODE) {
     error_reporting(E_ALL);

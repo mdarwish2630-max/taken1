@@ -113,7 +113,7 @@ class SiteController extends Controller
         }
 
         // استخدام الثيم المحدد من الموقع
-        $themeSlug = !empty($tenant->theme_slug) ? $tenant->theme_slug : 'nova';
+        $themeSlug = !empty($tenant->theme_slug) ? $tenant->theme_slug : 'cleanpro';
 
         // Determine current language for templates
         $currentLang  = function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar');
@@ -660,12 +660,18 @@ public function previewDemoService($themeSlug, $serviceSlug)
             return;
         }
 
+        $currentLang = function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar');
+        $currentDir  = ($currentLang === 'en') ? 'ltr' : 'rtl';
+
         $data = [
             'tenant' => $tenant,
             'service' => $service,
             'menu' => $this->pageModel->getMenuPages($tenant->id),
             'title' => $service->title . ' - ' . $tenant->site_name,
-            'related_services' => $this->serviceModel->getTenantServices($tenant->id)
+            'related_services' => $this->serviceModel->getTenantServices($tenant->id),
+            'lang'  => $currentLang,
+            'dir'   => $currentDir,
+            'siteBase' => '/site/' . $tenant->slug,
         ];
 
         $this->renderTheme($tenant->theme_slug, 'service', $data);
@@ -685,12 +691,22 @@ public function previewDemoService($themeSlug, $serviceSlug)
         // تحديد لغة الموقع
         $this->setSiteLanguage($tenant, $slug);
 
+        $currentLang = function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar');
+        $currentDir  = ($currentLang === 'en') ? 'ltr' : 'rtl';
+
         $data = [
             'tenant' => $tenant,
             'services' => $this->serviceModel->getTenantServices($tenant->id),
             'menu' => $this->pageModel->getMenuPages($tenant->id),
             'banners' => $this->bannerModel->getHeroBanners($tenant->id),
-            'title' => lang('our_services') . ' - ' . $tenant->site_name
+            'sectionsConfig' => $this->tenantModel->getSectionsConfig($tenant->id),
+            'siteStats' => $this->siteStatModel->getTenantStats($tenant->id, true),
+            'siteFeatures' => $this->siteFeatureModel->getSiteFeatures($tenant->id),
+            'testimonials' => $this->testimonialModel->getHomeTestimonials($tenant->id, 6),
+            'title' => lang('our_services') . ' - ' . $tenant->site_name,
+            'lang'  => $currentLang,
+            'dir'   => $currentDir,
+            'siteBase' => '/site/' . $tenant->slug,
         ];
 
         $this->renderTheme($tenant->theme_slug, 'services', $data);
@@ -710,12 +726,21 @@ public function previewDemoService($themeSlug, $serviceSlug)
         // تحديد لغة الموقع
         $this->setSiteLanguage($tenant, $slug);
 
+        $currentLang = function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar');
+        $currentDir  = ($currentLang === 'en') ? 'ltr' : 'rtl';
+
         $data = [
             'tenant' => $tenant,
             'gallery' => $this->galleryModel->getActiveGallery($tenant->id),
             'menu' => $this->pageModel->getMenuPages($tenant->id),
             'banners' => $this->bannerModel->getHeroBanners($tenant->id),
-            'title' => lang('our_gallery') . ' - ' . $tenant->site_name
+            'sectionsConfig' => $this->tenantModel->getSectionsConfig($tenant->id),
+            'services' => $this->serviceModel->getHomeServices($tenant->id, 6),
+            'testimonials' => $this->testimonialModel->getHomeTestimonials($tenant->id, 6),
+            'title' => lang('our_gallery') . ' - ' . $tenant->site_name,
+            'lang'  => $currentLang,
+            'dir'   => $currentDir,
+            'siteBase' => '/site/' . $tenant->slug,
         ];
 
         $this->renderTheme($tenant->theme_slug, 'gallery', $data);
@@ -735,11 +760,23 @@ public function previewDemoService($themeSlug, $serviceSlug)
         // تحديد لغة الموقع
         $this->setSiteLanguage($tenant, $slug);
 
+        $currentLang = function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar');
+        $currentDir  = ($currentLang === 'en') ? 'ltr' : 'rtl';
+
         $data = [
             'tenant' => $tenant,
             'menu' => $this->pageModel->getMenuPages($tenant->id),
             'banners' => $this->bannerModel->getHeroBanners($tenant->id),
-            'title' => lang('contact_us') . ' - ' . $tenant->site_name
+            'sectionsConfig' => $this->tenantModel->getSectionsConfig($tenant->id),
+            'services' => $this->serviceModel->getHomeServices($tenant->id, 6),
+            'siteStats' => $this->siteStatModel->getTenantStats($tenant->id, true),
+            'siteFeatures' => $this->siteFeatureModel->getSiteFeatures($tenant->id),
+            'faqItems' => $this->faqModel->getTenantFaqs($tenant->id, true),
+            'faqCategories' => $this->faqModel->getTenantFaqsGroupedByCategory($tenant->id, true),
+            'title' => lang('contact_us') . ' - ' . $tenant->site_name,
+            'lang'  => $currentLang,
+            'dir'   => $currentDir,
+            'siteBase' => '/site/' . $tenant->slug,
         ];
 
         $this->renderTheme($tenant->theme_slug, 'contact', $data);
@@ -759,6 +796,9 @@ public function previewDemoService($themeSlug, $serviceSlug)
         // تحديد لغة الموقع
         $this->setSiteLanguage($tenant, $slug);
 
+        $currentLang = function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar');
+        $currentDir  = ($currentLang === 'en') ? 'ltr' : 'rtl';
+
         $data = [
             'tenant' => $tenant,
             'services' => $this->serviceModel->getHomeServices($tenant->id, 6),
@@ -766,7 +806,15 @@ public function previewDemoService($themeSlug, $serviceSlug)
             'gallery' => $this->galleryModel->getActiveGallery($tenant->id, 6),
             'menu' => $this->pageModel->getMenuPages($tenant->id),
             'banners' => $this->bannerModel->getHeroBanners($tenant->id),
-            'title' => lang('about_us') . ' - ' . $tenant->site_name
+            'sectionsConfig' => $this->tenantModel->getSectionsConfig($tenant->id),
+            'faqItems' => $this->faqModel->getTenantFaqs($tenant->id, true),
+            'siteStats' => $this->siteStatModel->getTenantStats($tenant->id, true),
+            'siteFeatures' => $this->siteFeatureModel->getSiteFeatures($tenant->id),
+            'partnerItems' => $this->partnerModel->getTenantPartners($tenant->id, true),
+            'title' => lang('about_us') . ' - ' . $tenant->site_name,
+            'lang'  => $currentLang,
+            'dir'   => $currentDir,
+            'siteBase' => '/site/' . $tenant->slug,
         ];
 
         $this->renderTheme($tenant->theme_slug, 'about', $data);
@@ -841,7 +889,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
             $this->view('site/maintenance', ['tenant' => $tenant]);
             return;
         }
-        $themeSlug = !empty($tenant->theme_slug) ? $tenant->theme_slug : 'nova';
+        $themeSlug = !empty($tenant->theme_slug) ? $tenant->theme_slug : 'cleanpro';
         $page = $this->pageModel->findBySlug('faq', $tenant->id);
         if (!$page) {
             $page = (object) [
@@ -867,8 +915,13 @@ public function previewDemoService($themeSlug, $serviceSlug)
             'faqItems' => $this->faqModel->getTenantFaqs($tenant->id, true),
             'faqCategories' => $this->faqModel->getTenantFaqsGroupedByCategory($tenant->id, true),
             'siteStats' => $this->siteStatModel->getTenantStats($tenant->id, true),
+            'siteFeatures' => $this->siteFeatureModel->getSiteFeatures($tenant->id),
+            'partnerItems' => $this->partnerModel->getTenantPartners($tenant->id, true),
             'title' => lang('faq') . ' - ' . $tenant->site_name,
             'meta_description' => $tenant->meta_description,
+            'lang'  => function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar'),
+            'dir'   => (function_exists('lang') && lang() === 'en') ? 'ltr' : 'rtl',
+            'siteBase' => '/site/' . $tenant->slug,
         ];
         $this->renderTheme($themeSlug, 'faq', $data);
     }
@@ -882,7 +935,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
             $this->view('site/maintenance', ['tenant' => $tenant]);
             return;
         }
-        $themeSlug = !empty($tenant->theme_slug) ? $tenant->theme_slug : 'nova';
+        $themeSlug = !empty($tenant->theme_slug) ? $tenant->theme_slug : 'cleanpro';
         $page = $this->pageModel->findBySlug('partners', $tenant->id);
         if (!$page) {
             $page = (object) [
@@ -906,8 +959,13 @@ public function previewDemoService($themeSlug, $serviceSlug)
             'testimonials' => $this->testimonialModel->getHomeTestimonials($tenant->id, 6),
             'sectionsConfig' => $this->tenantModel->getSectionsConfig($tenant->id),
             'partnerItems' => $this->partnerModel->getTenantPartners($tenant->id, true),
+            'siteStats' => $this->siteStatModel->getTenantStats($tenant->id, true),
+            'siteFeatures' => $this->siteFeatureModel->getSiteFeatures($tenant->id),
             'title' => lang('partners') . ' - ' . $tenant->site_name,
             'meta_description' => $tenant->meta_description,
+            'lang'  => function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar'),
+            'dir'   => (function_exists('lang') && lang() === 'en') ? 'ltr' : 'rtl',
+            'siteBase' => '/site/' . $tenant->slug,
         ];
         $this->renderTheme($themeSlug, 'partners', $data);
     }
@@ -921,7 +979,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
             $this->view('site/maintenance', ['tenant' => $tenant]);
             return;
         }
-        $themeSlug = !empty($tenant->theme_slug) ? $tenant->theme_slug : 'nova';
+        $themeSlug = !empty($tenant->theme_slug) ? $tenant->theme_slug : 'cleanpro';
         $page = $this->pageModel->findBySlug('booking', $tenant->id);
         if (!$page) {
             $page = (object) [
@@ -944,8 +1002,15 @@ public function previewDemoService($themeSlug, $serviceSlug)
             'gallery' => $this->galleryModel->getActiveGallery($tenant->id, 8),
             'testimonials' => $this->testimonialModel->getHomeTestimonials($tenant->id, 6),
             'sectionsConfig' => $this->tenantModel->getSectionsConfig($tenant->id),
+            'siteStats' => $this->siteStatModel->getTenantStats($tenant->id, true),
+            'siteFeatures' => $this->siteFeatureModel->getSiteFeatures($tenant->id),
+            'faqItems' => $this->faqModel->getTenantFaqs($tenant->id, true),
+            'partnerItems' => $this->partnerModel->getTenantPartners($tenant->id, true),
             'title' => lang('booking') . ' - ' . $tenant->site_name,
             'meta_description' => $tenant->meta_description,
+            'lang'  => function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar'),
+            'dir'   => (function_exists('lang') && lang() === 'en') ? 'ltr' : 'rtl',
+            'siteBase' => '/site/' . $tenant->slug,
         ];
         $this->renderTheme($themeSlug, 'booking', $data);
     }
@@ -962,7 +1027,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
             require $themePath;
         } else {
             // استخدام الثيم الافتراضي
-            $defaultPath = THEMES_PATH . '/nova/' . $template . '.php';
+            $defaultPath = THEMES_PATH . '/cleanpro/' . $template . '.php';
             if (file_exists($defaultPath)) {
                 extract($data);
                 require $defaultPath;

@@ -98,7 +98,7 @@ require_once __DIR__ . '/_navbar.php';
         <?php foreach ($services as $i => $svc):
                 $svcTitle = $lang === 'en' && !empty($svc->title_en) ? $svc->title_en : ($svc->title ?? '');
                 $svcDesc  = $lang === 'en' && !empty($svc->description_en) ? $svc->description_en : ($svc->description ?? '');
-                $svcImg   = !empty($svc->image) ? upload($svc->image) : ($serviceImages[$i % count($serviceImages)] ?? '');
+                $svcImg   = !empty($svc->image) ? function_exists('upload') ? upload($svc->image) : $svc->image : ($serviceImages[$i % count($serviceImages)] ?? '');
                 $svcIcon  = $svc->icon ?? 'fas fa-star';
                 $svcPrice = !empty($svc->price) ? $svc->price : '';
             ?>

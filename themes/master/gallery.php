@@ -116,7 +116,7 @@ require_once __DIR__ . '/_navbar.php';
         <div id="galleryGrid" class="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
             <?php foreach ($gallery as $i => $item):
                 $imgTitle = $lang === 'en' && !empty($item->title_en) ? $item->title_en : ($item->title ?? '');
-                $imgSrc   = !empty($item->image) ? upload($item->image) : '';
+                $imgSrc   = !empty($item->image) ? function_exists('upload') ? upload($item->image) : $item->image : '';
                 $imgCat   = $item->category ?? '';
                 // Vary heights for masonry effect
                 $heights = ['h-56', 'h-72', 'h-64', 'h-80', 'h-60', 'h-48'];

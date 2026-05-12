@@ -116,7 +116,7 @@ require_once __DIR__ . '/_navbar.php';
 <section class="relative min-h-[690px] bg-dark-section">
     <!-- Background Image -->
     <?php if ($heroImage): ?>
-        <img src="<?= upload($heroImage) ?>" class="absolute inset-0 w-full h-full object-cover" alt="<?= htmlspecialchars($displaySiteName) ?>">
+        <img src="<?= function_exists('upload') ? upload($heroImage) : $heroImage ?>" class="absolute inset-0 w-full h-full object-cover" alt="<?= htmlspecialchars($displaySiteName) ?>">
     <?php else: ?>
         <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1800&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover" alt="hero">
     <?php endif; ?>
@@ -269,7 +269,7 @@ require_once __DIR__ . '/_navbar.php';
             <?php foreach ($allServices as $i => $svc): ?>
                 <?php
                     $svcTitle = $lang === 'en' && !empty($svc->title_en) ? $svc->title_en : ($svc->title ?? '');
-                    $svcImg   = !empty($svc->image) ? upload($svc->image) : ($serviceImages[$i % count($serviceImages)] ?? '');
+                    $svcImg   = !empty($svc->image) ? function_exists('upload') ? upload($svc->image) : $svc->image : ($serviceImages[$i % count($serviceImages)] ?? '');
                 ?>
                 <a href="<?= url($siteBase . '/service/' . ($svc->slug ?? 'service-' . ($i + 1))) ?>"
                    class="relative rounded-lg overflow-hidden h-28 group block">

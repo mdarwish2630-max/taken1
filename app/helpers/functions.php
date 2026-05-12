@@ -295,7 +295,12 @@ function array_has($array, $key)
 function randomPassword($length = 12)
 {
     $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-    return substr(str_shuffle($chars), 0, $length);
+    $max = strlen($chars) - 1;
+    $password = '';
+    for ($i = 0; $i < $length; $i++) {
+        $password .= $chars[random_int(0, $max)];
+    }
+    return $password;
 }
 
 /**

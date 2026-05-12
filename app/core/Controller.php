@@ -138,7 +138,21 @@ abstract class Controller
     }
 
     /**
-     * الحصول على البيانات المرسلة
+     * الحصول على البيانات المرسلة (بدون تنقية - للمحتوى الغني مثل HTML)
+     */
+    protected function rawInput($key = null, $default = null)
+    {
+        $data = array_merge($_GET, $_POST);
+        
+        if ($key === null) {
+            return $data;
+        }
+        
+        return $data[$key] ?? $default;
+    }
+
+    /**
+     * الحصول على البيانات المرسلة (مع تنقية XSS)
      */
     protected function input($key = null, $default = null)
     {
