@@ -64,7 +64,7 @@
                     <!-- Features Checklist -->
                     <?php
                     $features = $service->features ?? $service->items ?? null;
-                    $featureList = is_array($features) ? $features : (is_string($features) ? json_decode($features, true) : null);
+                    $featureList = is_array($features) ? $features : (is_string($features) ? json_decode($features) : null);
                     $defaultFeatures = ['فريق عمل مدرب ومحترف', 'مواد تنظيف آمنة ومعتمدة', 'أسعار تنافسية وشفافة', 'ضمان الجودة والرضا'];
                     $displayFeatures = !empty($featureList) ? $featureList : $defaultFeatures;
                     ?>
@@ -74,7 +74,7 @@
                             <span class="w-8 h-8 bg-[#ff7a00] text-white flex items-center justify-center font-black shrink-0">
                                 <i class="fas fa-check text-sm"></i>
                             </span>
-                            <span class="text-[#282828] font-bold"><?php echo htmlspecialchars(is_string($feature) ? $feature : ($feature['title'] ?? '')); ?></span>
+                            <span class="text-[#282828] font-bold"><?php echo htmlspecialchars(is_string($feature) ? $feature : ($feature->title ?? '')); ?></span>
                         </div>
                         <?php endforeach; ?>
                     </div>

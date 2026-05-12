@@ -229,6 +229,13 @@ class Router
                     header('Location: ' . SITE_URL . '/admin');
                     exit;
                 }
+                // التحقق من تأكيد البريد الإلكتروني
+                $user = Auth::user();
+                if ($user && !$user->email_verified) {
+                    Session::error('يجب تأكيد بريدك الإلكتروني أولاً للوصول للوحة التحكم');
+                    header('Location: ' . SITE_URL . '/verification-pending?email=' . urlencode($user->email));
+                    exit;
+                }
                 break;
                 
             case 'auth':

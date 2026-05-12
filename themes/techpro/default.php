@@ -92,13 +92,17 @@ $serviceImages = [
 /* ── Testimonials ── */
 $allTestimonials = [];
 if (!empty($testimonials)) {
-    foreach ($testimonials as $t) { $allTestimonials[] = $t; }
+    foreach ($testimonials as $t) {
+        $t->client_name = $t->client_name ?? $t->name ?? '';
+        $t->client_name_display = ($lang === 'en' && !empty($t->client_name_en)) ? $t->client_name_en : $t->client_name;
+        $allTestimonials[] = $t;
+    }
 }
 if (empty($allTestimonials)) {
     $allTestimonials = [
-        (object)['name' => 'أحمد محمد', 'name_en' => 'Ahmed Mohammed', 'content' => 'خدمة ممتازة وسريعة، الفريق محترف والنتيجة كانت رائعة. أنصح بالتعامل معهم.', 'content_en' => 'Excellent and fast service, professional team and amazing results. Highly recommended.', 'rating' => 5],
-        (object)['name' => 'سارة العلي', 'name_en' => 'Sara Ali', 'content' => 'تعامل راقي وخدمة عالية الجودة. سأعود بالتأكيد وأطلب المزيد من الخدمات.', 'content_en' => 'Elegant treatment and high-quality service. Will definitely come back for more.', 'rating' => 5],
-        (object)['name' => 'خالد يوسف', 'name_en' => 'Khaled Yousef', 'content' => 'احترافية عالية في العمل والتزام بالمواعيد. أنصح الجميع بالتجربة.', 'content_en' => 'High professionalism and commitment to deadlines. I recommend everyone to try.', 'rating' => 5],
+        (object)['client_name' => 'أحمد محمد', 'client_name_en' => 'Ahmed Mohammed', 'content' => 'خدمة ممتازة وسريعة، الفريق محترف والنتيجة كانت رائعة. أنصح بالتعامل معهم.', 'content_en' => 'Excellent and fast service, professional team and amazing results. Highly recommended.', 'rating' => 5],
+        (object)['client_name' => 'سارة العلي', 'client_name_en' => 'Sara Ali', 'content' => 'تعامل راقي وخدمة عالية الجودة. سأعود بالتأكيد وأطلب المزيد من الخدمات.', 'content_en' => 'Elegant treatment and high-quality service. Will definitely come back for more.', 'rating' => 5],
+        (object)['client_name' => 'خالد يوسف', 'client_name_en' => 'Khaled Yousef', 'content' => 'احترافية عالية في العمل والتزام بالمواعيد. أنصح الجميع بالتجربة.', 'content_en' => 'High professionalism and commitment to deadlines. I recommend everyone to try.', 'rating' => 5],
     ];
 }
 
@@ -287,7 +291,7 @@ require_once __DIR__ . '/_navbar.php';
                 <?php $firstTest = $allTestimonials[0]; ?>
                 <?php
                     $testContent = $lang === 'en' && !empty($firstTest->content_en) ? $firstTest->content_en : ($firstTest->content ?? '');
-                    $testName    = $lang === 'en' && !empty($firstTest->name_en) ? $firstTest->name_en : ($firstTest->name ?? '');
+                    $testName    = $firstTest->client_name_display ?? ($firstTest->client_name ?? ($firstTest->name ?? ''));
                 ?>
                 <div class="bg-[#f5f5f5] p-8 max-w-md">
                     <p class="text-gray-600 leading-loose mb-6"><?= htmlspecialchars($testContent) ?></p>

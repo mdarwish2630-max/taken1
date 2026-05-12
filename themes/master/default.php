@@ -386,25 +386,46 @@ require_once __DIR__ . '/_navbar.php';
 <!-- ══════════════════════════════════════════════════════
      CTA SECTION
      ══════════════════════════════════════════════════════ -->
+<?php
+    $ctaTitle     = $lang === 'en' && !empty($tenant->cta_title_en) ? $tenant->cta_title_en : ($tenant->cta_title ?? '');
+    $ctaText      = $lang === 'en' && !empty($tenant->cta_text_en) ? $tenant->cta_text_en : ($tenant->cta_text ?? '');
+    $ctaBtn       = $lang === 'en' && !empty($tenant->cta_button_text_en) ? $tenant->cta_button_text_en : ($tenant->cta_button_text ?? '');
+    $ctaIsActive  = ($tenant->cta_is_active ?? 0) == 1;
+?>
+<?php if ($ctaIsActive || empty($tenant->cta_title)): ?>
 <section class="relative z-10 px-6 lg:px-20 pb-24 fade-up">
     <div class="bg-gradient-to-r from-cyan-500 to-blue-700 rounded-[40px] p-12 lg:p-16 text-center shadow-2xl shadow-cyan-500/20">
         <h2 class="text-4xl lg:text-6xl font-black leading-tight mb-6">
-            <?= $lang === 'en' ? 'Need Professional Maintenance?' : 'تحتاج إلى صيانة احترافية؟' ?>
+            <?= htmlspecialchars($ctaTitle) ?: ($lang === 'en' ? 'Need Professional Maintenance?' : 'تحتاج إلى صيانة احترافية؟') ?>
         </h2>
 
         <p class="text-lg lg:text-xl opacity-90 max-w-3xl mx-auto leading-relaxed mb-10">
-            <?= $lang === 'en'
+            <?= htmlspecialchars($ctaText) ?: ($lang === 'en'
                 ? 'Contact our team now and get fast, professional maintenance services with the highest quality for your home or company.'
                 : 'تواصل مع فريقنا الآن واحصل على خدمات صيانة سريعة واحترافية بأعلى جودة لمنزلك أو شركتك.'
-            ?>
+            ) ?>
         </p>
 
         <a href="https://wa.me/<?= $waNumber ?>" target="_blank"
            class="inline-block bg-white text-black hover:scale-105 transition px-10 py-5 rounded-2xl font-black text-lg shadow-xl">
-            <?= $lang === 'en' ? 'Request Service Now' : 'اطلب الخدمة الآن' ?>
+            <?= htmlspecialchars($ctaBtn) ?: ($lang === 'en' ? 'Request Service Now' : 'اطلب الخدمة الآن') ?>
         </a>
     </div>
 </section>
+<?php elseif (!empty($ctaTitle)): ?>
+<section class="relative z-10 px-6 lg:px-20 pb-24 fade-up">
+    <div class="bg-gradient-to-r from-cyan-500 to-blue-700 rounded-[40px] p-12 lg:p-16 text-center shadow-2xl shadow-cyan-500/20">
+        <h2 class="text-4xl lg:text-6xl font-black leading-tight mb-6">
+            <?= htmlspecialchars($ctaTitle) ?>
+        </h2>
+        <?php if ($ctaText): ?><p class="text-lg lg:text-xl opacity-90 max-w-3xl mx-auto leading-relaxed mb-10"><?= htmlspecialchars($ctaText) ?></p><?php endif; ?>
+        <a href="https://wa.me/<?= $waNumber ?>" target="_blank"
+           class="inline-block bg-white text-black hover:scale-105 transition px-10 py-5 rounded-2xl font-black text-lg shadow-xl">
+            <?= htmlspecialchars($ctaBtn) ?: ($lang === 'en' ? 'Contact Us' : 'تواصل معنا') ?>
+        </a>
+    </div>
+</section>
+<?php endif; ?>
 
 <?php require_once __DIR__ . '/_footer.php'; ?>
 <?php require_once __DIR__ . '/_scripts.php'; ?>

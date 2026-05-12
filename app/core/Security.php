@@ -245,4 +245,101 @@ class Security
     {
         Session::forget('rate_limit_' . $key);
     }
+
+    /**
+     * توليد سؤال كابتشا رياضي
+     * يُرجع مصفوفة تحتوي: question (النص المعروض), answer (الإجابة الصحيحة)
+     */
+    public static function generateCaptcha()
+    {
+        $operations = ['+', '-', '×'];
+        $op = $operations[array_rand($operations)];
+
+        switch ($op) {
+            case '+':
+                $a = rand(1, 20);
+                $b = rand(1, 20);
+                $answer = $a + $b;
+                break;
+            case '-':
+                $a = rand(5, 30);
+                $b = rand(1, $a - 1); // نتأكد الناتج موجب
+                $answer = $a - $b;
+                break;
+            case '×':
+                $a = rand(2, 9);
+                $b = rand(2, 9);
+                $answer = $a * $b;
+                break;
+        }
+
+        // نص السؤال بالعربية
+        $questionAr = $a . ' ' . $op . ' ' . $b . ' = ?';
+
+        // حفظ الإجابة وبيانات السؤال في الجلسة
+        Session::put('captcha_answer', $answer);
+        Session::put('captcha_time', time());
+        Session::put('captcha_question', $questionAr);
+        Session::put('captcha_a', $a);
+        Session::put('captcha_b', $b);
+        Session::put('captcha_op', $op);
+
+        return [
+            'question' => $questionAr,
+            'a' => $a,
+            'b' => $b,
+            'op' => $op
+        ];
+    }
+
+    /**
+     * التحقق من إجابة الكابتشا
+     */
+    public static function verifyCaptcha($userAnswer)
+    {
+        $storedAnswer = Session::get('captcha_answer');
+        $captchaTime = Session::get('captcha_time', 0);
+
+        // الكابتشا تنتهي بعد 10 دقائق
+        if (time() - $captchaTime > 600) {
+            return false;
+        }
+
+        // تنظيف بيانات الكابتشا بعد التحقق
+        Session::forget('captcha_answer');
+        Session::forget('captcha_time');
+        Session::forget('captcha_question');
+        Session::forget('captcha_a');
+        Session::forget('captcha_b');
+        Session::forget('captcha_op');
+
+        // مقارنة الإجابة
+        return $userAnswer !== null && intval($userAnswer) === intval($storedAnswer);
+    }
+
+    /**
+     * الحصول على سؤال الكابتشا الحالي بدون توليد جديد
+     */
+    public static function getCurrentCaptcha()
+    {
+        $answer = Session::get('captcha_answer');
+        if ($answer === null) {
+            return self::generateCaptcha();
+        }
+
+        // إذا الكابتشا منتهية (أكثر من 10 دقائق)، ولّد واحد جديد
+        $captchaTime = Session::get('captcha_time', 0);
+        if (time() - $captchaTime > 600) {
+            return self::generateCaptcha();
+        }
+
+        // نرجع نفس السؤال الحالي (نولّد نص السؤال من الإجابة المحفوظة)
+        // ملاحظة: للحصول على النص الأصلي، نحفظه أيضاً
+        return [
+            'question' => Session::get('captcha_question', ''),
+            'a' => Session::get('captcha_a', 0),
+            'b' => Session::get('captcha_b', 0),
+            'op' => Session::get('captcha_op', '+')
+        ];
+    }
 }

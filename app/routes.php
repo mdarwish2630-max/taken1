@@ -7,10 +7,6 @@
 // ==================== الصفحات الرئيسية ====================
 Router::get('/', 'SiteController@index');
 
-// ==================== Platform Blog - Public ====================
-Router::get('/blog', 'PlatformBlogController@index');
-Router::get('/blog/{slug}', 'PlatformBlogController@show');
-
 // ==================== تغيير اللغة ====================
 Router::get('/lang/{lang}', 'LanguageController@change');
 Router::get('/lang/current', 'LanguageController@current');
@@ -28,6 +24,19 @@ Router::get('/reset-password/{token}', 'AuthController@resetPassword');
 Router::post('/reset-password', 'AuthController@updatePassword');
 Router::get('/verify-email/{token}', 'AuthController@verifyEmail');
 Router::post('/resend-verification', 'AuthController@resendVerification');
+
+// صفحة انتظار تأكيد البريد الإلكتروني
+Router::get('/verification-pending', 'AuthController@verificationPending');
+// إعادة إرسال تأكيد البريد بدون تسجيل دخول
+Router::post('/resend-verification-public', 'AuthController@resendVerificationPublic');
+
+// تحديث كابتشا (AJAX)
+Router::get('/captcha/refresh', function() {
+    header('Content-Type: application/json; charset=utf-8');
+    $captcha = Security::generateCaptcha();
+    echo json_encode(['question' => $captcha['question']]);
+    exit;
+});
 
 // مسارات بديلة للتوافق
 Router::get('/auth/login', 'AuthController@login');
@@ -304,14 +313,6 @@ Router::group(['middleware' => 'admin'], function() {
     Router::get('/admin/email-settings', 'AdminController@emailSettings');
     Router::post('/admin/email-settings', 'AdminController@updateEmailSettings');
     Router::post('/admin/email-settings/test', 'AdminController@testEmailSettings');
-    
-    // إدارة مدونة المنصة
-    Router::get('/admin/blog', 'PlatformBlogController@adminIndex');
-    Router::get('/admin/blog/create', 'PlatformBlogController@adminCreate');
-    Router::post('/admin/blog/create', 'PlatformBlogController@adminStore');
-    Router::get('/admin/blog/edit/{id}', 'PlatformBlogController@adminEdit');
-    Router::post('/admin/blog/edit/{id}', 'PlatformBlogController@adminUpdate');
-    Router::post('/admin/blog/delete/{id}', 'PlatformBlogController@adminDelete');
 });
 
 // ==================== معاينة القوالب (Theme Preview) ====================

@@ -9,9 +9,8 @@
             </div>
             <div>
                 <span class="text-xl lg:text-2xl font-black text-warm-dark leading-none block">
-                    <?= $tenant->site_name ?? 'ركاز' ?>
+                    <?= htmlspecialchars($tenant->site_name ?? 'ركاز') ?>
                 </span>
-                <span class="text-xs font-bold text-copper">للصيانة العامة</span>
             </div>
         </a>
 

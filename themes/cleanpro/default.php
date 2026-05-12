@@ -317,6 +317,27 @@ require_once __DIR__ . '/partials/_navbar.php';
     </div>
 </section>
 
+<?php
+    $ctaTitle     = $lang === 'en' && !empty($tenant->cta_title_en) ? $tenant->cta_title_en : ($tenant->cta_title ?? '');
+    $ctaText      = $lang === 'en' && !empty($tenant->cta_text_en) ? $tenant->cta_text_en : ($tenant->cta_text ?? '');
+    $ctaBtn       = $lang === 'en' && !empty($tenant->cta_button_text_en) ? $tenant->cta_button_text_en : ($tenant->cta_button_text ?? '');
+    $ctaIsActive  = ($tenant->cta_is_active ?? 0) == 1;
+?>
+<?php if ($ctaIsActive && !empty($ctaTitle)): ?>
+<!-- ═══════ FINAL CTA ═══════ -->
+<section class="cpro-section cpro-center">
+    <h2 class="cpro-title"><?= htmlspecialchars($ctaTitle) ?></h2>
+    <?php if ($ctaText): ?><p class="cpro-subtitle" style="max-width:700px;margin:16px auto 0"><?= htmlspecialchars($ctaText) ?></p><?php endif; ?>
+    <div style="display:flex;justify-content:center;gap:14px;margin-top:24px;flex-wrap:wrap">
+        <a href="<?= url($siteBase . '/booking') ?>" class="cpro-btn"><?= htmlspecialchars($ctaBtn) ?: ($lang === 'en' ? 'Book Now' : 'احجز الآن') ?></a>
+        <?php if ($waNumber): ?>
+        <a href="https://wa.me/<?= $waNumber ?>" target="_blank" class="cpro-btn" style="background:#25D366">
+            <i class="fab fa-whatsapp"></i> WhatsApp
+        </a>
+        <?php endif; ?>
+    </div>
+</section>
+<?php else: ?>
 <!-- ═══════ FINAL CTA ═══════ -->
 <section class="cpro-section cpro-center">
     <h2 class="cpro-title"><?= $lang === 'en'
@@ -331,6 +352,7 @@ require_once __DIR__ . '/partials/_navbar.php';
         <?php endif; ?>
     </div>
 </section>
+<?php endif; ?>
 
 <?php require_once __DIR__ . '/partials/_footer.php'; ?>
 <?php require_once __DIR__ . '/partials/_scripts.php'; ?>

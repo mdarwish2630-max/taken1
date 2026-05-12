@@ -37,8 +37,9 @@ $address  = $tenant->address ?? '';
         <a class="cpro-logo" href="<?= url($siteBase) ?>">
             <?php if ($logoUrl): ?>
                 <img src="<?= htmlspecialchars($logoUrl) ?>" alt="<?= $siteName ?>">
+            <?php else: ?>
+                <span><?= mb_substr($tenant->site_name ?? 'كلين برو', 0, 2) ?></span>
             <?php endif; ?>
-            <span>كلين</span><span>برو</span>
         </a>
 
         <nav class="cpro-menu" id="cproMenu">

@@ -465,6 +465,84 @@ $dir = Language::direction();
             border: 1px solid rgba(59, 130, 246, 0.2);
         }
 
+        /* ==================== CAPTCHA Styles ==================== */
+        .captcha-group .form-label i {
+            color: var(--primary);
+            margin-inline-end: 0.35rem;
+        }
+
+        .captcha-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .captcha-question {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #f0f0ff, #e8e8ff);
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius);
+            padding: 0.75rem 1rem;
+            gap: 0.75rem;
+        }
+
+        .captcha-text {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--dark);
+            letter-spacing: 1px;
+            direction: ltr;
+            user-select: none;
+        }
+
+        .captcha-refresh {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.3rem;
+            border-radius: 50%;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            min-height: 32px;
+        }
+
+        .captcha-refresh:hover {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--secondary);
+        }
+
+        .captcha-refresh.spinning i {
+            animation: spin 0.5s ease;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .captcha-input {
+            text-align: center;
+            font-size: 1.1rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 2px;
+        }
+
+        .captcha-input::-webkit-inner-spin-button,
+        .captcha-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .captcha-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
         /* ==================== Responsive ==================== */
         @media (max-width: 480px) {
             .auth-card { max-width: 100%; }
@@ -522,6 +600,26 @@ $dir = Language::direction();
                         </div>
                     </div>
 
+                    <!-- CAPTCHA - مسألة أمان -->
+                    <?php
+                    $captchaData = $captcha ?? null;
+                    if ($captchaData):
+                    ?>
+                    <div class="form-group captcha-group">
+                        <label class="form-label"><i class="fas fa-shield-alt"></i> مسألة الأمان (لمنع الروبوتات)</label>
+                        <div class="captcha-box">
+                            <div class="captcha-question">
+                                <span class="captcha-text"><?= e($captchaData['question']) ?></span>
+                                <button type="button" class="captcha-refresh" id="refreshCaptcha" title="مسألة جديدة">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                            <input type="number" name="captcha_answer" class="form-control captcha-input" required
+                                   placeholder="أدخل الإجابة" autocomplete="off" min="0" max="999">
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
                     <div class="remember-forgot">
                         <label class="remember-me">
                             <input type="checkbox" name="remember">
@@ -576,6 +674,25 @@ $dir = Language::direction();
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
             }
+        });
+
+        // Refresh CAPTCHA
+        document.getElementById('refreshCaptcha').addEventListener('click', function() {
+            var btn = this;
+            btn.classList.add('spinning');
+            setTimeout(function() { btn.classList.remove('spinning'); }, 500);
+
+            fetch('<?= url("/captcha/refresh") ?>')
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.question) {
+                        document.querySelector('.captcha-text').textContent = data.question;
+                        var input = document.querySelector('.captcha-input');
+                        input.value = '';
+                        input.focus();
+                    }
+                })
+                .catch(function() {});
         });
     </script>
 </body>

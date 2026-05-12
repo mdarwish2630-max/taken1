@@ -93,12 +93,16 @@ if (count($stats) < 3) {
 /* ── Testimonials ── */
 $allTestimonials = [];
 if (!empty($testimonials)) {
-    foreach ($testimonials as $t) { $allTestimonials[] = $t; }
+    foreach ($testimonials as $t) {
+        $t->client_name = $t->client_name ?? $t->name ?? '';
+        $t->client_name_display = ($lang === 'en' && !empty($t->client_name_en)) ? $t->client_name_en : $t->client_name;
+        $allTestimonials[] = $t;
+    }
 }
 if (empty($allTestimonials)) {
     $allTestimonials = [
-        (object)['name' => 'أحمد محمد', 'name_en' => 'Ahmed Mohammed', 'content' => 'خدمة ممتازة وسريعة، الفريق محترم والنتيجة كانت رائعة. أنصح بالتعامل معهم.', 'content_en' => 'Excellent and fast service, the team is professional and the result was amazing. I recommend dealing with them.', 'rating' => 5],
-        (object)['name' => 'سارة علي', 'name_en' => 'Sara Ali', 'content' => 'تعاملت معهم أكثر من مرة وكل مرة أكون راضي تماماً عن النتيجة. خدمة موثوقة فعلاً.', 'content_en' => 'I dealt with them more than once and every time I am fully satisfied with the result. Truly reliable service.', 'rating' => 5],
+        (object)['client_name' => 'أحمد محمد', 'client_name_en' => 'Ahmed Mohammed', 'content' => 'خدمة ممتازة وسريعة، الفريق محترم والنتيجة كانت رائعة. أنصح بالتعامل معهم.', 'content_en' => 'Excellent and fast service, the team is professional and the result was amazing. I recommend dealing with them.', 'rating' => 5],
+        (object)['client_name' => 'سارة علي', 'client_name_en' => 'Sara Ali', 'content' => 'تعاملت معهم أكثر من مرة وكل مرة أكون راضي تماماً عن النتيجة. خدمة موثوقة فعلاً.', 'content_en' => 'I dealt with them more than once and every time I am fully satisfied with the result. Truly reliable service.', 'rating' => 5],
     ];
 }
 
@@ -383,7 +387,7 @@ require_once __DIR__ . '/_navbar.php';
             <div class="bg-[#f5f5f5] p-8 max-w-md rounded-xl" id="takproTestimonialCard">
                 <?php if (!empty($allTestimonials[0])): ?>
                     <?php
-                        $tName = $lang === 'en' && !empty($allTestimonials[0]->name_en) ? $allTestimonials[0]->name_en : ($allTestimonials[0]->name ?? '');
+                        $tName = $allTestimonials[0]->client_name_display ?? ($allTestimonials[0]->client_name ?? ($allTestimonials[0]->name ?? ''));
                         $tContent = $lang === 'en' && !empty($allTestimonials[0]->content_en) ? $allTestimonials[0]->content_en : ($allTestimonials[0]->content ?? '');
                         $tRating = $allTestimonials[0]->rating ?? 5;
                     ?>
@@ -447,6 +451,13 @@ require_once __DIR__ . '/_navbar.php';
     </div>
 </section>
 
+<?php
+    $ctaTitle     = $lang === 'en' && !empty($tenant->cta_title_en) ? $tenant->cta_title_en : ($tenant->cta_title ?? '');
+    $ctaText      = $lang === 'en' && !empty($tenant->cta_text_en) ? $tenant->cta_text_en : ($tenant->cta_text ?? '');
+    $ctaBtn       = $lang === 'en' && !empty($tenant->cta_button_text_en) ? $tenant->cta_button_text_en : ($tenant->cta_button_text ?? '');
+    $ctaIsActive  = ($tenant->cta_is_active ?? 0) == 1;
+?>
+<?php if (!$ctaIsActive && empty($ctaTitle)): ?>
 <!-- ══════════════════════════════════════════════════════
      CTA SECTION
      ══════════════════════════════════════════════════════ -->
@@ -468,6 +479,20 @@ require_once __DIR__ . '/_navbar.php';
         </a>
     </div>
 </section>
+<?php elseif (!empty($ctaTitle)): ?>
+<section class="px-6 lg:px-16 py-20 bg-white fade-up">
+    <div class="max-w-4xl mx-auto bg-dark-card rounded-2xl p-12 lg:p-16 text-center shadow-2xl">
+        <h2 class="text-4xl lg:text-5xl font-black text-white leading-tight mb-6">
+            <?= htmlspecialchars($ctaTitle) ?>
+        </h2>
+        <?php if ($ctaText): ?><p class="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed mb-10"><?= htmlspecialchars($ctaText) ?></p><?php endif; ?>
+        <a href="https://wa.me/<?= $waNumber ?>" target="_blank"
+           class="inline-block bg-brand text-white hover:bg-brand-dark transition px-10 py-5 rounded-xl font-black text-lg shadow-xl hover:scale-105 transition-transform">
+            <?= htmlspecialchars($ctaBtn) ?: ($lang === 'en' ? 'Contact Us' : 'تواصل معنا') ?>
+        </a>
+    </div>
+</section>
+<?php endif; ?>
 
 <?php require_once __DIR__ . '/_footer.php'; ?>
 
@@ -476,7 +501,7 @@ require_once __DIR__ . '/_navbar.php';
 <script>
 const testimonials = <?= json_encode(array_map(function($t) use ($lang) {
     return [
-        'name' => $lang === 'en' && !empty($t->name_en) ? $t->name_en : ($t->name ?? ''),
+        'name' => $t->client_name_display ?? ($t->client_name ?? ($t->name ?? '')),
         'content' => $lang === 'en' && !empty($t->content_en) ? $t->content_en : ($t->content ?? ''),
         'rating' => $t->rating ?? 5,
     ];

@@ -10,6 +10,8 @@
  * 4. [FIX-10] التحقق من صلاحية Token في resetPassword (منع SQL Injection عبر Token)
  * 5. [FIX-11] تجديد Session ID بعد تسجيل الدخول (منع Session Fixation)
  * 6. [FIX-12] Rate Limiting لإعادة إرسال إيميل التحقق (منع Spam)
+ * 7. [SEC-01] إضافة CAPTCHA رياضية لمنع الروبوتات في تسجيل الدخول والتسجيل
+ * 8. [SEC-02] فرض تأكيد البريد الإلكتروني - منع الدخول بدون تأكيد
  */
 
 class AuthController extends Controller
@@ -35,8 +37,12 @@ class AuthController extends Controller
             $this->redirect('/dashboard');
         }
 
+        // توليد كابتشا
+        $captcha = Security::generateCaptcha();
+
         $this->view('auth/login', [
-            'title' => 'تسجيل الدخول'
+            'title' => 'تسجيل الدخول',
+            'captcha' => $captcha
         ]);
     }
 
@@ -62,6 +68,13 @@ class AuthController extends Controller
         $email = $this->input('email');
         $password = $this->input('password');
         $remember = $this->input('remember') === 'on';
+        $captchaAnswer = $this->input('captcha_answer');
+
+        // [SEC-01] التحقق من الكابتشا
+        if (!Security::verifyCaptcha($captchaAnswer)) {
+            Session::error('إجابة مسألة الأمان غير صحيحة');
+            $this->back();
+        }
 
         // [FIX-08] التحقق من طول كلمة المرور
         if ($password !== null && (strlen($password) < $minLength || strlen($password) > $maxLength)) {
@@ -82,6 +95,16 @@ class AuthController extends Controller
 
         // محاولة تسجيل الدخول
         if (Auth::attempt($email, $password, $remember)) {
+            // [SEC-02] التحقق من تأكيد البريد الإلكتروني
+            $user = Auth::user();
+            if (!$user->email_verified && $user->role !== 'admin') {
+                // المدير ما يحتاج تأكيد
+                Auth::logout();
+                session_regenerate_id(true);
+                Session::error('يجب تأكيد بريدك الإلكتروني أولاً قبل تسجيل الدخول. يرجى فحص بريدك الإلكتروني لرابط التأكيد');
+                $this->redirect('/login');
+            }
+
             // [FIX-11] تجديد Session ID بعد تسجيل الدخول الناجح
             session_regenerate_id(true);
 
@@ -114,8 +137,12 @@ class AuthController extends Controller
             $this->redirect('/dashboard');
         }
 
+        // توليد كابتشا
+        $captcha = Security::generateCaptcha();
+
         $this->view('auth/register', [
-            'title' => 'إنشاء حساب جديد'
+            'title' => 'إنشاء حساب جديد',
+            'captcha' => $captcha
         ]);
     }
 
@@ -129,6 +156,13 @@ class AuthController extends Controller
         // [FIX-12] Rate Limiting للتسجيل
         if (!Security::rateLimit('register_' . Security::getClientIp(), 3, 5)) {
             Session::error('تم تجاوز الحد الأقصى لطلبات التسجيل. يرجى المحاولة لاحقاً');
+            $this->back();
+        }
+
+        // [SEC-01] التحقق من الكابتشا
+        $captchaAnswer = $this->input('captcha_answer');
+        if (!Security::verifyCaptcha($captchaAnswer)) {
+            Session::error('إجابة مسألة الأمان غير صحيحة');
             $this->back();
         }
 
@@ -183,9 +217,9 @@ class AuthController extends Controller
 
             // محاولة إرسال إيميل التحقق
             try {
-                $email = EmailService::getInstance();
+                $emailService = EmailService::getInstance();
                 $verificationLink = fullUrl('/verify-email/' . $user->verification_token);
-                $email->sendVerificationEmail($user, $verificationLink);
+                $emailService->sendVerificationEmail($user, $verificationLink);
             } catch (\Exception $e) {
                 if (defined('DEBUG_MODE') && DEBUG_MODE) {
                     error_log('Email verification failed: ' . $e->getMessage());
@@ -195,14 +229,80 @@ class AuthController extends Controller
             // [FIX-11] تجديد Session ID بعد التسجيل
             session_regenerate_id(true);
 
-            // تسجيل الدخول تلقائياً
-            Auth::login($user);
-
-            Session::success('تم إنشاء حسابك بنجاح! يرجى تأكيد بريدك الإلكتروني');
-            $this->redirect('/site/create');
+            // [SEC-02] لا نسجل الدخول تلقائياً - نوجه لصفحة تأكيد البريد
+            Session::success('تم إنشاء حسابك بنجاح! يرجى تأكيد بريدك الإلكتروني لتفعيل الحساب');
+            $this->redirect('/verification-pending?email=' . urlencode($data['email']));
         }
 
         Session::error('حدث خطأ أثناء إنشاء الحساب');
+        $this->back();
+    }
+
+    /**
+     * عرض صفحة انتظار تأكيد البريد الإلكتروني
+     */
+    public function verificationPending()
+    {
+        // إذا مسجل دخول وبريده مؤكد، وجهه للداشبورد
+        if (Auth::check() && Auth::user()->email_verified) {
+            $this->redirect('/dashboard');
+        }
+
+        $email = isset($_GET['email']) ? urldecode($_GET['email']) : '';
+
+        $this->view('auth/verification-pending', [
+            'title' => 'تأكيد البريد الإلكتروني',
+            'email' => $email
+        ]);
+    }
+
+    /**
+     * إعادة إرسال إيميل التحقق (بدون تسجيل دخول)
+     */
+    public function resendVerificationPublic()
+    {
+        $this->verifyCsrf();
+
+        // Rate Limiting
+        $ip = Security::getClientIp();
+        if (!Security::rateLimit('verify_public_' . $ip, 2, 5)) {
+            Session::error('تم تجاوز الحد الأقصى لإرسال إيميل التحقق. يرجى المحاولة لاحقاً');
+            $this->back();
+        }
+
+        $email = $this->input('email');
+
+        if (!$email) {
+            Session::error('يرجى إدخال البريد الإلكتروني');
+            $this->back();
+        }
+
+        $user = $this->userModel->findByEmail($email);
+
+        if ($user && !$user->email_verified) {
+            // إنشاء رمز تحقق جديد
+            $newToken = Security::generateVerificationToken();
+            $this->userModel->update($user->id, [
+                'verification_token' => $newToken
+            ]);
+            $user->verification_token = $newToken;
+
+            try {
+                $emailService = EmailService::getInstance();
+                $verificationLink = fullUrl('/verify-email/' . $newToken);
+                $emailService->sendVerificationEmail($user, $verificationLink);
+                Session::success('تم إرسال إيميل التحقق بنجاح! تحقق من صندوق البريد');
+            } catch (\Exception $e) {
+                if (defined('DEBUG_MODE') && DEBUG_MODE) {
+                    error_log('Verification email failed: ' . $e->getMessage());
+                }
+                Session::error('تعذر إرسال الإيميل. تأكد من إعدادات SMTP');
+            }
+        } else {
+            // لا نكشف إذا كان الإيميل موجود أو مؤكد (أمان)
+            Session::success('إذا كان البريد غير مؤكد، سيتم إرسال رابط التأكيد إليه');
+        }
+
         $this->back();
     }
 
@@ -225,8 +325,12 @@ class AuthController extends Controller
      */
     public function forgotPassword()
     {
+        // توليد كابتشا
+        $captcha = Security::generateCaptcha();
+
         $this->view('auth/forgot-password', [
-            'title' => 'استعادة كلمة المرور'
+            'title' => 'استعادة كلمة المرور',
+            'captcha' => $captcha
         ]);
     }
 
@@ -236,6 +340,13 @@ class AuthController extends Controller
     public function sendResetLink()
     {
         $this->verifyCsrf();
+
+        // [SEC-01] التحقق من الكابتشا
+        $captchaAnswer = $this->input('captcha_answer');
+        if (!Security::verifyCaptcha($captchaAnswer)) {
+            Session::error('إجابة مسألة الأمان غير صحيحة');
+            $this->back();
+        }
 
         // [FIX-12] Rate Limiting لاستعادة كلمة المرور
         if (!Security::rateLimit('reset_' . Security::getClientIp(), 3, 5)) {
@@ -363,11 +474,11 @@ class AuthController extends Controller
             // [FIX-11] تجديد Session ID بعد تأكيد الإيميل
             session_regenerate_id(true);
 
-            // تسجيل الدخول إذا لم يكن مسجل
+            // تسجيل الدخول تلقائياً بعد التأكيد
             if (!Auth::check()) {
                 Auth::login($user);
             }
-            Session::success('تم تأكيد بريدك الإلكتروني بنجاح!');
+            Session::success('تم تأكيد بريدك الإلكتروني بنجاح! مرحباً بك');
             $this->redirect('/dashboard');
         }
 
@@ -376,7 +487,7 @@ class AuthController extends Controller
     }
 
     /**
-     * إعادة إرسال إيميل التحقق
+     * إعادة إرسال إيميل التحقق (للمستخدم المسجل)
      */
     public function resendVerification()
     {

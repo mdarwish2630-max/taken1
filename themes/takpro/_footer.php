@@ -37,9 +37,9 @@ $year = date('Y');
         <div>
             <h3 class="text-3xl font-black mb-4"><?= $displaySiteName ?></h3>
             <p class="text-gray-400 leading-loose">
-                <?= ($lang ?? 'ar') === 'en'
+                <?= htmlspecialchars($tenant->meta_description) ?: (($lang ?? 'ar') === 'en'
                     ? 'A modern tech company offering professional services and innovative solutions with the highest quality.'
-                    : 'شركة تقنية حديثة تقدم خدمات احترافية وحلول عصرية بأعلى جودة.' ?>
+                    : 'شركة تقنية حديثة تقدم خدمات احترافية وحلول عصرية بأعلى جودة.') ?>
             </p>
         </div>
 
@@ -93,7 +93,7 @@ $year = date('Y');
     </div>
 
     <!-- Social Links -->
-    <?php if (!empty($tenant->facebook) || !empty($tenant->instagram) || !empty($tenant->twitter) || !empty($tenant->youtube)): ?>
+    <?php if (!empty($tenant->facebook) || !empty($tenant->instagram) || !empty($tenant->twitter) || !empty($tenant->youtube) || !empty($tenant->linkedin) || !empty($tenant->tiktok)): ?>
     <div class="max-w-7xl mx-auto border-t border-white/10 pt-8 pb-6">
         <div class="flex items-center gap-4 justify-center">
             <?php if (!empty($tenant->facebook)): ?>
@@ -107,6 +107,12 @@ $year = date('Y');
             <?php endif; ?>
             <?php if (!empty($tenant->youtube)): ?>
                 <a href="<?= htmlspecialchars($tenant->youtube) ?>" target="_blank" class="w-10 h-10 rounded-full bg-white/10 hover:bg-brand transition flex items-center justify-center text-gray-400 hover:text-white"><i class="fab fa-youtube"></i></a>
+            <?php endif; ?>
+            <?php if (!empty($tenant->linkedin)): ?>
+                <a href="<?= htmlspecialchars($tenant->linkedin) ?>" target="_blank" class="w-10 h-10 rounded-full bg-white/10 hover:bg-brand transition flex items-center justify-center text-gray-400 hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+            <?php endif; ?>
+            <?php if (!empty($tenant->tiktok)): ?>
+                <a href="<?= htmlspecialchars($tenant->tiktok) ?>" target="_blank" class="w-10 h-10 rounded-full bg-white/10 hover:bg-brand transition flex items-center justify-center text-gray-400 hover:text-white"><i class="fab fa-tiktok"></i></a>
             <?php endif; ?>
         </div>
     </div>

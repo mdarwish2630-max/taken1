@@ -37,15 +37,18 @@ $year = date('Y');
                 </div>
             </div>
             <p class="text-gray-400 leading-loose text-sm">
-                <?= ($lang ?? 'ar') === 'en'
+                <?= htmlspecialchars($tenant->meta_description) ?: (($lang ?? 'ar') === 'en'
                     ? 'A modern tech company providing professional services and innovative solutions with the highest quality.'
-                    : 'شركة تقنية حديثة تقدم خدمات احترافية وحلول عصرية بأعلى جودة.' ?>
+                    : 'شركة تقنية حديثة تقدم خدمات احترافية وحلول عصرية بأعلى جودة.') ?>
             </p>
-            <?php if (!empty($tenant->facebook) || !empty($tenant->instagram) || !empty($tenant->twitter)): ?>
+            <?php if (!empty($tenant->facebook) || !empty($tenant->instagram) || !empty($tenant->twitter) || !empty($tenant->youtube) || !empty($tenant->linkedin) || !empty($tenant->tiktok)): ?>
             <div class="flex items-center gap-3 mt-5">
                 <?php if (!empty($tenant->facebook)): ?><a href="<?= htmlspecialchars($tenant->facebook) ?>" target="_blank" class="w-9 h-9 rounded-lg bg-white/10 hover:bg-[#ff7a00] transition flex items-center justify-center text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a><?php endif; ?>
                 <?php if (!empty($tenant->instagram)): ?><a href="<?= htmlspecialchars($tenant->instagram) ?>" target="_blank" class="w-9 h-9 rounded-lg bg-white/10 hover:bg-[#ff7a00] transition flex items-center justify-center text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a><?php endif; ?>
                 <?php if (!empty($tenant->twitter)): ?><a href="<?= htmlspecialchars($tenant->twitter) ?>" target="_blank" class="w-9 h-9 rounded-lg bg-white/10 hover:bg-[#ff7a00] transition flex items-center justify-center text-gray-400 hover:text-white"><i class="fab fa-x-twitter"></i></a><?php endif; ?>
+                <?php if (!empty($tenant->youtube)): ?><a href="<?= htmlspecialchars($tenant->youtube) ?>" target="_blank" class="w-9 h-9 rounded-lg bg-white/10 hover:bg-[#ff7a00] transition flex items-center justify-center text-gray-400 hover:text-white"><i class="fab fa-youtube"></i></a><?php endif; ?>
+                <?php if (!empty($tenant->linkedin)): ?><a href="<?= htmlspecialchars($tenant->linkedin) ?>" target="_blank" class="w-9 h-9 rounded-lg bg-white/10 hover:bg-[#ff7a00] transition flex items-center justify-center text-gray-400 hover:text-white"><i class="fab fa-linkedin-in"></i></a><?php endif; ?>
+                <?php if (!empty($tenant->tiktok)): ?><a href="<?= htmlspecialchars($tenant->tiktok) ?>" target="_blank" class="w-9 h-9 rounded-lg bg-white/10 hover:bg-[#ff7a00] transition flex items-center justify-center text-gray-400 hover:text-white"><i class="fab fa-tiktok"></i></a><?php endif; ?>
             </div>
             <?php endif; ?>
         </div>

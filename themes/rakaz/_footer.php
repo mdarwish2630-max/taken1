@@ -9,12 +9,11 @@
                     <i class="fas fa-wrench"></i>
                 </div>
                 <div>
-                    <span class="text-xl font-black block"><?= $tenant->site_name ?? 'ركاز' ?></span>
-                    <span class="text-xs text-copper font-bold">للصيانة العامة</span>
+                    <span class="text-xl font-black block"><?= htmlspecialchars($tenant->site_name ?? 'ركاز') ?></span>
                 </div>
             </div>
             <p class="text-gray-400 leading-loose text-sm mb-6">
-                شركة متخصصة في تقديم خدمات الصيانة العامة والتنظيف والتشطيبات بأعلى معايير الجودة مع فريق مدرب وضمان على جميع الأعمال.
+                <?= htmlspecialchars($tenant->meta_description ?? 'شركة متخصصة في تقديم خدمات الصيانة العامة والتنظيف والتشطيبات بأعلى معايير الجودة مع فريق مدرب وضمان على جميع الأعمال.') ?>
             </p>
             <div class="flex gap-3">
                 <?php if (!empty($tenant->contact_whatsapp)): ?>
@@ -24,37 +23,48 @@
                     <i class="fab fa-whatsapp text-lg"></i>
                 </a>
                 <?php endif; ?>
-                <a href="#" class="w-10 h-10 bg-white/10 text-white flex items-center justify-center hover:bg-copper transition-all duration-300 rounded-full">
+                <?php if (!empty($tenant->instagram)): ?>
+                <a href="<?= htmlspecialchars($tenant->instagram) ?>" target="_blank" rel="noopener" class="w-10 h-10 bg-white/10 text-white flex items-center justify-center hover:bg-copper transition-all duration-300 rounded-full">
                     <i class="fab fa-instagram text-lg"></i>
                 </a>
-                <a href="#" class="w-10 h-10 bg-white/10 text-white flex items-center justify-center hover:bg-copper transition-all duration-300 rounded-full">
+                <?php endif; ?>
+                <?php if (!empty($tenant->twitter)): ?>
+                <a href="<?= htmlspecialchars($tenant->twitter) ?>" target="_blank" rel="noopener" class="w-10 h-10 bg-white/10 text-white flex items-center justify-center hover:bg-copper transition-all duration-300 rounded-full">
                     <i class="fab fa-twitter text-lg"></i>
                 </a>
-                <a href="#" class="w-10 h-10 bg-white/10 text-white flex items-center justify-center hover:bg-copper transition-all duration-300 rounded-full">
+                <?php endif; ?>
+                <?php if (!empty($tenant->linkedin)): ?>
+                <a href="<?= htmlspecialchars($tenant->linkedin) ?>" target="_blank" rel="noopener" class="w-10 h-10 bg-white/10 text-white flex items-center justify-center hover:bg-copper transition-all duration-300 rounded-full">
                     <i class="fab fa-linkedin text-lg"></i>
                 </a>
+                <?php endif; ?>
+                <?php if (!empty($tenant->facebook)): ?>
+                <a href="<?= htmlspecialchars($tenant->facebook) ?>" target="_blank" rel="noopener" class="w-10 h-10 bg-white/10 text-white flex items-center justify-center hover:bg-copper transition-all duration-300 rounded-full">
+                    <i class="fab fa-facebook text-lg"></i>
+                </a>
+                <?php endif; ?>
             </div>
         </div>
 
         <!-- Column 2: Services -->
         <div class="fade-up">
             <h4 class="text-lg font-black mb-6 relative inline-block">
-                خدماتنا
+                <?= ($lang ?? 'ar') === 'en' ? 'Our Services' : 'خدماتنا' ?>
                 <span class="absolute -bottom-2 right-0 w-8 h-1 bg-copper rounded-full"></span>
             </h4>
             <ul class="space-y-3 text-gray-400">
-                <li><a href="#" class="hover:text-copper transition-colors text-sm">صيانة التكييف</a></li>
-                <li><a href="#" class="hover:text-copper transition-colors text-sm">كهرباء المنازل</a></li>
-                <li><a href="#" class="hover:text-copper transition-colors text-sm">سباكة وتركيبات</a></li>
-                <li><a href="#" class="hover:text-copper transition-colors text-sm">تنظيف عام</a></li>
-                <li><a href="#" class="hover:text-copper transition-colors text-sm">دهانات وديكور</a></li>
+                <?php if (!empty($services)): ?>
+                    <?php foreach (array_slice($services, 0, 5) as $svc): ?>
+                        <li><a href="<?= url(($siteBase ?? '/') . '/service/' . ($svc->slug ?? '')) ?>" class="hover:text-copper transition-colors text-sm"><?= htmlspecialchars(($lang ?? 'ar') === 'en' ? ($svc->title_en ?? $svc->title ?? '') : ($svc->title ?? '')) ?></a></li>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </ul>
         </div>
 
         <!-- Column 3: Quick Links -->
         <div class="fade-up">
             <h4 class="text-lg font-black mb-6 relative inline-block">
-                روابط سريعة
+                <?= ($lang ?? 'ar') === 'en' ? 'Quick Links' : 'روابط سريعة' ?>
                 <span class="absolute -bottom-2 right-0 w-8 h-1 bg-copper rounded-full"></span>
             </h4>
             <ul class="space-y-3 text-gray-400">
@@ -68,7 +78,7 @@
                 <li>
                     <a href="<?= url($navHref) ?>"
                        class="hover:text-copper transition-colors text-sm">
-                        <?= $item->title ?>
+                        <?= htmlspecialchars($item->title) ?>
                     </a>
                 </li>
                 <?php endforeach; ?>
@@ -78,7 +88,7 @@
         <!-- Column 4: Contact -->
         <div class="fade-up">
             <h4 class="text-lg font-black mb-6 relative inline-block">
-                تواصل معنا
+                <?= ($lang ?? 'ar') === 'en' ? 'Contact Us' : 'تواصل معنا' ?>
                 <span class="absolute -bottom-2 right-0 w-8 h-1 bg-copper rounded-full"></span>
             </h4>
             <ul class="space-y-3 text-gray-400">
@@ -86,7 +96,7 @@
                 <li class="flex items-center gap-3 text-sm">
                     <i class="fas fa-phone text-copper"></i>
                     <a href="tel:<?= preg_replace('/[^0-9+]/', '', $tenant->contact_phone) ?>" class="hover:text-white transition-colors" dir="ltr">
-                        <?= $tenant->contact_phone ?>
+                        <?= htmlspecialchars($tenant->contact_phone) ?>
                     </a>
                 </li>
                 <?php endif; ?>
@@ -94,20 +104,20 @@
                 <li class="flex items-center gap-3 text-sm">
                     <i class="fas fa-envelope text-copper"></i>
                     <a href="mailto:<?= htmlspecialchars($tenant->contact_email) ?>" class="hover:text-white transition-colors">
-                        <?= $tenant->contact_email ?>
+                        <?= htmlspecialchars($tenant->contact_email) ?>
                     </a>
                 </li>
                 <?php endif; ?>
                 <?php if (!empty($tenant->address)): ?>
                 <li class="flex items-center gap-3 text-sm">
                     <i class="fas fa-location-dot text-copper"></i>
-                    <span><?= $tenant->address ?></span>
+                    <span><?= htmlspecialchars($tenant->address) ?></span>
                 </li>
                 <?php endif; ?>
                 <?php if (!empty($tenant->working_hours)): ?>
                 <li class="flex items-center gap-3 text-sm">
                     <i class="fas fa-clock text-copper"></i>
-                    <span><?= $tenant->working_hours ?></span>
+                    <span><?= htmlspecialchars($tenant->working_hours) ?></span>
                 </li>
                 <?php endif; ?>
             </ul>
@@ -116,6 +126,6 @@
 
     <!-- Copyright -->
     <div class="bg-copper text-white text-center py-4 font-bold text-sm rounded-t-rakaz">
-        &copy; <?= date('Y') ?> <?= $tenant->site_name ?? 'ركاز للصيانة' ?> — جميع الحقوق محفوظة
+        &copy; <?= date('Y') ?> <?= htmlspecialchars($tenant->site_name ?? 'ركاز') ?> — <?= ($lang ?? 'ar') === 'en' ? 'All Rights Reserved' : 'جميع الحقوق محفوظة' ?>
     </div>
 </footer>

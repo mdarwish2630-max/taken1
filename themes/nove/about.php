@@ -73,23 +73,23 @@
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             <?php
             $defaultStats = [
-                ['value' => '+12', 'label' => 'سنة خبرة', 'icon' => 'fas fa-trophy'],
-                ['value' => '24/7', 'label' => 'دعم متواصل', 'icon' => 'fas fa-headset'],
-                ['value' => '+8K', 'label' => 'عميل سعيد', 'icon' => 'fas fa-users'],
-                ['value' => '100%', 'label' => 'رضا العملاء', 'icon' => 'fas fa-star'],
+                (object)['value' => '+12', 'label' => 'سنة خبرة', 'icon' => 'fas fa-trophy'],
+                (object)['value' => '24/7', 'label' => 'دعم متواصل', 'icon' => 'fas fa-headset'],
+                (object)['value' => '+8K', 'label' => 'عميل سعيد', 'icon' => 'fas fa-users'],
+                (object)['value' => '100%', 'label' => 'رضا العملاء', 'icon' => 'fas fa-star'],
             ];
             $stats = !empty($siteStats) ? $siteStats : $defaultStats;
             ?>
             <?php foreach ($stats as $stat): ?>
             <div class="text-center bg-white p-8 group hover:bg-[#ff7a00] transition-all duration-500 shadow-sm">
                 <div class="text-3xl mb-4 text-[#ff7a00] group-hover:text-white transition-colors">
-                    <i class="<?php echo htmlspecialchars($stat['icon'] ?? 'fas fa-chart-bar'); ?>"></i>
+                    <i class="<?php echo htmlspecialchars($stat->icon ?? 'fas fa-chart-bar'); ?>"></i>
                 </div>
                 <div class="text-4xl sm:text-5xl font-black text-[#282828] group-hover:text-white mb-2 transition-colors">
-                    <?php echo htmlspecialchars($stat['value']); ?>
+                    <?php echo htmlspecialchars($stat->value); ?>
                 </div>
                 <div class="text-gray-500 group-hover:text-white/80 text-sm font-bold transition-colors">
-                    <?php echo htmlspecialchars($stat['label']); ?>
+                    <?php echo htmlspecialchars($stat->label); ?>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -139,16 +139,16 @@
                     <i class="fas fa-star text-[#ff7a00]"></i>
                     <?php endfor; ?>
                 </div>
-                <p class="text-gray-600 leading-relaxed mb-6 text-sm">"<?php echo htmlspecialchars($t->content ?? $t->text ?? $t->review ?? ''); ?>"</p>
+                <p class="text-gray-600 leading-relaxed mb-6 text-sm">"<?php echo htmlspecialchars($t->content ?? ''); ?>"</p>
                 <div class="flex items-center gap-3">
-                    <?php if (!empty($t->avatar ?? $t->image)): ?>
-                    <img src="<?php echo htmlspecialchars($t->avatar ?? $t->image); ?>" alt="" class="w-10 h-10 object-cover">
+                    <?php if (!empty($t->client_image)): ?>
+                    <img src="<?php echo htmlspecialchars($t->client_image); ?>" alt="" class="w-10 h-10 object-cover">
                     <?php else: ?>
-                    <div class="w-10 h-10 bg-[#ff7a00] flex items-center justify-center text-white font-black"><?php echo mb_substr(htmlspecialchars($t->name ?? 'ع'), 0, 1); ?></div>
+                    <div class="w-10 h-10 bg-[#ff7a00] flex items-center justify-center text-white font-black"><?php echo mb_substr(htmlspecialchars($t->client_name ?? 'ع'), 0, 1); ?></div>
                     <?php endif; ?>
                     <div>
-                        <h4 class="font-black text-[#282828] text-sm"><?php echo htmlspecialchars($t->name ?? ''); ?></h4>
-                        <p class="text-gray-400 text-xs"><?php echo htmlspecialchars($t->role ?? $t->position ?? 'عميل'); ?></p>
+                        <h4 class="font-black text-[#282828] text-sm"><?php echo htmlspecialchars($t->client_name ?? ''); ?></h4>
+                        <p class="text-gray-400 text-xs"><?php echo htmlspecialchars($t->client_title ?? 'عميل'); ?></p>
                     </div>
                 </div>
             </div>
