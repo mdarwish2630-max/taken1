@@ -44,7 +44,7 @@ document.querySelectorAll('form[data-ajax]').forEach(function(form) {
         btn.textContent = 'جاري الإرسال...';
         btn.disabled = true;
         
-        fetch(this.action || '<?php echo $siteBase ?? "/"; ?>/contact', {
+        fetch(this.action || (<?= safeJS(($siteBase ?? '/') . '/contact') ?>), {
             method: 'POST',
             body: formData
         })

@@ -18,10 +18,10 @@ $metaDesc = $meta_description ?? ($tenant->meta_description ?? '');
     <?php if (!empty($metaDesc)): ?>
         <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>" />
     <?php endif; ?>
-    <?php if (!empty($themeFontsUrl)): ?>
+    <?php $_safeFontUrl = safeFontUrl($themeFontsUrl ?? ''); if (!empty($_safeFontUrl)): ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="<?= $themeFontsUrl ?>" rel="stylesheet">
+    <link href="<?= $_safeFontUrl ?>" rel="stylesheet">
     <?php else: ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -266,7 +266,7 @@ $metaDesc = $meta_description ?? ($tenant->meta_description ?? '');
         }
         <?php if (!empty($themeCustomCSS)): ?>
 /* Custom Theme Settings CSS */
-<?= $themeCustomCSS ?>
+<?= sanitizeCSS($themeCustomCSS) ?>
 <?php endif; ?>
     </style>
 </head>

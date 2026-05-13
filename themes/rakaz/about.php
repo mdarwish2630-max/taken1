@@ -58,7 +58,7 @@
         <div class="grid md:grid-cols-3 gap-8 mb-20" data-aos="fade-up">
             <div class="bg-white rounded-card p-8 text-center border border-warm-200">
                 <div class="text-gray-600 text-sm leading-relaxed space-y-4">
-                    <?= $page->content ?>
+                    <?= sanitizeHTML($page->content) ?>
                 </div>
             </div>
         </div>
@@ -67,7 +67,7 @@
         <div class="grid md:grid-cols-3 gap-8 mb-20" data-aos="fade-up">
             <div class="bg-white rounded-card p-8 text-center border border-warm-200">
                 <div class="text-gray-600 text-sm leading-relaxed space-y-4">
-                    <?= $page->content_en ?>
+                    <?= sanitizeHTML($page->content_en) ?>
                 </div>
             </div>
         </div>

@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($title ?? ($site_name ?? 'ركاز للصيانة')); ?></title>
     <meta name="description" content="<?php echo htmlspecialchars($site_description ?? 'شركة ركاز للصيانة'); ?>">
-    <?php if (!empty($themeFontsUrl)): ?>
+    <?php $_safeFontUrl = safeFontUrl($themeFontsUrl ?? ''); if (!empty($_safeFontUrl)): ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="<?= $themeFontsUrl ?>" rel="stylesheet">
+    <link href="<?= $_safeFontUrl ?>" rel="stylesheet">
     <?php else: ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,9 +21,9 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '<?php echo $primary_color ?? "#c97b47"; ?>',
-                        secondary: '<?php echo $secondary_color ?? "#2d2520"; ?>',
-                        accent: '<?php echo $accent_color ?? "#e8a96f"; ?>',
+                        primary: '<?= validateHexColor($primary_color ?? '', '#c97b47') ?>',
+                        secondary: '<?= validateHexColor($secondary_color ?? '', '#2d2520') ?>',
+                        accent: '<?= validateHexColor($accent_color ?? '', '#e8a96f') ?>',
                         warm: {
                             50: '#fdfcfa', 100: '#f8f5f1', 200: '#f0ebe4',
                             300: '#e4d9cc', 400: '#d4c3af', 500: '#c97b47',
@@ -31,7 +31,7 @@
                         }
                     },
                     fontFamily: { cairo: ['<?= !empty($themeSettings->primary_font) ? htmlspecialchars($themeSettings->primary_font) : 'Cairo' ?>', 'sans-serif'] },
-                    borderRadius: { 'card': '<?php echo $border_radius ?? "35px"; ?>' }
+                    borderRadius: { 'card': '<?= preg_match('/^\d+(px|rem|em|%|cm|mm|in|pt|vh|vw)$/', $border_radius ?? '35px') ? htmlspecialchars($border_radius) : '35px' ?>' }
                 }
             }
         }
@@ -52,7 +52,7 @@
         .service-icon-wrapper { background: linear-gradient(135deg, rgba(201,123,71,0.1), rgba(232,169,111,0.1)); }
         <?php if (!empty($themeCustomCSS)): ?>
 /* Custom Theme Settings CSS */
-<?= $themeCustomCSS ?>
+<?= sanitizeCSS($themeCustomCSS) ?>
 <?php endif; ?>
     </style>
 </head>

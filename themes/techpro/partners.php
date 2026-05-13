@@ -35,7 +35,7 @@ require_once __DIR__ . '/_navbar.php';
         <p class="text-[#ff7a00] font-black mb-3"><?= $lang === 'en' ? 'Our Partners' : 'شركاؤنا' ?></p>
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight mb-6"><?= htmlspecialchars($pageTitle) ?></h1>
         <?php if (!empty($pageContent)): ?>
-            <p class="text-gray-600 text-lg leading-relaxed max-w-3xl"><?= $pageContent ?></p>
+            <p class="text-gray-600 text-lg leading-relaxed max-w-3xl"><?= sanitizeHTML($pageContent) ?></p>
         <?php else: ?>
             <p class="text-gray-600 text-lg leading-relaxed max-w-3xl">
                 <?= $lang === 'en' ? 'Proud to work with trusted partners who share our commitment to excellence.' : 'نفخر بالعمل مع شبكة من الشركاء الموثوقين الذين يشاركوننا التزامنا بالتميز.' ?>

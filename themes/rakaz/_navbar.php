@@ -25,7 +25,7 @@
                 ?>
                 <a href="<?= url($navHref) ?>"
                    class="px-4 py-7 border-b-3 border-transparent hover:border-copper hover:text-copper transition-all duration-300 text-sm tracking-wide">
-                    <?= $item->title ?>
+                    <?= e($item->title) ?>
                 </a>
             <?php endforeach; ?>
         </div>
@@ -64,7 +64,7 @@
                 <a href="<?= url($navHref) ?>"
                    class="block text-warm-text hover:text-copper font-bold transition-colors duration-300 py-2 text-base
                           border-b border-copper/5 last:border-0 mobile-nav-link">
-                    <?= $item->title ?>
+                    <?= e($item->title) ?>
                 </a>
             <?php endforeach; ?>
             <a href="<?= url(($siteBase ?? '/') . '/booking') ?>"

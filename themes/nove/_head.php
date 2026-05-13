@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?? ($page->title ?? $tenant->site_name ?? 'لمعة كلين') ?> | <?= $tenant->site_name ?? 'لمعة كلين' ?></title>
+    <title><?= e($title ?? ($page->title ?? $tenant->site_name ?? 'لمعة كلين')) ?> | <?= e($tenant->site_name ?? 'لمعة كلين') ?></title>
     <?php if (!empty($page->meta_title)): ?>
         <meta name="title" content="<?= htmlspecialchars($page->meta_title) ?>">
     <?php endif; ?>
@@ -11,11 +11,11 @@
         <meta name="description" content="<?= htmlspecialchars($tenant->meta_description) ?>">
     <?php endif; ?>
 
-    <?php if (!empty($themeFontsUrl)): ?>
+    <?php $_safeFontUrl = safeFontUrl($themeFontsUrl ?? ''); if (!empty($_safeFontUrl)): ?>
     <!-- Google Fonts (dynamic) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="<?= $themeFontsUrl ?>" rel="stylesheet">
+    <link href="<?= $_safeFontUrl ?>" rel="stylesheet">
     <?php else: ?>
     <!-- Google Fonts: Tajawal -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -122,7 +122,7 @@
         }
         <?php if (!empty($themeCustomCSS)): ?>
 /* Custom Theme Settings CSS */
-<?= $themeCustomCSS ?>
+<?= sanitizeCSS($themeCustomCSS) ?>
 <?php endif; ?>
     </style>
 </head>

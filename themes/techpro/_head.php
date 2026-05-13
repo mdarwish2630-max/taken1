@@ -21,10 +21,10 @@ $siteBase  = $siteBase ?? ('/site/' . $tenant->slug);
     <meta name="keywords" content="<?= htmlspecialchars($metaKeys) ?>">
     <?php endif; ?>
 
-    <?php if (!empty($themeFontsUrl)): ?>
+    <?php $_safeFontUrl = safeFontUrl($themeFontsUrl ?? ''); if (!empty($_safeFontUrl)): ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="<?= $themeFontsUrl ?>" rel="stylesheet">
+    <link href="<?= $_safeFontUrl ?>" rel="stylesheet">
     <?php else: ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -75,7 +75,7 @@ $siteBase  = $siteBase ?? ('/site/' . $tenant->slug);
         .tekpro-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,.1); }
         <?php if (!empty($themeCustomCSS)): ?>
 /* Custom Theme Settings CSS */
-<?= $themeCustomCSS ?>
+<?= sanitizeCSS($themeCustomCSS) ?>
 <?php endif; ?>
     </style>
 </head>

@@ -84,7 +84,7 @@ require_once __DIR__ . '/_navbar.php';
         <!-- Main Content -->
         <div class="lg:col-span-2 fade-up">
             <?php if ($svcContent): ?>
-                <div class="prose prose-lg max-w-none text-gray-600 leading-loose mb-10"><?= $svcContent ?></div>
+                <div class="prose prose-lg max-w-none text-gray-600 leading-loose mb-10"><?= sanitizeHTML($svcContent) ?></div>
             <?php else: ?>
                 <p class="text-gray-600 leading-loose mb-10">
                     <?= $lang === 'en'

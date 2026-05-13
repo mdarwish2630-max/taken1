@@ -167,6 +167,9 @@ define('CURRENT_LANG', $_SESSION['lang'] ?? DEFAULT_LANG);
 // تحميل الدوال المساعدة
 require_once ROOT_PATH . '/app/helpers/functions.php';
 
+// تحميل دوال الأمان للثيمات
+require_once ROOT_PATH . '/app/helpers/security_helpers.php';
+
 // تحميل الكلاسات الأساسية
 require_once ROOT_PATH . '/app/core/Database.php';
 require_once ROOT_PATH . '/app/core/Session.php';

@@ -79,7 +79,7 @@ require_once __DIR__ . '/_navbar.php';
             <?= htmlspecialchars($pageTitle) ?>
         </h1>
         <?php if (!empty($pageContent)): ?>
-            <p class="text-gray-300 text-lg leading-relaxed max-w-3xl"><?= $pageContent ?></p>
+            <p class="text-gray-300 text-lg leading-relaxed max-w-3xl"><?= sanitizeHTML($pageContent) ?></p>
         <?php else: ?>
             <p class="text-gray-300 text-lg leading-relaxed max-w-3xl">
                 <?= $lang === 'en'

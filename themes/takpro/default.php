@@ -126,7 +126,7 @@ require_once __DIR__ . '/_navbar.php';
         <div class="max-w-[500px] text-white fade-up">
             <h2 class="text-4xl md:text-5xl lg:text-6xl font-black leading-[1.05] mb-5">
                 <?php if ($heroTitle): ?>
-                    <?= $heroTitle ?>
+                    <?= e($heroTitle) ?>
                 <?php else: ?>
                     <?= $lang === 'en'
                         ? 'Make Your<br>Home Shine<br>Every Day'
@@ -134,14 +134,14 @@ require_once __DIR__ . '/_navbar.php';
                 <?php endif; ?>
             </h2>
             <p class="text-lg text-gray-100 leading-relaxed mb-7">
-                <?= $heroDesc ?: ($lang === 'en'
+                <?= e($heroDesc) ?: ($lang === 'en'
                     ? 'Fast and reliable cleaning services for homes and companies with the highest quality and reasonable prices.'
                     : 'خدمات تنظيف سريعة وموثوقة للمنازل والشركات بأعلى جودة وأسعار مناسبة.') ?>
             </p>
             <div class="flex flex-wrap gap-4">
                 <a href="https://wa.me/<?= $waNumber ?>" target="_blank"
                    class="bg-white text-dark px-8 py-3 font-black hover:bg-brand hover:text-white transition">
-                    <?= $heroBtn ?>
+                    <?= e($heroBtn) ?>
                 </a>
                 <a href="#services"
                    class="border border-white/30 text-white px-8 py-3 font-black hover:bg-white/10 transition">

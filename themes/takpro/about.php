@@ -70,7 +70,7 @@ require_once __DIR__ . '/_navbar.php';
                 <?= $lang === 'en' ? 'We Deliver Excellence in Every Service' : 'نقدم التميز في كل خدمة' ?>
             </h2>
             <?php if ($pageContent): ?>
-                <div class="text-gray-600 leading-loose mb-7"><?= $pageContent ?></div>
+                <div class="text-gray-600 leading-loose mb-7"><?= sanitizeHTML($pageContent) ?></div>
             <?php else: ?>
                 <p class="text-gray-600 leading-loose mb-7">
                     <?= $lang === 'en'

@@ -121,13 +121,13 @@ require_once __DIR__ . '/_navbar.php';
         <!-- Badge -->
         <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full text-sm text-cyan-300 mb-6">
             <span>&#11088;</span>
-            <span><?= $heroSub ?: ($lang === 'en' ? 'Trusted by thousands' : 'أكثر من 5000 عميل يثق بنا') ?></span>
+            <span><?= e($heroSub) ?: ($lang === 'en' ? 'Trusted by thousands' : 'أكثر من 5000 عميل يثق بنا') ?></span>
         </div>
 
         <!-- Title -->
         <h2 class="text-4xl sm:text-5xl lg:text-7xl font-black leading-tight mb-6">
             <?php if ($heroTitle): ?>
-                <?= $heroTitle ?>
+                <?= e($heroTitle) ?>
             <?php else: ?>
                 <?= $lang === 'en' ? 'Professional <span class="text-cyan-400">Services</span> with Excellence' : 'خدمات <span class="text-cyan-400">الصيانة</span> الحديثة باحترافية عالية' ?>
             <?php endif; ?>
@@ -135,7 +135,7 @@ require_once __DIR__ . '/_navbar.php';
 
         <!-- Description -->
         <p class="text-lg text-gray-300 leading-relaxed mb-8 max-w-xl">
-            <?= $heroDesc ?: ($lang === 'en'
+            <?= e($heroDesc) ?: ($lang === 'en'
                 ? 'We deliver integrated maintenance solutions for homes and companies with the latest technologies, fast response, and a specialized team to ensure the best results.'
                 : 'نقدم حلول صيانة متكاملة للمنازل والشركات بأحدث التقنيات، سرعة استجابة، وفريق متخصص لضمان أفضل النتائج.'
             ) ?>
@@ -145,7 +145,7 @@ require_once __DIR__ . '/_navbar.php';
         <div class="flex flex-wrap gap-4">
             <a href="https://wa.me/<?= $waNumber ?>" target="_blank"
                class="bg-cyan-500 hover:bg-cyan-400 transition px-7 py-4 rounded-2xl font-bold text-lg shadow-xl shadow-cyan-500/30">
-                <?= $heroBtn ?: 'احجز خدمة' ?>
+                <?= e($heroBtn) ?: 'احجز خدمة' ?>
             </a>
             <a href="#services"
                class="border border-white/20 hover:border-cyan-400 hover:text-cyan-300 transition px-7 py-4 rounded-2xl font-bold text-lg backdrop-blur-md bg-white/5">
@@ -158,7 +158,7 @@ require_once __DIR__ . '/_navbar.php';
             <?php foreach (array_slice($stats, 0, 3) as $i => $stat): ?>
                 <div class="bg-white/5 border border-white/10 p-5 rounded-3xl backdrop-blur-md">
                     <h3 class="text-2xl sm:text-3xl font-black text-cyan-400"><?= htmlspecialchars($stat->value) ?></h3>
-                    <p class="text-gray-400 mt-1 text-sm"><?= $lang === 'en' && !empty($stat->label_en) ? $stat->label_en : ($stat->label ?? '') ?></p>
+                    <p class="text-gray-400 mt-1 text-sm"><?= e($lang === 'en' && !empty($stat->label_en) ? $stat->label_en : ($stat->label ?? '')) ?></p>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -188,10 +188,10 @@ require_once __DIR__ . '/_navbar.php';
                         <div class="bg-white/5 border border-white/10 p-5 rounded-3xl flex justify-between items-center hover:border-cyan-400/30 transition">
                             <div class="flex-1 min-w-0 me-3">
                                 <h4 class="font-bold text-lg truncate">
-                                    <?= $lang === 'en' && !empty($psvc->title_en) ? $psvc->title_en : ($psvc->title ?? '') ?>
+                                    <?= e($lang === 'en' && !empty($psvc->title_en) ? $psvc->title_en : ($psvc->title ?? '')) ?>
                                 </h4>
                                 <p class="text-gray-400 text-sm truncate">
-                                    <?= $lang === 'en' && !empty($psvc->description_en) ? $psvc->description_en : ($psvc->description ?? '') ?>
+                                    <?= e($lang === 'en' && !empty($psvc->description_en) ? $psvc->description_en : ($psvc->description ?? '')) ?>
                                 </p>
                             </div>
                             <?php

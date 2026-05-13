@@ -130,14 +130,14 @@ require_once __DIR__ . '/_navbar.php';
                 <?php endif; ?>
             </h2>
             <p class="text-lg text-gray-100 leading-relaxed mb-7">
-                <?= $heroDesc ?: ($lang === 'en'
+                <?= e($heroDesc) ?: ($lang === 'en'
                     ? 'Professional and reliable services for homes and companies with the highest quality and competitive prices.'
                     : 'خدمات احترافية وموثوقة للمنازل والشركات بأعلى جودة وأسعار مناسبة.'
                 ) ?>
             </p>
             <a href="<?= url($siteBase . '/booking') ?>"
                class="inline-block bg-white text-[#171717] px-8 py-3 font-black hover:bg-[#ff7a00] hover:text-white transition">
-                <?= $heroBtn ?>
+                <?= e($heroBtn) ?>
             </a>
         </div>
     </div>

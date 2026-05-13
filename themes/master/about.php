@@ -69,7 +69,7 @@ require_once __DIR__ . '/_navbar.php';
             <div class="fade-up">
                 <?php if (!empty($pageContent)): ?>
                     <div class="text-gray-300 text-lg leading-relaxed space-y-4">
-                        <?= $pageContent ?>
+                        <?= sanitizeHTML($pageContent) ?>
                     </div>
                 <?php else: ?>
                     <p class="text-gray-300 text-lg leading-relaxed">
@@ -84,14 +84,14 @@ require_once __DIR__ . '/_navbar.php';
             <?php if (!empty($page->content)): ?>
             <div class="glass rounded-2xl p-7 glow-border transition-all duration-300 fade-up" style="transition-delay:.1s">
                 <div class="text-gray-300 text-lg leading-relaxed space-y-4">
-                    <?= $page->content ?>
+                    <?= sanitizeHTML($page->content) ?>
                 </div>
             </div>
             <?php endif; ?>
             <?php if (!empty($page->content_en) && $lang === 'en'): ?>
             <div class="glass rounded-2xl p-7 glow-border transition-all duration-300 fade-up" style="transition-delay:.1s">
                 <div class="text-gray-300 text-lg leading-relaxed space-y-4">
-                    <?= $page->content_en ?>
+                    <?= sanitizeHTML($page->content_en) ?>
                 </div>
             </div>
             <?php endif; ?>
@@ -117,7 +117,7 @@ require_once __DIR__ . '/_navbar.php';
                                         <div class="w-12 h-12 rounded-xl bg-cyan-500/15 flex items-center justify-center text-xl mx-auto mb-3">
                                             <i class="<?= htmlspecialchars($statIcon) ?> text-cyan-400"></i>
                                         </div>
-                                        <h4 class="text-2xl sm:text-3xl font-black text-cyan-400"><?= $stat->value ?></h4>
+                                        <h4 class="text-2xl sm:text-3xl font-black text-cyan-400"><?= e($stat->value) ?></h4>
                                         <p class="text-gray-400 mt-1 text-sm"><?= htmlspecialchars($statLabel) ?></p>
                                     </div>
                                 <?php endforeach; ?>
