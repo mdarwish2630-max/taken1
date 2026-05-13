@@ -159,12 +159,13 @@ class BlogPost extends Model
      */
     public function search($tenantId, $query, $limit = 10)
     {
-        $searchTerm = "%{$query}%";
+        $escaped = Security::escapeLike($query);
+        $searchTerm = "%{$escaped}%";
         return $this->db->query(
             "SELECT * FROM {$this->table} 
              WHERE tenant_id = ? AND status = 'published'
              AND (title LIKE ? OR content LIKE ? OR excerpt LIKE ?)
-             ORDER BY published_at DESC LIMIT {$limit}",
+             ORDER BY published_at DESC LIMIT " . (int)$limit,
             [$tenantId, $searchTerm, $searchTerm, $searchTerm]
         )->results();
     }

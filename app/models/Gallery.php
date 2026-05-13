@@ -39,7 +39,7 @@ class Gallery extends Model
         $sql = "SELECT * FROM {$this->table} WHERE tenant_id = ? AND status = 'active' ORDER BY display_order ASC";
         
         if ($limit) {
-            $sql .= " LIMIT {$limit}";
+            $sql .= " LIMIT " . (int)$limit;
         }
         
         return $this->db->query($sql, [$tenantId])->results();
@@ -150,8 +150,21 @@ class Gallery extends Model
                     'size' => $files['size'][$key]
                 ];
                 
-                // التحقق من نوع الصورة
+                // التحقق من نوع الصورة (الامتداد + MIME)
                 if (!Security::isAllowedImageType($name)) {
+                    continue;
+                }
+                
+                // التحقق من MIME type الفعلي
+                $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+                $finfo = new finfo(FILEINFO_MIME_TYPE);
+                $detectedMime = $finfo->file($file['tmp_name']);
+                if (!in_array($detectedMime, $allowedMimes)) {
+                    continue;
+                }
+                
+                // التحقق من حجم الملف (5MB max)
+                if ($file['size'] > 5 * 1024 * 1024) {
                     continue;
                 }
                 

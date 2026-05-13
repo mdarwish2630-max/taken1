@@ -246,13 +246,14 @@ class Auth
         );
         
         // تعيين الكوكي
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') == 443;
         setcookie(
             'remember_token',
             $userId . ':' . $token,
             time() + (86400 * 30), // 30 يوم
             '/',
             '',
-            false,
+            $isSecure,
             true
         );
     }

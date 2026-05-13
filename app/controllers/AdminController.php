@@ -93,9 +93,10 @@ class AdminController extends Controller
         $params = [];
 
         if ($search) {
+            $escapedSearch = Security::escapeLike($search);
             $conditions .= " AND (full_name LIKE ? OR email LIKE ?)";
-            $params[] = "%{$search}%";
-            $params[] = "%{$search}%";
+            $params[] = "%{$escapedSearch}%";
+            $params[] = "%{$escapedSearch}%";
         }
 
         $pagination = $this->userModel->paginate($page, 20, $conditions, $params, 'created_at DESC');
@@ -194,8 +195,8 @@ class AdminController extends Controller
                 Session::error(lang('password_mismatch') ?? 'كلمة المرور غير متطابقة');
                 $this->redirect('/admin/users/edit/' . $id);
             }
-            if (strlen($newPassword) < 6) {
-                Session::error(lang('password_min') ?? 'كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+            if (strlen($newPassword) < (defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 8)) {
+                Session::error(lang('password_min') ?? 'كلمة المرور يجب أن تكون ' . (defined('PASSWORD_MIN_LENGTH') ? PASSWORD_MIN_LENGTH : 8) . ' أحرف على الأقل');
                 $this->redirect('/admin/users/edit/' . $id);
             }
             $data['password'] = Security::hashPassword($newPassword);
@@ -504,7 +505,7 @@ class AdminController extends Controller
 
         try {
             $csrfToken = $_POST['csrf_token'] ?? '';
-            if (empty($csrfToken) || !isset($_SESSION['csrf_token']) || $csrfToken !== $_SESSION['csrf_token']) {
+            if (empty($csrfToken) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
                 $_SESSION['error'] = 'رمز CSRF غير صالح';
                 $this->redirect('/admin/plans');
                 return;
@@ -633,7 +634,7 @@ class AdminController extends Controller
         try {
             $id = intval($id);
             $csrfToken = $_POST['csrf_token'] ?? '';
-            if (empty($csrfToken) || !isset($_SESSION['csrf_token']) || $csrfToken !== $_SESSION['csrf_token']) {
+            if (empty($csrfToken) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
                 $_SESSION['error'] = 'رمز CSRF غير صالح';
                 $this->redirect('/admin/plans');
                 return;
@@ -771,7 +772,7 @@ class AdminController extends Controller
                 Session::error(lang('plan_delete_error') ?? 'لا يمكن حذف الخطة لوجود مشتركين بها');
             }
         } catch (\Exception $e) {
-            Session::error('خطأ في حذف الخطة: ' . $e->getMessage());
+            Session::error('خطأ في حذف الخطة. تحقق من السجلات لمزيد من التفاصيل.');
         }
 
         $this->redirect('/admin/plans');
@@ -1256,7 +1257,7 @@ class AdminController extends Controller
             $this->redirect('/admin/themes');
 
         } catch (Exception $e) {
-            Session::error('حدث خطأ أثناء الاستيراد: ' . $e->getMessage());
+            Session::error('حدث خطأ أثناء الاستيراد. تحقق من السجلات لمزيد من التفاصيل.');
             $this->redirect('/admin/themes');
         }
     }
@@ -1281,7 +1282,7 @@ class AdminController extends Controller
             Session::success("تم حذف جميع البيانات التجريبية ({$c} نص + {$m} وسائط)");
             $this->redirect('/admin/themes');
         } catch (Exception $e) {
-            Session::error('حدث خطأ: ' . $e->getMessage());
+            Session::error('حدث خطأ. تحقق من السجلات لمزيد من التفاصيل.');
             $this->redirect('/admin/themes');
         }
     }
@@ -1707,7 +1708,7 @@ class AdminController extends Controller
                 $this->jsonError($result['message']);
             }
         } catch (\Exception $e) {
-            $this->jsonError('فشل الاتصال: ' . $e->getMessage());
+            $this->jsonError('فشل الاتصال. تحقق من السجلات لمزيد من التفاصيل.');
         }
     }
 

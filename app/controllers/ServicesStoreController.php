@@ -121,8 +121,8 @@ class ServicesStoreController extends Controller
                 }
             } catch (\Exception $e) {}
 
-            // توجيه لرابط الدفع إذا كان موجود
-            if ($service->payment_link) {
+            // توجيه لرابط الدفع إذا كان موجود (مسار داخلي فقط)
+            if ($service->payment_link && preg_match('#^/#', $service->payment_link)) {
                 Session::success('تم تسجيل طلبك بنجاح - سيتم توجيهك لصفحة الدفع');
                 $this->redirect($service->payment_link);
             } else {

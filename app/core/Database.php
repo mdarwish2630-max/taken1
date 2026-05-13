@@ -170,8 +170,7 @@ class Database
      */
     public function raw($sql)
     {
-        error_log('SECURITY WARNING: Database::raw() is deprecated. Use parameterized query() instead. SQL: ' . $sql);
-        return $this->pdo->exec($sql);
+        throw new \RuntimeException('Database::raw() is permanently disabled for security. Use parameterized query() instead.');
     }
 
     /**
