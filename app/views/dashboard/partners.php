@@ -171,8 +171,8 @@ function editPartner(id) {
     fetch(`/dashboard/partners/edit/${id}`, { headers: {'X-Requested-With': 'XMLHttpRequest'} })
     .then(r => r.json())
     .then(data => {
-        if (data.success && data.partner) {
-            const p = data.partner;
+        if (data.success && data.data && data.data.partner) {
+            const p = data.data.partner;
             document.getElementById('edit_partner_id').value = p.id;
             document.getElementById('edit_name').value = p.name || '';
             document.getElementById('edit_name_en').value = p.name_en || '';

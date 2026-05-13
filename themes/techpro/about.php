@@ -62,46 +62,21 @@ require_once __DIR__ . '/_navbar.php';
                 <?php endif; ?>
             </div>
 
-            <!-- Mission & Vision -->
-            <div class="grid sm:grid-cols-2 gap-6 fade-up" style="transition-delay:.1s">
-                <div class="bg-[#f5f5f5] rounded-lg p-7 tekpro-card">
-                    <div class="w-14 h-14 rounded-lg bg-[#ff7a00] flex items-center justify-center text-2xl mb-5 text-white">
-                        <i class="fas fa-bullseye"></i>
-                    </div>
-                    <h3 class="text-xl font-black mb-3"><?= $lang === 'en' ? 'Our Mission' : 'رسالتنا' ?></h3>
-                    <p class="text-gray-500 leading-relaxed text-sm">
-                        <?= $lang === 'en'
-                            ? 'To deliver exceptional services that exceed expectations and build lasting relationships with our clients.'
-                            : 'تقديم خدمات استثنائية تفوق التوقعات وبناء علاقات دائمة ومثمرة مع عملائنا.' ?>
-                    </p>
-                </div>
-                <div class="bg-[#f5f5f5] rounded-lg p-7 tekpro-card">
-                    <div class="w-14 h-14 rounded-lg bg-[#171717] flex items-center justify-center text-2xl mb-5 text-white">
-                        <i class="fas fa-eye"></i>
-                    </div>
-                    <h3 class="text-xl font-black mb-3"><?= $lang === 'en' ? 'Our Vision' : 'رؤيتنا' ?></h3>
-                    <p class="text-gray-500 leading-relaxed text-sm">
-                        <?= $lang === 'en'
-                            ? 'To be the leading provider recognized for innovation, reliability, and customer satisfaction.'
-                            : 'أن نكون الخيار الأول المعترف بنا بالابتكار والموثوقية ورضا العملاء.' ?>
-                    </p>
+            <!-- Mission, Vision & Values — dynamic from CMS -->
+            <?php if (!empty($page->content)): ?>
+            <div class="bg-[#f5f5f5] rounded-lg p-7 tekpro-card fade-up" style="transition-delay:.1s">
+                <div class="text-gray-600 text-lg leading-relaxed space-y-4">
+                    <?= $page->content ?>
                 </div>
             </div>
-
-            <!-- Values -->
-            <div class="fade-up" style="transition-delay:.2s">
-                <div class="flex flex-wrap gap-3">
-                    <?php
-                    $values = $lang === 'en' ? ['Excellence', 'Integrity', 'Innovation', 'Teamwork'] : ['التميز', 'الأمانة', 'الابتكار', 'العمل الجماعي'];
-                    $valueIcons = ['fas fa-gem', 'fas fa-shield-halved', 'fas fa-lightbulb', 'fas fa-people-group'];
-                    foreach ($values as $vi => $value): ?>
-                        <div class="bg-[#f5f5f5] rounded-lg px-5 py-3 flex items-center gap-3 hover:bg-[#ff7a00]/10 transition">
-                            <i class="<?= $valueIcons[$vi] ?> text-[#ff7a00] text-sm"></i>
-                            <span class="font-bold text-sm"><?= $value ?></span>
-                        </div>
-                    <?php endforeach; ?>
+            <?php endif; ?>
+            <?php if (!empty($page->content_en) && $lang === 'en'): ?>
+            <div class="bg-[#f5f5f5] rounded-lg p-7 tekpro-card fade-up" style="transition-delay:.1s">
+                <div class="text-gray-600 text-lg leading-relaxed space-y-4">
+                    <?= $page->content_en ?>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
 
         <!-- Right Column: Stats + Features -->

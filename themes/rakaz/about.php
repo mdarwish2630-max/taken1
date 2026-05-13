@@ -53,30 +53,25 @@
             </div>
         </div>
 
-        <!-- Vision & Mission -->
-        <div class="grid md:grid-cols-3 gap-8 mb-20">
-            <div class="bg-white rounded-card p-8 text-center border border-warm-200" data-aos="fade-up">
-                <div class="w-16 h-16 mx-auto mb-5 bg-primary/10 rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-eye text-3xl text-primary"></i>
+        <!-- Vision & Mission — dynamic from CMS -->
+        <?php if (!empty($page->content)): ?>
+        <div class="grid md:grid-cols-3 gap-8 mb-20" data-aos="fade-up">
+            <div class="bg-white rounded-card p-8 text-center border border-warm-200">
+                <div class="text-gray-600 text-sm leading-relaxed space-y-4">
+                    <?= $page->content ?>
                 </div>
-                <h3 class="text-xl font-bold text-secondary mb-3">رؤيتنا</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">أن نكون الخيار الأول والأفضل في مجال الصيانة المنزلية والتجارية على مستوى المملكة العربية السعودية والمنطقة.</p>
-            </div>
-            <div class="bg-white rounded-card p-8 text-center border border-warm-200" data-aos="fade-up" data-aos-delay="100">
-                <div class="w-16 h-16 mx-auto mb-5 bg-primary/10 rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-bullseye text-3xl text-primary"></i>
-                </div>
-                <h3 class="text-xl font-bold text-secondary mb-3">مهمتنا</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">تقديم خدمات صيانة عالية الجودة تلبي توقعات عملائنا وتتجاوزها، مع الالتزام بالمواعيد والشفافية في التعامل.</p>
-            </div>
-            <div class="bg-white rounded-card p-8 text-center border border-warm-200" data-aos="fade-up" data-aos-delay="200">
-                <div class="w-16 h-16 mx-auto mb-5 bg-primary/10 rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-heart text-3xl text-primary"></i>
-                </div>
-                <h3 class="text-xl font-bold text-secondary mb-3">قيمنا</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">الجودة، الالتزام، الشفافية، والعمل الجماعي. نؤمن بأن نجاح عملائنا هو نجاحنا.</p>
             </div>
         </div>
+        <?php endif; ?>
+        <?php if (!empty($page->content_en) && $lang === 'en'): ?>
+        <div class="grid md:grid-cols-3 gap-8 mb-20" data-aos="fade-up">
+            <div class="bg-white rounded-card p-8 text-center border border-warm-200">
+                <div class="text-gray-600 text-sm leading-relaxed space-y-4">
+                    <?= $page->content_en ?>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Stats -->
         <?php if (!empty($siteStats)): ?>

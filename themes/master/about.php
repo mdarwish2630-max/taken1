@@ -80,50 +80,21 @@ require_once __DIR__ . '/_navbar.php';
                 <?php endif; ?>
             </div>
 
-            <!-- Mission & Vision Cards -->
-            <div class="grid sm:grid-cols-2 gap-6 fade-up" style="transition-delay:.1s">
-                <!-- Mission -->
-                <div class="glass rounded-2xl p-7 glow-border transition-all duration-300 hover:-translate-y-1">
-                    <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 border border-cyan-400/20 flex items-center justify-center text-2xl mb-5">
-                        <i class="fas fa-bullseye text-cyan-400"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3"><?= $lang === 'en' ? 'Our Mission' : 'رسالتنا' ?></h3>
-                    <p class="text-gray-400 leading-relaxed text-sm">
-                        <?= $lang === 'en'
-                            ? 'To deliver exceptional professional services that exceed expectations and build lasting relationships with our clients.'
-                            : 'تقديم خدمات احترافية استثنائية تفوق التوقعات وبناء علاقات دائمة ومثمرة مع عملائنا.' ?>
-                    </p>
-                </div>
-                <!-- Vision -->
-                <div class="glass rounded-2xl p-7 glow-border transition-all duration-300 hover:-translate-y-1">
-                    <div class="w-14 h-14 rounded-2xl bg-blue-500/20 border border-blue-400/20 flex items-center justify-center text-2xl mb-5">
-                        <i class="fas fa-eye text-blue-400"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3"><?= $lang === 'en' ? 'Our Vision' : 'رؤيتنا' ?></h3>
-                    <p class="text-gray-400 leading-relaxed text-sm">
-                        <?= $lang === 'en'
-                            ? 'To be the leading provider of professional services, recognized for innovation, reliability, and customer satisfaction.'
-                            : 'أن نكون الخيار الأول في تقديم الخدمات الاحترافية، معترف بنا بالابتكار والموثوقية ورضا العملاء.' ?>
-                    </p>
+            <!-- Mission, Vision & Values — dynamic from CMS -->
+            <?php if (!empty($page->content)): ?>
+            <div class="glass rounded-2xl p-7 glow-border transition-all duration-300 fade-up" style="transition-delay:.1s">
+                <div class="text-gray-300 text-lg leading-relaxed space-y-4">
+                    <?= $page->content ?>
                 </div>
             </div>
-
-            <!-- Values Row -->
-            <div class="fade-up" style="transition-delay:.2s">
-                <div class="flex flex-wrap gap-3">
-                    <?php
-                    $values = $lang === 'en'
-                        ? ['Excellence', 'Integrity', 'Innovation', 'Teamwork']
-                        : ['التميز', 'الأمانة', 'الابتكار', 'العمل الجماعي'];
-                    $valueIcons = ['fas fa-gem', 'fas fa-shield-halved', 'fas fa-lightbulb', 'fas fa-people-group'];
-                    foreach ($values as $vi => $value): ?>
-                        <div class="glass rounded-xl px-5 py-3 flex items-center gap-3 hover:border-cyan-400/30 transition">
-                            <i class="<?= $valueIcons[$vi] ?> text-cyan-400 text-sm"></i>
-                            <span class="font-semibold text-sm"><?= $value ?></span>
-                        </div>
-                    <?php endforeach; ?>
+            <?php endif; ?>
+            <?php if (!empty($page->content_en) && $lang === 'en'): ?>
+            <div class="glass rounded-2xl p-7 glow-border transition-all duration-300 fade-up" style="transition-delay:.1s">
+                <div class="text-gray-300 text-lg leading-relaxed space-y-4">
+                    <?= $page->content_en ?>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
 
         <!-- Right Column: Stats + Features -->

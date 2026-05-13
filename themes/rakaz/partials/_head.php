@@ -5,9 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($title ?? ($site_name ?? 'ركاز للصيانة')); ?></title>
     <meta name="description" content="<?php echo htmlspecialchars($site_description ?? 'شركة ركاز للصيانة'); ?>">
+    <?php if (!empty($themeFontsUrl)): ?>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="<?= $themeFontsUrl ?>" rel="stylesheet">
+    <?php else: ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <?php endif; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -24,14 +30,14 @@
                             600: '#b56a3a', 700: '#9a5830', 800: '#2d2520', 900: '#1a1614',
                         }
                     },
-                    fontFamily: { cairo: ['Cairo', 'sans-serif'] },
+                    fontFamily: { cairo: ['<?= !empty($themeSettings->primary_font) ? htmlspecialchars($themeSettings->primary_font) : 'Cairo' ?>', 'sans-serif'] },
                     borderRadius: { 'card': '<?php echo $border_radius ?? "35px"; ?>' }
                 }
             }
         }
     </script>
     <style>
-        * { font-family: 'Cairo', 'sans-serif'; }
+        * { font-family: <?= !empty($themeSettings->primary_font) ? "'" . htmlspecialchars($themeSettings->primary_font) . "'" : "'Cairo'" ?>, sans-serif; }
         body { background-color: #f8f5f1; }
         .hero-gradient { background: linear-gradient(135deg, #2d2520 0%, #4a3728 50%, #c97b47 100%); }
         .card-hover { transition: all 0.3s ease; }
@@ -44,6 +50,10 @@
         .faq-item:hover { border-color: #c97b47; }
         .scroll-smooth { scroll-behavior: smooth; }
         .service-icon-wrapper { background: linear-gradient(135deg, rgba(201,123,71,0.1), rgba(232,169,111,0.1)); }
+        <?php if (!empty($themeCustomCSS)): ?>
+/* Custom Theme Settings CSS */
+<?= $themeCustomCSS ?>
+<?php endif; ?>
     </style>
 </head>
 <body class="scroll-smooth text-secondary">

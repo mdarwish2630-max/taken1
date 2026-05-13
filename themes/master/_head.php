@@ -21,9 +21,15 @@ $siteBase  = $siteBase ?? ('/site/' . $tenant->slug);
     <meta name="keywords" content="<?= htmlspecialchars($metaKeys) ?>">
     <?php endif; ?>
 
+    <?php if (!empty($themeFontsUrl)): ?>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="<?= $themeFontsUrl ?>" rel="stylesheet">
+    <?php else: ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <?php endif; ?>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,14 +37,14 @@ $siteBase  = $siteBase ?? ('/site/' . $tenant->slug);
     tailwind.config = {
         theme: {
             extend: {
-                fontFamily: { tajawal: ['Tajawal', 'sans-serif'] },
+                fontFamily: { tajawal: ['<?= !empty($themeSettings->primary_font) ? htmlspecialchars($themeSettings->primary_font) : 'Tajawal' ?>', 'sans-serif'] },
             }
         }
     }
     </script>
 
     <style>
-        * { font-family: 'Tajawal', sans-serif; }
+        * { font-family: <?= !empty($themeSettings->primary_font) ? "'" . htmlspecialchars($themeSettings->primary_font) . "'" : "'Tajawal'" ?>, sans-serif; }
         ::selection { background: rgba(6,182,212,.3); color: #fff; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
@@ -58,6 +64,10 @@ $siteBase  = $siteBase ?? ('/site/' . $tenant->slug);
         .animate-float { animation: float 4s ease-in-out infinite; }
 
         .service-card:hover .service-img { transform: scale(1.1); }
+        <?php if (!empty($themeCustomCSS)): ?>
+/* Custom Theme Settings CSS */
+<?= $themeCustomCSS ?>
+<?php endif; ?>
     </style>
 </head>
 <body class="min-h-screen bg-[#0f172a] text-white overflow-x-hidden font-tajawal">

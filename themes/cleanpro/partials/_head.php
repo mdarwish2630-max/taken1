@@ -18,9 +18,15 @@ $metaDesc = $meta_description ?? ($tenant->meta_description ?? '');
     <?php if (!empty($metaDesc)): ?>
         <meta name="description" content="<?= htmlspecialchars($metaDesc) ?>" />
     <?php endif; ?>
+    <?php if (!empty($themeFontsUrl)): ?>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="<?= $themeFontsUrl ?>" rel="stylesheet">
+    <?php else: ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <?php endif; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
         :root {
@@ -37,7 +43,7 @@ $metaDesc = $meta_description ?? ($tenant->meta_description ?? '');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
         body {
-            font-family: 'Tajawal', sans-serif;
+            font-family: <?= !empty($themeSettings->primary_font) ? "'" . htmlspecialchars($themeSettings->primary_font) . "'" : "'Tajawal'" ?>, sans-serif;
             color: var(--text);
             background: #fff;
             line-height: 1.7;
@@ -258,6 +264,10 @@ $metaDesc = $meta_description ?? ($tenant->meta_description ?? '');
             .cpro-nav-cta { display: none; }
             .cpro-blue-cta { flex-direction: column; text-align: center; }
         }
+        <?php if (!empty($themeCustomCSS)): ?>
+/* Custom Theme Settings CSS */
+<?= $themeCustomCSS ?>
+<?php endif; ?>
     </style>
 </head>
 <body class="<?= $isRtl ? 'rtl' : 'ltr' ?>">

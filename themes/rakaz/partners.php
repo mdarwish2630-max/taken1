@@ -52,6 +52,7 @@
 </section>
 
 <!-- Why Partner With Us -->
+<?php if (!empty($siteFeatures)): ?>
 <section class="py-16 bg-warm-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-14" data-aos="fade-up">
@@ -60,30 +61,21 @@
             <div class="section-divider mx-auto"></div>
         </div>
         <div class="grid md:grid-cols-3 gap-8">
-            <div class="bg-white rounded-card p-8 text-center" data-aos="fade-up">
+            <?php foreach ($siteFeatures as $i => $feat): ?>
+            <div class="bg-white rounded-card p-8 text-center" data-aos="fade-up" data-aos-delay="<?= $i * 100 ?>">
+                <?php if (!empty($feat->icon)): ?>
                 <div class="w-16 h-16 mx-auto mb-5 bg-primary/10 rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-trophy text-3xl text-primary"></i>
+                    <i class="<?php echo htmlspecialchars($feat->icon); ?> text-3xl text-primary"></i>
                 </div>
-                <h3 class="text-lg font-bold text-secondary mb-3">جودة عالية</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">نلتزم بأعلى معايير الجودة في جميع خدماتنا مما يعكس إيجابياً على شركائنا.</p>
+                <?php endif; ?>
+                <h3 class="text-lg font-bold text-secondary mb-3"><?php echo htmlspecialchars($lang === 'en' && !empty($feat->title_en) ? $feat->title_en : ($feat->title ?? '')); ?></h3>
+                <p class="text-gray-500 text-sm leading-relaxed"><?php echo htmlspecialchars($lang === 'en' && !empty($feat->description_en) ? $feat->description_en : ($feat->description ?? '')); ?></p>
             </div>
-            <div class="bg-white rounded-card p-8 text-center" data-aos="fade-up" data-aos-delay="100">
-                <div class="w-16 h-16 mx-auto mb-5 bg-primary/10 rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-handshake text-3xl text-primary"></i>
-                </div>
-                <h3 class="text-lg font-bold text-secondary mb-3">علاقات طويلة الأمد</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">نبني علاقات شراكة مستدامة مبنية على الثقة والشفافية والاحترام المتبادل.</p>
-            </div>
-            <div class="bg-white rounded-card p-8 text-center" data-aos="fade-up" data-aos-delay="200">
-                <div class="w-16 h-16 mx-auto mb-5 bg-primary/10 rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-chart-line text-3xl text-primary"></i>
-                </div>
-                <h3 class="text-lg font-bold text-secondary mb-3">نمو مشترك</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">نعمل على تحقيق نمو مشترك مع شركائنا من خلال التميز في الخدمات المقدمة.</p>
-            </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <?php include __DIR__ . '/partials/_footer.php'; ?>
 <?php include __DIR__ . '/partials/_scripts.php'; ?>

@@ -25,16 +25,7 @@ if (empty($partnerItems)) {
     ];
 }
 
-// Benefits
-$benefits = $lang === 'en' ? [
-    (object)['title' => 'Trusted Brands', 'description' => 'We partner with industry-leading brands to ensure the highest quality materials and services.', 'icon' => 'fas fa-shield-halved'],
-    (object)['title' => 'Mutual Growth', 'description' => 'Our partnerships are built on shared values, innovation, and long-term growth strategies.', 'icon' => 'fas fa-handshake'],
-    (object)['title' => 'Quality Assurance', 'description' => 'Every partner meets our strict quality standards before joining our network.', 'icon' => 'fas fa-award'],
-] : [
-    (object)['title' => 'علامات تجارية موثوقة', 'description' => 'نتشارك مع علامات تجارية رائدة لضمان أعلى جودة في المواد والخدمات.', 'icon' => 'fas fa-shield-halved'],
-    (object)['title' => 'نمو متبادل', 'description' => 'شراكاتنا مبنية على قيم مشتركة والابتكار واستراتيجيات النمو طويلة الأمد.', 'icon' => 'fas fa-handshake'],
-    (object)['title' => 'ضمان الجودة', 'description' => 'كل شريك يستوفي معاييرنا الصارمة قبل الانضمام لشبكتنا.', 'icon' => 'fas fa-award'],
-];
+// Benefits — now sourced from $siteFeatures (CMS-managed)
 
 require_once __DIR__ . '/_head.php';
 require_once __DIR__ . '/_navbar.php';
@@ -70,19 +61,23 @@ require_once __DIR__ . '/_navbar.php';
 </section>
 
 <!-- ═══════ BENEFITS SECTION ═══════ -->
+<?php if (!empty($siteFeatures)): ?>
 <section class="relative z-10 px-6 lg:px-20 py-12">
     <div class="grid sm:grid-cols-3 gap-6">
-        <?php foreach ($benefits as $i => $benefit): ?>
+        <?php foreach ($siteFeatures as $i => $feat): ?>
             <div class="glass rounded-2xl p-7 glow-border transition-all duration-300 hover:-translate-y-1 fade-up" style="transition-delay:<?= $i * 0.1 ?>s">
+                <?php if (!empty($feat->icon)): ?>
                 <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 border border-cyan-400/20 flex items-center justify-center text-2xl mb-5">
-                    <i class="<?= htmlspecialchars($benefit->icon) ?> text-cyan-400"></i>
+                    <i class="<?= htmlspecialchars($feat->icon) ?> text-cyan-400"></i>
                 </div>
-                <h3 class="text-lg font-bold mb-3"><?= htmlspecialchars($benefit->title) ?></h3>
-                <p class="text-gray-400 leading-relaxed text-sm"><?= htmlspecialchars($benefit->description) ?></p>
+                <?php endif; ?>
+                <h3 class="text-lg font-bold mb-3"><?= htmlspecialchars($lang === 'en' && !empty($feat->title_en) ? $feat->title_en : $feat->title) ?></h3>
+                <p class="text-gray-400 leading-relaxed text-sm"><?= htmlspecialchars($lang === 'en' && !empty($feat->description_en) ? $feat->description_en : $feat->description) ?></p>
             </div>
         <?php endforeach; ?>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- ═══════ PARTNERS GRID ═══════ -->
 <section class="relative z-10 px-6 lg:px-20 py-16 pb-20">

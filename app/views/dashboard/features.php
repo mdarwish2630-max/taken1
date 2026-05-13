@@ -133,14 +133,15 @@ function openFeatureModal(id = null) {
         fetch(`<?= url('/dashboard/features/edit/') ?>${id}`)
             .then(r => r.json())
             .then(data => {
-                if (data.success) {
-                    document.getElementById('feature_id').value = data.feature.id;
-                    document.getElementById('feature_icon').value = data.feature.icon;
-                    document.getElementById('feature_title').value = data.feature.title;
-                    document.getElementById('feature_title_en').value = data.feature.title_en || '';
-                    document.getElementById('feature_description').value = data.feature.description;
-                    document.getElementById('feature_description_en').value = data.feature.description_en || '';
-                    document.getElementById('iconPreview').innerHTML = `<i class="${data.feature.icon}"></i>`;
+                if (data.success && data.data && data.data.feature) {
+                    var f = data.data.feature;
+                    document.getElementById('feature_id').value = f.id;
+                    document.getElementById('feature_icon').value = f.icon;
+                    document.getElementById('feature_title').value = f.title;
+                    document.getElementById('feature_title_en').value = f.title_en || '';
+                    document.getElementById('feature_description').value = f.description;
+                    document.getElementById('feature_description_en').value = f.description_en || '';
+                    document.getElementById('iconPreview').innerHTML = `<i class="${f.icon}"></i>`;
                     document.getElementById('featureModalTitle').textContent = '<?= lang('edit_feature') ?? 'تعديل ميزة' ?>';
                 }
             });

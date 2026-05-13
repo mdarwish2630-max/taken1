@@ -23,15 +23,7 @@ if (empty($partnerItems)) {
     ];
 }
 
-$benefits = $lang === 'en' ? [
-    (object)['title' => 'Trusted Brands', 'description' => 'We partner with industry-leading brands for the highest quality.', 'icon' => 'fas fa-shield-halved'],
-    (object)['title' => 'Mutual Growth', 'description' => 'Partnerships built on shared values and long-term growth strategies.', 'icon' => 'fas fa-handshake'],
-    (object)['title' => 'Quality Assurance', 'description' => 'Every partner meets our strict quality standards.', 'icon' => 'fas fa-award'],
-] : [
-    (object)['title' => 'علامات تجارية موثوقة', 'description' => 'نتشارك مع علامات تجارية رائدة لضمان أعلى جودة.', 'icon' => 'fas fa-shield-halved'],
-    (object)['title' => 'نمو متبادل', 'description' => 'شراكات مبنية على قيم مشتركة واستراتيجيات نمو طويلة الأمد.', 'icon' => 'fas fa-handshake'],
-    (object)['title' => 'ضمان الجودة', 'description' => 'كل شريك يستوفي معاييرنا الصارمة قبل الانضمام.', 'icon' => 'fas fa-award'],
-];
+// Benefits — now sourced from $siteFeatures (CMS-managed)
 
 require_once __DIR__ . '/_head.php';
 require_once __DIR__ . '/_navbar.php';
@@ -53,19 +45,23 @@ require_once __DIR__ . '/_navbar.php';
 </section>
 
 <!-- ═══════ BENEFITS ═══════ -->
+<?php if (!empty($siteFeatures)): ?>
 <section class="px-6 lg:px-16 py-12">
     <div class="max-w-7xl mx-auto grid sm:grid-cols-3 gap-6">
-        <?php foreach ($benefits as $i => $benefit): ?>
+        <?php foreach ($siteFeatures as $i => $feat): ?>
             <div class="bg-[#f5f5f5] rounded-lg p-7 tekpro-card fade-up" style="transition-delay:<?= $i * 0.1 ?>s">
+                <?php if (!empty($feat->icon)): ?>
                 <div class="w-14 h-14 rounded-lg bg-[#ff7a00] flex items-center justify-center text-2xl mb-5 text-white">
-                    <i class="<?= htmlspecialchars($benefit->icon) ?>"></i>
+                    <i class="<?= htmlspecialchars($feat->icon) ?>"></i>
                 </div>
-                <h3 class="text-lg font-black mb-3"><?= htmlspecialchars($benefit->title) ?></h3>
-                <p class="text-gray-500 leading-relaxed text-sm"><?= htmlspecialchars($benefit->description) ?></p>
+                <?php endif; ?>
+                <h3 class="text-lg font-black mb-3"><?= htmlspecialchars($lang === 'en' && !empty($feat->title_en) ? $feat->title_en : $feat->title) ?></h3>
+                <p class="text-gray-500 leading-relaxed text-sm"><?= htmlspecialchars($lang === 'en' && !empty($feat->description_en) ? $feat->description_en : $feat->description) ?></p>
             </div>
         <?php endforeach; ?>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- ═══════ PARTNERS GRID ═══════ -->
 <section class="px-6 lg:px-16 py-16 pb-20">

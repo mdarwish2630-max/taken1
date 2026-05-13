@@ -102,6 +102,7 @@ Router::group(['middleware' => 'customer'], function() {
     // البانرات
     Router::get('/dashboard/banners', 'DashboardController@banners');
     Router::post('/dashboard/banners', 'DashboardController@storeBanner');
+    Router::get('/dashboard/banners/edit/{id}', 'DashboardController@updateBanner');
     Router::post('/dashboard/banners/edit/{id}', 'DashboardController@updateBanner');
     Router::post('/dashboard/banners/delete/{id}', 'DashboardController@deleteBanner');
     
@@ -114,6 +115,8 @@ Router::group(['middleware' => 'customer'], function() {
     // آراء العملاء
     Router::get('/dashboard/testimonials', 'DashboardController@testimonials');
     Router::post('/dashboard/testimonials', 'DashboardController@storeTestimonial');
+    Router::get('/dashboard/testimonials/edit/{id}', 'DashboardController@updateTestimonial');
+    Router::post('/dashboard/testimonials/edit/{id}', 'DashboardController@updateTestimonial');
     Router::post('/dashboard/testimonials/delete/{id}', 'DashboardController@deleteTestimonial');
     
     // الأسئلة الشائعة

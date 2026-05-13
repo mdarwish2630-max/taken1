@@ -119,6 +119,13 @@ class SiteController extends Controller
         $currentLang  = function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar');
         $currentDir   = ($currentLang === 'en') ? 'ltr' : 'rtl';
 
+        // Load theme settings for custom CSS/fonts
+        require_once ROOT_PATH . '/app/models/ThemeSettings.php';
+        $themeSettingsModel = new ThemeSettings();
+        $themeSettings = $themeSettingsModel->getTenantSettings($tenant->id);
+        $themeCustomCSS = $themeSettingsModel->generateCustomCSS($tenant->id, $tenant);
+        $themeFontsUrl = $themeSettingsModel->getGoogleFontsUrl($tenant->id);
+
         $data = [
             'tenant' => $tenant,
             'page' => $page,
@@ -138,6 +145,9 @@ class SiteController extends Controller
             'lang'  => $currentLang,
             'dir'   => $currentDir,
             'siteBase' => '/site/' . $tenant->slug,
+            'themeSettings' => $themeSettings,
+            'themeCustomCSS' => $themeCustomCSS,
+            'themeFontsUrl' => $themeFontsUrl,
         ];
 
         // تحميل الثيم
@@ -448,6 +458,9 @@ class SiteController extends Controller
             'siteBase' => '/theme-preview/' . $themeSlug,
             'lang'  => 'ar',
             'dir'   => 'rtl',
+            'themeSettings' => (object)['primary_color' => '#0f172a'],
+            'themeCustomCSS' => '',
+            'themeFontsUrl' => 'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap',
         ];
 
         return $data;
@@ -694,8 +707,20 @@ public function previewDemoService($themeSlug, $serviceSlug)
         $currentLang = function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar');
         $currentDir  = ($currentLang === 'en') ? 'ltr' : 'rtl';
 
+        // Get the "services" page content
+        $servicesPage = $this->pageModel->findBySlug('services', $tenant->id);
+        if (!$servicesPage) {
+            $servicesPage = (object)[
+                'content' => '',
+                'content_en' => '',
+                'title' => 'خدماتنا',
+                'title_en' => 'Our Services'
+            ];
+        }
+
         $data = [
             'tenant' => $tenant,
+            'page' => $servicesPage,
             'services' => $this->serviceModel->getTenantServices($tenant->id),
             'menu' => $this->pageModel->getMenuPages($tenant->id),
             'banners' => $this->bannerModel->getHeroBanners($tenant->id),
@@ -799,8 +824,20 @@ public function previewDemoService($themeSlug, $serviceSlug)
         $currentLang = function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar');
         $currentDir  = ($currentLang === 'en') ? 'ltr' : 'rtl';
 
+        // Get the "about" page content for the dynamic mission/vision section
+        $aboutPage = $this->pageModel->findBySlug('about', $tenant->id);
+        if (!$aboutPage) {
+            $aboutPage = (object)[
+                'content' => '',
+                'content_en' => '',
+                'title' => 'من نحن',
+                'title_en' => 'About Us'
+            ];
+        }
+
         $data = [
             'tenant' => $tenant,
+            'page' => $aboutPage,
             'services' => $this->serviceModel->getHomeServices($tenant->id, 6),
             'testimonials' => $this->testimonialModel->getHomeTestimonials($tenant->id, 6),
             'gallery' => $this->galleryModel->getActiveGallery($tenant->id, 6),

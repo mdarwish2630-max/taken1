@@ -610,54 +610,68 @@ class DashboardController extends Controller
     }
 
     /**
-     * تعديل بانر (AJAX)
+     * تعديل بانر (GET لتحميل البيانات + POST للحفظ)
      */
     public function updateBanner($id)
     {
-        $this->verifyCsrf();
-
         $tenant = Auth::tenant();
         $banner = $this->bannerModel->find($id);
 
         if (!$banner || $banner->tenant_id != $tenant->id) {
-            $this->jsonError('البانر غير موجود', [], 404);
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->jsonError('البانر غير موجود', [], 404);
+            }
+            Session::error('البانر غير موجود');
+            $this->redirect('/dashboard/banners');
+            return;
         }
 
-        // إذا كان طلب GET (تحميل بيانات للتعديل)
+        // طلب GET: تحميل بيانات البانر للتعديل (AJAX)
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $this->jsonSuccess(['banner' => $banner]);
             return;
         }
 
-        // حفظ التعديلات
-        $data = [];
-        if ($this->hasInput('title')) $data['title'] = $this->input('title');
-        if ($this->hasInput('title_en')) $data['title_en'] = $this->input('title_en');
-        if ($this->hasInput('subtitle')) $data['subtitle'] = $this->input('subtitle');
-        if ($this->hasInput('subtitle_en')) $data['subtitle_en'] = $this->input('subtitle_en');
-        if ($this->hasInput('link')) $data['link'] = $this->input('link');
-        if ($this->hasInput('link_text')) $data['link_text'] = $this->input('link_text');
-        if ($this->hasInput('link_text_en')) $data['link_text_en'] = $this->input('link_text_en');
+        // طلب POST: حفظ التعديلات
+        $this->verifyCsrf();
+
+        $data = [
+            'title'       => $this->input('title'),
+            'subtitle'    => $this->input('subtitle'),
+            'description' => $this->input('description'),
+            'link'        => $this->input('link'),
+            'button_text' => $this->input('button_text'),
+            'position'    => $this->input('position') ?: 'hero',
+            'title_en'       => $this->input('title_en') ?: null,
+            'subtitle_en'    => $this->input('subtitle_en') ?: null,
+            'description_en' => $this->input('description_en') ?: null,
+            'button_text_en' => $this->input('button_text_en') ?: null,
+        ];
 
         // معالجة رفع صورة جديدة
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            require_once ROOT_PATH . '/app/helpers/ImageHandler.php';
-            $imageHandler = new ImageHandler();
-            $imageResult = $imageHandler->upload($_FILES['image'], $tenant->id . '/banners');
-            if ($imageResult['success']) {
-                // حذف الصورة القديمة
-                if (!empty($banner->image)) {
-                    $imageHandler->delete($banner->image);
-                }
-                $data['image'] = $imageResult['full_path'];
+            $result = $this->uploadFile($_FILES['image'], $tenant->id . '/banners', ALLOWED_IMAGE_TYPES);
+            if (isset($result['error'])) {
+                Session::error($result['error']);
+                $this->redirect('/dashboard/banners');
             }
+            // حذف الصورة القديمة
+            if (!empty($banner->image)) {
+                $oldImagePath = UPLOAD_PATH . '/' . $banner->image;
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
+            $data['image'] = $result['path'];
         }
 
         if ($this->bannerModel->update($id, $data)) {
-            $this->jsonSuccess([], 'تم تحديث البانر بنجاح');
+            Session::success('تم تحديث البانر بنجاح');
+        } else {
+            Session::error('حدث خطأ أثناء تحديث البانر');
         }
 
-        $this->jsonError('حدث خطأ أثناء التحديث');
+        $this->redirect('/dashboard/banners');
     }
 
     // ==================== المعرض ====================
@@ -846,6 +860,68 @@ class DashboardController extends Controller
         }
 
         $this->jsonError('حدث خطأ أثناء حذف الرأي');
+    }
+
+    /**
+     * تعديل رأي (GET لتحميل البيانات + POST للحفظ)
+     */
+    public function updateTestimonial($id)
+    {
+        $tenant = Auth::tenant();
+        $testimonial = $this->testimonialModel->find($id);
+
+        if (!$testimonial || $testimonial->tenant_id != $tenant->id) {
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                $this->jsonError('الرأي غير موجود', [], 404);
+            }
+            Session::error('الرأي غير موجود');
+            $this->redirect('/dashboard/testimonials');
+            return;
+        }
+
+        // طلب GET: تحميل بيانات الرأي للتعديل (AJAX)
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $this->jsonSuccess(['testimonial' => $testimonial]);
+            return;
+        }
+
+        // طلب POST: حفظ التعديلات
+        $this->verifyCsrf();
+
+        $data = [
+            'client_name'   => $this->input('client_name'),
+            'client_title'  => $this->input('client_title'),
+            'content'       => $this->rawInput('content'),
+            'rating'        => $this->input('rating') ?: 5,
+            'show_on_home'  => $this->input('show_on_home') ? 1 : 0,
+            'content_en'      => $this->input('content_en') ?: null,
+            'client_title_en' => $this->input('client_title_en') ?: null,
+        ];
+
+        // رفع صورة جديدة
+        if (isset($_FILES['client_image']) && $_FILES['client_image']['error'] === UPLOAD_ERR_OK) {
+            $result = $this->uploadFile($_FILES['client_image'], $tenant->id . '/testimonials', ALLOWED_IMAGE_TYPES);
+            if (isset($result['error'])) {
+                Session::error($result['error']);
+                $this->redirect('/dashboard/testimonials');
+            }
+            // حذف الصورة القديمة
+            if (!empty($testimonial->client_image)) {
+                $oldImagePath = UPLOAD_PATH . '/' . $testimonial->client_image;
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
+            $data['client_image'] = $result['path'];
+        }
+
+        if ($this->testimonialModel->update($id, $data)) {
+            Session::success('تم تحديث الرأي بنجاح');
+        } else {
+            Session::error('حدث خطأ أثناء تحديث الرأي');
+        }
+
+        $this->redirect('/dashboard/testimonials');
     }
 
     // ==================== الرسائل ====================

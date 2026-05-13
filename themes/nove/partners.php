@@ -66,6 +66,7 @@
 </section>
 
 <!-- ==================== WHY PARTNER ==================== -->
+<?php if (!empty($siteFeatures)): ?>
 <section class="bg-[#f4f4f4] py-24 px-6 lg:px-20 fade-up">
     <div class="max-w-7xl mx-auto">
         <div class="text-center mb-14">
@@ -74,27 +75,21 @@
         </div>
 
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            <?php
-            $partnerBenefits = [
-                ['icon' => 'fas fa-chart-line', 'title' => 'نمو مشترك', 'desc' => 'نسعى لتحقيق نمو مستدام ومتبادل المنفعة مع جميع شركائنا'],
-                ['icon' => 'fas fa-bullseye', 'title' => 'جودة عالية', 'desc' => 'نلتزم بأعلى معايير الجودة في جميع خدماتنا ومنتجاتنا'],
-                ['icon' => 'fas fa-lightbulb', 'title' => 'ابتكار مستمر', 'desc' => 'نعتمد على أحدث التقنيات والحلول المبتكرة لتقديم أفضل الخدمات'],
-                ['icon' => 'fas fa-handshake', 'title' => 'علاقات طويلة', 'desc' => 'نبني علاقات شراكة مستدامة مبنية على الثقة والشفافية'],
-                ['icon' => 'fas fa-globe', 'title' => 'انتشار واسع', 'desc' => 'نغطي مناطق واسعة لنضمن وصول خدماتنا لجميع العملاء'],
-                ['icon' => 'fas fa-star', 'title' => 'سمعة ممتازة', 'desc' => 'نمتلك سمعة قوية في السوق مبنية على سنوات من التميز'],
-            ];
-            foreach ($partnerBenefits as $b): ?>
-            <div class="bg-white p-8 text-center hover:shadow-xl hover:-translate-y-1 transition-all duration-500">
+            <?php foreach ($siteFeatures as $i => $feat): ?>
+            <div class="bg-white p-8 text-center hover:shadow-xl hover:-translate-y-1 transition-all duration-500 fade-up" style="transition-delay:<?= $i * 0.05 ?>s">
+                <?php if (!empty($feat->icon)): ?>
                 <div class="w-16 h-16 bg-[#ff7a00]/10 flex items-center justify-center mx-auto mb-5">
-                    <i class="<?php echo $b['icon']; ?> text-3xl text-[#ff7a00]"></i>
+                    <i class="<?php echo htmlspecialchars($feat->icon); ?> text-3xl text-[#ff7a00]"></i>
                 </div>
-                <h3 class="text-lg font-black text-[#282828] mb-3"><?php echo $b['title']; ?></h3>
-                <p class="text-gray-500 text-sm leading-relaxed"><?php echo $b['desc']; ?></p>
+                <?php endif; ?>
+                <h3 class="text-lg font-black text-[#282828] mb-3"><?php echo htmlspecialchars($lang === 'en' && !empty($feat->title_en) ? $feat->title_en : ($feat->title ?? '')); ?></h3>
+                <p class="text-gray-500 text-sm leading-relaxed"><?php echo htmlspecialchars($lang === 'en' && !empty($feat->description_en) ? $feat->description_en : ($feat->description ?? '')); ?></p>
             </div>
             <?php endforeach; ?>
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- ==================== CTA ==================== -->
 <section class="bg-[#151515] py-28 px-6 lg:px-20 fade-up">

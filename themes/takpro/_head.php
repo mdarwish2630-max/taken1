@@ -21,9 +21,15 @@ $siteBase  = $siteBase ?? ('/site/' . $tenant->slug);
     <meta name="keywords" content="<?= htmlspecialchars($metaKeys) ?>">
     <?php endif; ?>
 
+    <?php if (!empty($themeFontsUrl)): ?>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="<?= $themeFontsUrl ?>" rel="stylesheet">
+    <?php else: ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <?php endif; ?>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,7 +37,7 @@ $siteBase  = $siteBase ?? ('/site/' . $tenant->slug);
     tailwind.config = {
         theme: {
             extend: {
-                fontFamily: { cairo: ['Cairo', 'sans-serif'] },
+                fontFamily: { cairo: ['<?= !empty($themeSettings->primary_font) ? htmlspecialchars($themeSettings->primary_font) : 'Cairo' ?>', 'sans-serif'] },
                 colors: {
                     brand: '#ff7a00',
                     'brand-dark': '#e06e00',
@@ -47,7 +53,7 @@ $siteBase  = $siteBase ?? ('/site/' . $tenant->slug);
     </script>
 
     <style>
-        * { font-family: 'Cairo', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+        * { font-family: <?= !empty($themeSettings->primary_font) ? "'" . htmlspecialchars($themeSettings->primary_font) . "'" : "'Cairo'" ?>, sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
         ::selection { background: rgba(255,122,0,.25); color: #161616; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -67,6 +73,10 @@ $siteBase  = $siteBase ?? ('/site/' . $tenant->slug);
 
         /* Smooth scroll */
         html { scroll-behavior: smooth; }
+        <?php if (!empty($themeCustomCSS)): ?>
+/* Custom Theme Settings CSS */
+<?= $themeCustomCSS ?>
+<?php endif; ?>
     </style>
 </head>
 <body class="min-h-screen bg-white text-dark overflow-x-hidden font-cairo">

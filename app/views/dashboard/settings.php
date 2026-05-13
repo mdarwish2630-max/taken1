@@ -174,6 +174,72 @@
                            placeholder="كلمة1، كلمة2، كلمة3">
                 </div>
                 
+                <!-- CTA Section -->
+                <h4 class="mt-4 mb-3" style="font-size: 1rem; font-weight: 600;">قسم الدعوة لاتخاذ إجراء (CTA)</h4>
+                
+                <div class="form-group">
+                    <div class="d-flex align-center gap-2">
+                        <label class="form-label" style="margin-bottom: 0;">تفعيل القسم</label>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="cta_is_active" name="cta_is_active" value="1" class="toggle-input" <?= !empty($tenant->cta_is_active) ? 'checked' : '' ?>>
+                            <label for="cta_is_active" class="toggle-label">
+                                <span class="toggle-inner"></span>
+                                <span class="toggle-switch-btn"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">عنوان CTA (العربية)</label>
+                        <input type="text" name="cta_title" class="form-control" dir="rtl"
+                               value="<?= $this->e($tenant->cta_title ?? '') ?>"
+                               placeholder="مثال: جاهز لبدء مشروعك؟">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">CTA Title (English)</label>
+                        <input type="text" name="cta_title_en" class="form-control" dir="ltr"
+                               value="<?= $this->e($tenant->cta_title_en ?? '') ?>"
+                               placeholder="Ready to start?">
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">نص CTA (العربية)</label>
+                        <textarea name="cta_text" class="form-control" rows="2" dir="rtl"
+                                  placeholder="مثال: تواصل معنا اليوم واحصل على استشارة مجانية"><?= $this->e($tenant->cta_text ?? '') ?></textarea>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">CTA Text (English)</label>
+                        <textarea name="cta_text_en" class="form-control" rows="2" dir="ltr"
+                                  placeholder="Contact us today"><?= $this->e($tenant->cta_text_en ?? '') ?></textarea>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">نص الزر (العربية)</label>
+                        <input type="text" name="cta_button_text" class="form-control" dir="rtl"
+                               value="<?= $this->e($tenant->cta_button_text ?? '') ?>"
+                               placeholder="مثال: تواصل معنا">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Button Text (English)</label>
+                        <input type="text" name="cta_button_text_en" class="form-control" dir="ltr"
+                               value="<?= $this->e($tenant->cta_button_text_en ?? '') ?>"
+                               placeholder="Contact Us">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">رابط الزر</label>
+                    <input type="text" name="cta_link" class="form-control" dir="ltr"
+                           value="<?= $this->e($tenant->cta_link ?? '#contact') ?>"
+                           placeholder="#contact أو رابط كامل">
+                </div>
+                
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i>
                     <?= lang('save_changes') ?>
