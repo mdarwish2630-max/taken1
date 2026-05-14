@@ -34,7 +34,7 @@ Router::post('/resend-verification-public', 'AuthController@resendVerificationPu
 Router::get('/captcha/refresh', function() {
     header('Content-Type: application/json; charset=utf-8');
     $captcha = Security::generateCaptcha();
-    echo json_encode(['question' => $captcha['question']]);
+    echo json_encode(['code' => $captcha['code']]);
     exit;
 });
 

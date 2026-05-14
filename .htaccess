@@ -7,19 +7,19 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ public/index.php [QSA,L]
 
-# [FIX-30] تعزيز حماية الملفات الحساسة
+# Block sensitive file types
 <FilesMatch "\.(env|log|sql|md|json|lock|yml|yaml|xml|ini|conf|sh|bak|dist)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
-# [FIX-30] منع الوصول لملفات التكوين
+# Block sensitive config files
 <FilesMatch "^(config|database|composer|package)\.(php|json|lock)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
-# [FIX-30] منع الوصول لمجلدات التطبيق
+# Block direct access to app/vendor/core directories
 <IfModule mod_rewrite.c>
     RewriteRule ^(app|vendor|core) - [F,L]
 </IfModule>

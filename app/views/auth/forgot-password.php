@@ -135,23 +135,29 @@ $dir = Language::direction();
 
         /* CAPTCHA Styles */
         .captcha-group .form-label i { color: var(--primary); margin-inline-end: 0.35rem; }
-        .captcha-box { display: flex; flex-direction: column; gap: 0.5rem; }
-        .captcha-question {
-            display: flex; align-items: center; justify-content: space-between;
+        .captcha-box { display: flex; align-items: center; gap: 0.75rem; }
+        .captcha-code-box {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
             background: linear-gradient(135deg, #f0f0ff, #e8e8ff);
             border: 1.5px solid var(--gray-200); border-radius: var(--radius);
-            padding: 0.75rem 1rem; gap: 0.75rem;
+            padding: 0.75rem 1rem; min-width: 160px; user-select: none;
         }
-        .captcha-text { font-size: 1.25rem; font-weight: 800; color: var(--dark); letter-spacing: 1px; direction: ltr; user-select: none; }
+        .captcha-digit {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 32px; height: 38px; font-size: 1.35rem; font-weight: 800;
+            color: var(--dark); direction: ltr; border-radius: 4px;
+        }
+        .captcha-digit:nth-child(odd) { transform: rotate(-3deg); color: var(--primary); }
+        .captcha-digit:nth-child(even) { transform: rotate(3deg); color: var(--secondary); }
         .captcha-refresh {
-            background: none; border: none; color: var(--primary); cursor: pointer; font-size: 1rem;
-            padding: 0.3rem; border-radius: 50%; transition: var(--transition);
-            display: flex; align-items: center; justify-content: center; min-width: 32px; min-height: 32px;
+            background: none; border: none; color: var(--primary); cursor: pointer; font-size: 1.1rem;
+            padding: 0.5rem; border-radius: 50%; transition: var(--transition);
+            display: flex; align-items: center; justify-content: center; min-width: 40px; min-height: 40px; flex-shrink: 0;
         }
         .captcha-refresh:hover { background: rgba(79, 70, 229, 0.1); color: var(--secondary); }
         .captcha-refresh.spinning i { animation: spin 0.5s ease; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .captcha-input { text-align: center; font-size: 1.1rem !important; font-weight: 700 !important; letter-spacing: 2px; }
+        .captcha-input { text-align: center; font-size: 1.1rem !important; font-weight: 700 !important; letter-spacing: 4px; direction: ltr; }
         .captcha-input::-webkit-inner-spin-button, .captcha-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         .captcha-input[type=number] { -moz-appearance: textfield; }
 
@@ -196,19 +202,21 @@ $dir = Language::direction();
 
                     <?php
                     $captchaData = $captcha ?? null;
-                    if ($captchaData):
+                    if ($captchaData && isset($captchaData['code'])):
                     ?>
                     <div class="form-group captcha-group">
-                        <label class="form-label"><i class="fas fa-shield-alt"></i> مسألة الأمان (لمنع الروبوتات)</label>
+                        <label class="form-label"><i class="fas fa-shield-alt"></i> أدخل رمز التحقق الموضح</label>
                         <div class="captcha-box">
-                            <div class="captcha-question">
-                                <span class="captcha-text"><?= e($captchaData['question']) ?></span>
-                                <button type="button" class="captcha-refresh" id="refreshCaptcha" title="مسألة جديدة">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
+                            <div class="captcha-code-box" id="captchaCodeBox" dir="ltr">
+                                <?php foreach (str_split($captchaData['code']) as $d): ?>
+                                <span class="captcha-digit"><?= e($d) ?></span>
+                                <?php endforeach; ?>
                             </div>
-                            <input type="number" name="captcha_answer" class="form-control captcha-input" required
-                                   placeholder="أدخل الإجابة" autocomplete="off" min="0" max="999">
+                            <button type="button" class="captcha-refresh" id="refreshCaptcha" title="رمز جديد">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <input type="text" name="captcha_answer" class="form-control captcha-input" required
+                                   placeholder="أدخل الرمز" autocomplete="off" dir="ltr" inputmode="numeric" pattern="[0-9]{5}" maxlength="5">
                         </div>
                     </div>
                     <?php endif; ?>
@@ -237,8 +245,14 @@ $dir = Language::direction();
             fetch('<?= url("/captcha/refresh") ?>')
                 .then(function(response) { return response.json(); })
                 .then(function(data) {
-                    if (data.question) {
-                        document.querySelector('.captcha-text').textContent = data.question;
+                    if (data.code) {
+                        var box = document.getElementById('captchaCodeBox');
+                        var digits = data.code.split('');
+                        var html = '';
+                        for (var i = 0; i < digits.length; i++) {
+                            html += '<span class="captcha-digit">' + digits[i] + '</span>';
+                        }
+                        box.innerHTML = html;
                         var input = document.querySelector('.captcha-input');
                         input.value = '';
                         input.focus();

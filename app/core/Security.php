@@ -247,48 +247,27 @@ class Security
     }
 
     /**
-     * توليد سؤال كابتشا رياضي
-     * يُرجع مصفوفة تحتوي: question (النص المعروض), answer (الإجابة الصحيحة)
+     * توليد كود تحقق رقمي (كابتشا أرقام)
+     * يُولّد كود عشوائي من 5 أرقام ويُرجعه للعرض والتحقق
      */
     public static function generateCaptcha()
     {
-        $operations = ['+', '-', '×'];
-        $op = $operations[array_rand($operations)];
+        // توليد كود عشوائي من 5 أرقام (يبدأ دائماً برقم غير صفر)
+        $code = (string)mt_rand(10000, 99999);
 
-        switch ($op) {
-            case '+':
-                $a = rand(1, 20);
-                $b = rand(1, 20);
-                $answer = $a + $b;
-                break;
-            case '-':
-                $a = rand(5, 30);
-                $b = rand(1, $a - 1); // نتأكد الناتج موجب
-                $answer = $a - $b;
-                break;
-            case '×':
-                $a = rand(2, 9);
-                $b = rand(2, 9);
-                $answer = $a * $b;
-                break;
-        }
-
-        // نص السؤال بالعربية
-        $questionAr = $a . ' ' . $op . ' ' . $b . ' = ?';
-
-        // حفظ الإجابة وبيانات السؤال في الجلسة
-        Session::put('captcha_answer', $answer);
+        // حفظ الكود في الجلسة
+        Session::put('captcha_answer', $code);
         Session::put('captcha_time', time());
-        Session::put('captcha_question', $questionAr);
-        Session::put('captcha_a', $a);
-        Session::put('captcha_b', $b);
-        Session::put('captcha_op', $op);
+        Session::put('captcha_code', $code);
+
+        // تنظيف بيانات الكابتشا القديمة
+        Session::forget('captcha_question');
+        Session::forget('captcha_a');
+        Session::forget('captcha_b');
+        Session::forget('captcha_op');
 
         return [
-            'question' => $questionAr,
-            'a' => $a,
-            'b' => $b,
-            'op' => $op
+            'code' => $code
         ];
     }
 
@@ -308,22 +287,29 @@ class Security
         // تنظيف بيانات الكابتشا بعد التحقق
         Session::forget('captcha_answer');
         Session::forget('captcha_time');
+        Session::forget('captcha_code');
         Session::forget('captcha_question');
         Session::forget('captcha_a');
         Session::forget('captcha_b');
         Session::forget('captcha_op');
 
-        // مقارنة الإجابة
-        return $userAnswer !== null && intval($userAnswer) === intval($storedAnswer);
+        // تنظيف إجابة المستخدم من رموز الاتجاه المخفية (RTL/LTR markers)
+        // بعض المتصفحات في صفحات RTL تضيف رموز مخفية عند إدخال أرقام
+        $cleanAnswer = (string)$userAnswer;
+        $cleanAnswer = preg_replace('/[\x{200E}\x{200F}\x{200B}-\x{200D}\x{202A}-\x{202E}\x{2066}-\x{2069}\x{FEFF}]/u', '', $cleanAnswer);
+        $cleanAnswer = trim($cleanAnswer);
+
+        // مقارنة الكود كنص
+        return $cleanAnswer !== '' && $cleanAnswer === (string)$storedAnswer;
     }
 
     /**
-     * الحصول على سؤال الكابتشا الحالي بدون توليد جديد
+     * الحصول على كود الكابتشا الحالي بدون توليد جديد
      */
     public static function getCurrentCaptcha()
     {
-        $answer = Session::get('captcha_answer');
-        if ($answer === null) {
+        $code = Session::get('captcha_code');
+        if ($code === null) {
             return self::generateCaptcha();
         }
 
@@ -333,13 +319,8 @@ class Security
             return self::generateCaptcha();
         }
 
-        // نرجع نفس السؤال الحالي (نولّد نص السؤال من الإجابة المحفوظة)
-        // ملاحظة: للحصول على النص الأصلي، نحفظه أيضاً
         return [
-            'question' => Session::get('captcha_question', ''),
-            'a' => Session::get('captcha_a', 0),
-            'b' => Session::get('captcha_b', 0),
-            'op' => Session::get('captcha_op', '+')
+            'code' => $code
         ];
     }
 }

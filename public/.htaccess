@@ -7,26 +7,20 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ public/index.php [QSA,L]
 
-# [FIX-30] تعزيز حماية الملفات الحساسة
-<FilesMatch "\.(env|log|sql|md|json|lock|yml|yaml|xml|ini|conf|sh|bak|dist)$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
-
-# [FIX-30] منع الوصول لملفات التكوين
-<FilesMatch "^(config|database|composer|package)\.(php|json|lock)$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
-
-# [SECURITY] Block direct access to PHP files in public/ except index.php
+# Block PHP execution except index.php
 <FilesMatch "\.php[0-9]?$">
     Order allow,deny
     Deny from all
-</Files>
+</FilesMatch>
 <Files "index.php">
     Order allow,deny
     Allow from all
 </Files>
+
+# Block sensitive file types
+<FilesMatch "\.(env|log|sql|md|json|lock|yml|yaml|xml|ini|conf|sh|bak|dist)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
 
 Options -Indexes

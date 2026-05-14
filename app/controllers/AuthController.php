@@ -72,7 +72,7 @@ class AuthController extends Controller
 
         // [SEC-01] التحقق من الكابتشا
         if (!Security::verifyCaptcha($captchaAnswer)) {
-            Session::error('إجابة مسألة الأمان غير صحيحة');
+            Session::error('رمز التحقق غير صحيح');
             $this->back();
         }
 
@@ -162,7 +162,7 @@ class AuthController extends Controller
         // [SEC-01] التحقق من الكابتشا
         $captchaAnswer = $this->input('captcha_answer');
         if (!Security::verifyCaptcha($captchaAnswer)) {
-            Session::error('إجابة مسألة الأمان غير صحيحة');
+            Session::error('رمز التحقق غير صحيح');
             $this->back();
         }
 
@@ -344,7 +344,7 @@ class AuthController extends Controller
         // [SEC-01] التحقق من الكابتشا
         $captchaAnswer = $this->input('captcha_answer');
         if (!Security::verifyCaptcha($captchaAnswer)) {
-            Session::error('إجابة مسألة الأمان غير صحيحة');
+            Session::error('رمز التحقق غير صحيح');
             $this->back();
         }
 
