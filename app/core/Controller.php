@@ -442,10 +442,23 @@ abstract class Controller
      */
     protected function deleteFile($path)
     {
+        // [SEC-FIX-18] Prevent path traversal attacks
+        $path = str_replace(['../', '..\\'], '', $path);
         $fullPath = UPLOAD_PATH . '/' . $path;
+        $realPath = realpath($fullPath);
+        $realUploadPath = realpath(UPLOAD_PATH);
         
-        if (file_exists($fullPath)) {
-            return unlink($fullPath);
+        if ($realPath === false || $realUploadPath === false) {
+            return false;
+        }
+        
+        // Ensure the file is within the upload directory
+        if (strpos($realPath, $realUploadPath) !== 0) {
+            return false;
+        }
+        
+        if (file_exists($realPath) && is_file($realPath)) {
+            return unlink($realPath);
         }
         
         return false;

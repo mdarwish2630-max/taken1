@@ -70,6 +70,8 @@ class NotificationController extends Controller
     public function markRead($id)
     {
         $this->requireAuth();
+        // [SEC-FIX-21] Add CSRF protection
+        $this->verifyCsrf();
         $userId = $_SESSION['user_id'] ?? null;
 
         if ($this->notificationModel->markAsRead($id, $userId)) {
@@ -86,6 +88,8 @@ class NotificationController extends Controller
     public function markAllRead()
     {
         $this->requireAuth();
+        // [SEC-FIX-21] Add CSRF protection
+        $this->verifyCsrf();
         $userId = $_SESSION['user_id'] ?? null;
 
         $count = $this->notificationModel->markAllAsRead($userId);

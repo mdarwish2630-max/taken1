@@ -51,34 +51,37 @@ class SeoSettings extends Model
         $settings = $this->getTenantSettings($tenantId);
         $scripts = [];
 
-        // Google Analytics
-        if ($settings->google_analytics_id) {
+        // [SEC-FIX-15] Validate tracking IDs format to prevent XSS
+        $gaId = $settings->google_analytics_id;
+        if ($gaId && preg_match('/^(UA-\d{4,10}-\d{1,4}|G-[A-Z0-9]{6,12})$/', $gaId)) {
             $scripts[] = <<<HTML
 <!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id={$settings->google_analytics_id}"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id={$gaId}"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', '{$settings->google_analytics_id}');
+  gtag('config', '{$gaId}');
 </script>
 HTML;
         }
 
         // Google Tag Manager
-        if ($settings->google_tag_manager_id) {
+        $gtmId = $settings->google_tag_manager_id;
+        if ($gtmId && preg_match('/^GTM-[A-Z0-9]{4,8}$/i', $gtmId)) {
             $scripts[] = <<<HTML
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','{$settings->google_tag_manager_id}');</script>
+})(window,document,'script','dataLayer','{$gtmId}');</script>
 HTML;
         }
 
         // Facebook Pixel
-        if ($settings->facebook_pixel_id) {
+        $fbPixelId = $settings->facebook_pixel_id;
+        if ($fbPixelId && preg_match('/^\d{10,20}$/', $fbPixelId)) {
             $scripts[] = <<<HTML
 <!-- Facebook Pixel -->
 <script>
@@ -90,7 +93,7 @@ HTML;
   t.src=v;s=b.getElementsByTagName(e)[0];
   s.parentNode.insertBefore(t,s)}(window, document,'script',
   'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '{$settings->facebook_pixel_id}');
+  fbq('init', '{$fbPixelId}');
   fbq('track', 'PageView');
 </script>
 HTML;
@@ -127,7 +130,12 @@ HTML;
 
         // إذا كان هناك schema مخصص
         if ($settings->schema_org) {
-            return '<script type="application/ld+json">' . $settings->schema_org . '</script>';
+            // [SEC-FIX-14] Validate JSON before output to prevent XSS via JSON-LD
+            $decoded = json_decode($settings->schema_org);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return '<script type="application/ld+json">' . json_encode($decoded, JSON_UNESCAPED_UNICODE) . '</script>';
+            }
+            return '';
         }
 
         // إنشاء schema افتراضي للمؤسسة

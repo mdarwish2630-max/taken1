@@ -123,7 +123,7 @@ class CustomForm extends Model
             "SELECT * FROM form_submissions 
              WHERE form_id = ? 
              ORDER BY created_at DESC 
-             LIMIT {$limit} OFFSET {$offset}",
+             LIMIT " . (int)$limit . " OFFSET " . (int)$offset,
             [$formId]
         )->results();
     }
@@ -139,7 +139,7 @@ class CustomForm extends Model
              JOIN {$this->table} f ON s.form_id = f.id
              WHERE s.tenant_id = ? 
              ORDER BY s.created_at DESC 
-             LIMIT {$limit}",
+             LIMIT " . (int)$limit,
             [$tenantId]
         )->results();
     }

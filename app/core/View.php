@@ -19,9 +19,18 @@ class View
         extract($data);
         
         // تحديد مسار ملف العرض
+        // [SEC-FIX-20] Prevent path traversal in view loading
+        $view = str_replace(['../', '..\\', "\0"], '', $view);
         $viewFile = ROOT_PATH . '/app/views/' . $view . '.php';
+        $viewsDir = realpath(ROOT_PATH . '/app/views/');
+        $realViewFile = realpath($viewFile);
+        if ($realViewFile === false || !$viewsDir || strpos($realViewFile, $viewsDir) !== 0) {
+            error_log("Invalid view path attempted: {$view}");
+            echo "<h1>Error</h1><p>Invalid view path.</p>";
+            return;
+        }
         
-        if (!file_exists($viewFile)) {
+        if (!file_exists($realViewFile)) {
             error_log("View file not found: {$viewFile}");
             echo "<h1>Error</h1><p>View file not found: " . htmlspecialchars($view) . "</p>";
             return;
@@ -32,7 +41,7 @@ class View
         
         try {
             // تضمين ملف العرض
-            require $viewFile;
+            require $realViewFile;
         } catch (\Exception $e) {
             ob_end_clean();
             error_log("View render error in {$view}: " . $e->getMessage());
@@ -115,10 +124,17 @@ class View
     {
         extract($data);
         
+        // [SEC-FIX-20] Prevent path traversal in partial loading
+        $partial = str_replace(['../', '..\\', "\0"], '', $partial);
         $partialFile = ROOT_PATH . '/app/views/partials/' . $partial . '.php';
+        $partialsDir = realpath(ROOT_PATH . '/app/views/partials/');
+        $realPartialFile = realpath($partialFile);
+        if ($realPartialFile === false || !$partialsDir || strpos($realPartialFile, $partialsDir) !== 0) {
+            return;
+        }
         
-        if (file_exists($partialFile)) {
-            require $partialFile;
+        if (file_exists($realPartialFile)) {
+            require $realPartialFile;
         }
     }
 

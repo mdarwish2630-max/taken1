@@ -335,7 +335,7 @@ let currentFieldItem = null;
 
 // Initialize with existing fields
 <?php if ($isEdit && !empty($form->fields)): ?>
-const existingFields = <?= $form->fields ?? '[]' ?>;
+const existingFields = <?= json_encode(json_decode($form->fields ?? '[]', true) ?: [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 existingFields.forEach(field => addExistingField(field));
 <?php endif; ?>
 

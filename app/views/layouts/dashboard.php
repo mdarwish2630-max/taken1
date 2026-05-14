@@ -308,20 +308,20 @@ $dir = Language::direction();
             <div class="sidebar-header">
                 <div class="sidebar-logo">
                     <?php if ($tenant && $tenant->logo): ?>
-                        <img src="<?= upload($tenant->logo) ?>" alt="<?= $tenant->site_name ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
+                        <img src="<?= upload($tenant->logo) ?>" alt="<?= htmlspecialchars($tenant->site_name ?? '', ENT_QUOTES, 'UTF-8') ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
                     <?php else: ?>
                         <i class="fas fa-cube"></i>
                     <?php endif; ?>
                 </div>
-                <span class="sidebar-title"><?= $tenant ? $tenant->site_name : SITE_NAME ?></span>
+                <span class="sidebar-title"><?= htmlspecialchars($tenant ? $tenant->site_name : SITE_NAME, ENT_QUOTES, 'UTF-8') ?></span>
             </div>
 
             <!-- User Card in Sidebar -->
             <div class="sidebar-user-card">
                 <div class="sidebar-user-avatar">
-                    <?= mb_substr(Auth::user()->full_name, 0, 1) ?>
+                    <?= htmlspecialchars(mb_substr(Auth::user()->full_name ?? '', 0, 1), ENT_QUOTES, 'UTF-8') ?>
                 </div>
-                <div class="sidebar-user-name"><?= Auth::user()->full_name ?></div>
+                <div class="sidebar-user-name"><?= htmlspecialchars(Auth::user()->full_name ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="sidebar-user-role"><?= Auth::isAdmin() ? lang('admin_panel') : lang('dashboard') ?></div>
             </div>
 
@@ -498,10 +498,10 @@ $dir = Language::direction();
                     <div class="user-menu-wrapper">
                         <div class="user-menu" id="userMenu">
                             <div class="user-avatar">
-                                <?= mb_substr(Auth::user()->full_name, 0, 1) ?>
+                                <?= htmlspecialchars(mb_substr(Auth::user()->full_name ?? '', 0, 1), ENT_QUOTES, 'UTF-8') ?>
                             </div>
                             <div class="user-info">
-                                <div class="user-name"><?= Auth::user()->full_name ?></div>
+                                <div class="user-name"><?= htmlspecialchars(Auth::user()->full_name ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                                 <div class="user-role"><?= Auth::isAdmin() ? lang('admin_panel') : lang('dashboard') ?></div>
                             </div>
                             <i class="fas fa-chevron-down" style="color: #94a3b8; font-size: 0.7rem;"></i>

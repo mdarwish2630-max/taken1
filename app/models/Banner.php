@@ -48,7 +48,7 @@ class Banner extends Model
         $sql .= " ORDER BY display_order ASC";
         
         if ($limit) {
-            $sql .= " LIMIT {$limit}";
+            $sql .= " LIMIT " . (int)$limit;
         }
         
         return $this->db->query($sql, $params)->results();

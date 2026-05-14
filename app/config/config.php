@@ -50,7 +50,8 @@ define('LOGIN_LOCKOUT_TIME', 900); // 15 دقيقة
 define('BCRYPT_COST', 12);
 // [SEC-FIX-08] مفتاح تشفير لكلمات المرور الحساسة (SMTP)
 // يجب تغيير هذا المفتاح في بيئة الإنتاج إلى قيمة عشوائية فريدة
-define('APP_KEY', 'takweenweb_' . hash('sha256', 'sec_key_' . (DB_HOST ?? 'localhost')));
+// [SEC-FIX-25] Use a proper random APP_KEY (change this value for production!)
+define('APP_KEY', 'tkwn_' . bin2hex(random_bytes(32)));
 
 // إعدادات الرفع
 define('UPLOAD_PATH', ROOT_PATH . '/uploads');

@@ -76,7 +76,8 @@ class MenuController extends Controller
                 }
             }
         } catch (\Exception $e) {
-            $this->jsonError('حدث خطأ: ' . $e->getMessage());
+            error_log("MenuController addSection error: " . $e->getMessage());
+            $this->jsonError('حدث خطأ أثناء المعالجة');
         }
     }
 
@@ -106,7 +107,8 @@ class MenuController extends Controller
                 $this->jsonError('فشل في إضافة الصفحة' . ($dbErr ? ' (خطأ في قاعدة البيانات)' : ''));
             }
         } catch (\Exception $e) {
-            $this->jsonError('حدث خطأ: ' . $e->getMessage());
+            error_log("MenuController addPage error: " . $e->getMessage());
+            $this->jsonError('حدث خطأ أثناء المعالجة');
         }
     }
 

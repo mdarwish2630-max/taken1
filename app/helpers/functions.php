@@ -203,6 +203,10 @@ function generateSlug($text, $separator = '-')
  */
 function generateUniqueSlug($text, $table, $column = 'slug', $excludeId = null)
 {
+    // [SEC-FIX-22] Validate table and column names to prevent SQL injection
+    if (!preg_match('/^[a-zA-Z_]+$/', $table) || !preg_match('/^[a-zA-Z_]+$/', $column)) {
+        throw new \InvalidArgumentException('Invalid table or column name');
+    }
     $db = Database::getInstance();
     $baseSlug = generateSlug($text);
     $slug = $baseSlug;
@@ -387,7 +391,9 @@ function sendMail($to, $subject, $message, $headers = [])
 function fullUrl($path = '')
 {
     $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-    return $protocol . '://' . $_SERVER['HTTP_HOST'] . url($path);
+    // [SEC-FIX-11] Use SITE_URL or SERVER_NAME instead of attacker-controlled HTTP_HOST
+    $host = defined('SITE_URL') ? parse_url(SITE_URL, PHP_URL_HOST) : $_SERVER['SERVER_NAME'];
+    return $protocol . '://' . $host . url($path);
 }
 
 /**

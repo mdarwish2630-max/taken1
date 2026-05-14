@@ -48,7 +48,7 @@ class BlogPost extends Model
         $sql .= " ORDER BY created_at DESC";
 
         if ($limit) {
-            $sql .= " LIMIT {$limit}";
+            $sql .= " LIMIT " . (int)$limit;
         }
 
         return $this->db->query($sql, $params)->results();
@@ -65,7 +65,7 @@ class BlogPost extends Model
                 ORDER BY published_at DESC";
 
         if ($limit) {
-            $sql .= " LIMIT {$limit}";
+            $sql .= " LIMIT " . (int)$limit;
         }
 
         return $this->db->query($sql, [$tenantId])->results();
@@ -96,7 +96,7 @@ class BlogPost extends Model
             "SELECT * FROM {$this->table} 
              WHERE tenant_id = ? AND status = 'published' AND show_on_home = 1 
              AND (published_at IS NULL OR published_at <= NOW())
-             ORDER BY published_at DESC LIMIT {$limit}",
+             ORDER BY published_at DESC LIMIT " . (int)$limit,
             [$tenantId]
         )->results();
     }
@@ -111,7 +111,7 @@ class BlogPost extends Model
                 ORDER BY published_at DESC";
 
         if ($limit) {
-            $sql .= " LIMIT {$limit}";
+            $sql .= " LIMIT " . (int)$limit;
         }
 
         return $this->db->query($sql, [$tenantId, $category])->results();
@@ -149,7 +149,7 @@ class BlogPost extends Model
         return $this->db->query(
             "SELECT * FROM {$this->table} 
              WHERE tenant_id = ? AND id != ? AND category = ? AND status = 'published'
-             ORDER BY published_at DESC LIMIT {$limit}",
+             ORDER BY published_at DESC LIMIT " . (int)$limit,
             [$tenantId, $postId, $category]
         )->results();
     }

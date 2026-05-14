@@ -9,7 +9,7 @@ class User extends Model
     protected $table = 'users';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'email', 'password', 'full_name', 'phone', 'role', 'status',
+        'email', 'password', 'full_name', 'phone', 'status',
         'email_verified', 'verification_token', 'reset_token', 'reset_token_expires',
         'last_login'
     ];
@@ -30,8 +30,9 @@ class User extends Model
         // تشفير كلمة المرور
         $data['password'] = Security::hashPassword($data['password']);
         
-        // تعيين الدور الافتراضي
-        $data['role'] = $data['role'] ?? 'customer';
+        // [SEC-FIX-16] Force role to customer to prevent privilege escalation
+        unset($data['role']);
+        $data['role'] = 'customer';
         
         // إنشاء رمز التحقق
         $data['verification_token'] = Security::generateVerificationToken();
@@ -138,7 +139,7 @@ class User extends Model
                 ORDER BY u.created_at DESC";
         
         if ($limit) {
-            $sql .= " LIMIT {$limit}";
+            $sql .= " LIMIT " . (int)$limit;
         }
         
         return $this->db->query($sql)->results();

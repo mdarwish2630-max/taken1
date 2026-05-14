@@ -178,7 +178,7 @@ $this->noLayout();
             <?php endif; ?>
 
             <div class="post-content">
-                <?= $post->content ?? '' ?>
+                <?= function_exists('sanitizeHTML') ? sanitizeHTML($post->content ?? '') : htmlspecialchars($post->content ?? '', ENT_QUOTES, 'UTF-8') ?>
             </div>
         </div>
     </div>

@@ -45,7 +45,15 @@ class ImageHandler
 
         $dir = $this->uploadPath;
         if ($subdir) {
-            $dir .= '/' . trim($subdir, '/');
+            // [SEC-FIX-19] Sanitize subdir to prevent path traversal
+            $subdir = preg_replace('#[^a-zA-Z0-9_/]#', '', trim($subdir, '/'));
+            $dir .= '/' . $subdir;
+        }
+        // [SEC-FIX-19] Ensure resolved path is within upload directory
+        $realDir = realpath($dir);
+        $realUploadPath = realpath($this->uploadPath);
+        if ($realUploadPath && ($realDir === false || strpos($realDir, $realUploadPath) !== 0)) {
+            return ['success' => false, 'error' => 'مسار الرفع غير صالح'];
         }
 
         if (!is_dir($dir)) {
@@ -75,10 +83,21 @@ class ImageHandler
     {
         if (empty($path)) return false;
 
+        // [SEC-FIX-19] Prevent path traversal in delete
+        $path = str_replace(['../', '..\\'], '', $path);
         $filepath = $this->uploadPath . '/' . ltrim($path, '/');
+        $realPath = realpath($filepath);
+        $realUploadPath = realpath($this->uploadPath);
 
-        if (file_exists($filepath) && is_file($filepath)) {
-            return unlink($filepath);
+        if ($realPath === false || $realUploadPath === false) {
+            return false;
+        }
+        if (strpos($realPath, $realUploadPath) !== 0) {
+            return false;
+        }
+
+        if (is_file($realPath)) {
+            return unlink($realPath);
         }
 
         return false;

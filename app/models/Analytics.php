@@ -159,7 +159,7 @@ class Analytics extends Model
              WHERE tenant_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
              GROUP BY page_url, page_title
              ORDER BY views DESC
-             LIMIT {$limit}",
+             LIMIT " . (int)$limit,
             [$tenantId, $days]
         )->results();
     }

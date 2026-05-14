@@ -156,7 +156,7 @@ class Gallery extends Model
                 }
                 
                 // التحقق من MIME type الفعلي
-                $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+                $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
                 $finfo = new finfo(FILEINFO_MIME_TYPE);
                 $detectedMime = $finfo->file($file['tmp_name']);
                 if (!in_array($detectedMime, $allowedMimes)) {

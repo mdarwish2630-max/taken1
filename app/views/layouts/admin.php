@@ -370,13 +370,13 @@ $user = Auth::user();
             <!-- User Card in Sidebar -->
             <div class="sidebar-user-card">
                 <div class="sidebar-user-avatar">
-                    <?= mb_substr($user->full_name ?? 'م', 0, 1) ?>
+                    <?= htmlspecialchars(mb_substr($user->full_name ?? 'م', 0, 1), ENT_QUOTES, 'UTF-8') ?>
                 </div>
                 <div class="admin-badge">
                     <i class="fas fa-crown"></i>
                     <?= lang('admin') ?? 'مدير النظام' ?>
                 </div>
-                <div class="sidebar-user-name"><?= $user->full_name ?? 'مدير النظام' ?></div>
+                <div class="sidebar-user-name"><?= htmlspecialchars($user->full_name ?? 'مدير النظام', ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="sidebar-user-role"><?= lang('super_admin') ?? 'مدير عام' ?></div>
             </div>
 
@@ -552,10 +552,10 @@ $user = Auth::user();
                     <div class="user-menu-wrapper">
                         <div class="user-menu" id="userMenu">
                             <div class="user-avatar">
-                                <?= mb_substr($user->full_name ?? 'م', 0, 1) ?>
+                                <?= htmlspecialchars(mb_substr($user->full_name ?? 'م', 0, 1), ENT_QUOTES, 'UTF-8') ?>
                             </div>
                             <div class="user-info">
-                                <div class="user-name"><?= $user->full_name ?? 'مدير النظام' ?></div>
+                                <div class="user-name"><?= htmlspecialchars($user->full_name ?? 'مدير النظام', ENT_QUOTES, 'UTF-8') ?></div>
                                 <div class="user-role"><?= lang('admin') ?? 'مدير' ?></div>
                             </div>
                             <i class="fas fa-chevron-down" style="color: #94a3b8; font-size: 0.7rem;"></i>

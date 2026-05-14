@@ -33,6 +33,8 @@ class Security
         $sessionToken = Session::get(CSRF_TOKEN_NAME);
         
         if ($sessionToken && hash_equals($sessionToken, $token)) {
+            // [SEC-FIX-12] Rotate token after successful verification to prevent replay attacks
+            Session::put(CSRF_TOKEN_NAME, bin2hex(random_bytes(32)));
             return true;
         }
         
@@ -190,12 +192,17 @@ class Security
      */
     public static function getClientIp()
     {
-        $ip = $_SERVER['REMOTE_ADDR'];
+        // [SEC-FIX-24] Only trust REMOTE_ADDR - HTTP headers are easily spoofed
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
         
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-            $ip = $_SERVER['HTTP_CLIENT_IP'];
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+        // Only use X-Forwarded-For if behind a known trusted proxy
+        if (defined('TRUSTED_PROXIES') && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $trustedProxies = explode(',', TRUSTED_PROXIES);
+            $clientIp = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+            $clientIp = trim($clientIp);
+            if (filter_var($clientIp, FILTER_VALIDATE_IP)) {
+                $ip = $clientIp;
+            }
         }
         
         return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : '0.0.0.0';
@@ -214,14 +221,18 @@ class Security
      */
     public static function rateLimit($key, $maxAttempts = 5, $decayMinutes = 1)
     {
-        $cacheKey = 'rate_limit_' . $key;
+        // [SEC-FIX-23] Use file-based storage instead of session to prevent bypass via session destruction
+        $cacheDir = sys_get_temp_dir() . '/takween_rate_limit';
+        if (!is_dir($cacheDir)) {
+            @mkdir($cacheDir, 0700, true);
+        }
+        $cacheFile = $cacheDir . '/' . md5($key);
+        
         $now = time();
         $decaySeconds = $decayMinutes * 60;
         
-        $data = Session::get($cacheKey, ['attempts' => 0, 'first_attempt' => 0]);
-        
-        // Reset if decay time has passed
-        if ($data['first_attempt'] > 0 && ($now - $data['first_attempt']) > $decaySeconds) {
+        $data = @json_decode(@file_get_contents($cacheFile), true);
+        if (!$data || ($now - ($data['first_attempt'] ?? 0)) > $decaySeconds) {
             $data = ['attempts' => 0, 'first_attempt' => 0];
         }
         
@@ -234,7 +245,7 @@ class Security
             $data['first_attempt'] = $now;
         }
         
-        Session::put($cacheKey, $data);
+        @file_put_contents($cacheFile, json_encode($data), LOCK_EX);
         return true;
     }
 
@@ -243,7 +254,8 @@ class Security
      */
     public static function clearRateLimit($key)
     {
-        Session::forget('rate_limit_' . $key);
+        $cacheFile = sys_get_temp_dir() . '/takween_rate_limit/' . md5($key);
+        @unlink($cacheFile);
     }
 
     /**

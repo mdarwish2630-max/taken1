@@ -137,12 +137,20 @@ class TenantPurchase extends Model
      */
     public function createPurchase($data)
     {
+        // [SEC-FIX-13] Apply fillable whitelist to prevent mass assignment
+        $data = $this->filterFillable($data);
         $data['created_at'] = date('Y-m-d H:i:s');
         $data['updated_at'] = date('Y-m-d H:i:s');
 
+        // [SEC-FIX-13] Validate column names to prevent SQL injection via keys
+        foreach (array_keys($data) as $col) {
+            if (!preg_match('/^[a-zA-Z0-9_]+$/', $col)) {
+                throw new \InvalidArgumentException("Invalid column name: $col");
+            }
+        }
+
         $columns = implode(', ', array_keys($data));
         $placeholders = implode(', ', array_fill(0, count($data), '?'));
-
         $this->db->query(
             "INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders})",
             array_values($data)

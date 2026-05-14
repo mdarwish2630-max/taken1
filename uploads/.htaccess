@@ -21,7 +21,7 @@
 Options -Indexes
 
 # [FIX-31] تقييد أنواع الملفات المسموح رفعها
-<FilesMatch "\.(jpg|jpeg|png|gif|webp|pdf|doc|docx|svg)$">
+<FilesMatch "\.(jpg|jpeg|png|gif|webp|pdf|doc|docx)$">
     Order allow,deny
     Allow from all
 </FilesMatch>

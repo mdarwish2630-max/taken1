@@ -40,6 +40,15 @@
 [14-May-2026 08:32:42 Asia/Riyadh] Layout file not found: C:\xampp\htdocs\takweenweb/app/views/layouts/main.php
 [14-May-2026 12:36:15 Asia/Riyadh] Layout file not found: C:\xampp\htdocs\takweenweb/app/views/layouts/main.php
 [14-May-2026 12:36:15 Asia/Riyadh] Layout file not found: C:\xampp\htdocs\takweenweb/app/views/layouts/main.php
-[14-May-2026 19:47:47 Asia/Riyadh] Layout file not found: C:\xampp\htdocs\takweenweb/app/views/layouts/main.php
-[14-May-2026 19:47:47 Asia/Riyadh] Layout file not found: C:\xampp\htdocs\takweenweb/app/views/layouts/main.php
-[14-May-2026 19:48:02 Asia/Riyadh] Layout file not found: C:\xampp\htdocs\takweenweb/app/views/layouts/main.php
+[14-May-2026 20:20:32 Asia/Riyadh] Handler Fatal Error: syntax error, unexpected token ":", expecting "]" in C:\xampp\htdocs\takweenweb\themes\cleanpro\faq.php:15
+[14-May-2026 20:20:32 Asia/Riyadh] Stack Trace: #0 C:\xampp\htdocs\takweenweb\app\controllers\SiteController.php(1001): SiteController->renderTheme('takpro', 'faq', Array)
+#1 C:\xampp\htdocs\takweenweb\app\core\Router.php(299): SiteController->faq('sahara')
+#2 C:\xampp\htdocs\takweenweb\app\core\Router.php(136): Router::runHandler('SiteController@...', Array)
+#3 C:\xampp\htdocs\takweenweb\public\index.php(26): Router::dispatch()
+#4 {main}
+[14-May-2026 20:20:45 Asia/Riyadh] Handler Fatal Error: syntax error, unexpected token ":", expecting "]" in C:\xampp\htdocs\takweenweb\themes\cleanpro\faq.php:15
+[14-May-2026 20:20:45 Asia/Riyadh] Stack Trace: #0 C:\xampp\htdocs\takweenweb\app\controllers\SiteController.php(1001): SiteController->renderTheme('takpro', 'faq', Array)
+#1 C:\xampp\htdocs\takweenweb\app\core\Router.php(299): SiteController->faq('sahara')
+#2 C:\xampp\htdocs\takweenweb\app\core\Router.php(136): Router::runHandler('SiteController@...', Array)
+#3 C:\xampp\htdocs\takweenweb\public\index.php(26): Router::dispatch()
+#4 {main}

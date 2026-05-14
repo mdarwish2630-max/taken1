@@ -282,6 +282,10 @@ class Auth
         )->first();
         
         if ($user) {
+            // [SEC-FIX-17] Verify email before allowing remember-me auto-login
+            if (empty($user->email_verified)) {
+                return false;
+            }
             self::login($user);
             return true;
         }

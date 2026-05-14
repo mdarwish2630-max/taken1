@@ -818,11 +818,11 @@ class DashboardController extends Controller
             'tenant_id' => $tenant->id,
             'client_name' => $this->input('client_name'),
             'client_title' => $this->input('client_title'),
-            'content' => $this->rawInput('content'),
+            'content' => function_exists('sanitizeHTML') ? sanitizeHTML($this->rawInput('content')) : $this->input('content'),
             'rating' => $this->input('rating') ?: 5,
             'show_on_home' => $this->input('show_on_home') ? 1 : 0,
             'status' => 'active',
-            'content_en' => $this->input('content_en') ?: null,
+            'content_en' => function_exists('sanitizeHTML') ? sanitizeHTML($this->rawInput('content_en')) : $this->input('content_en'),
             'client_title_en' => $this->input('client_title_en') ?: null
         ];
 
@@ -893,10 +893,10 @@ class DashboardController extends Controller
         $data = [
             'client_name'   => $this->input('client_name'),
             'client_title'  => $this->input('client_title'),
-            'content'       => $this->rawInput('content'),
+            'content'       => function_exists('sanitizeHTML') ? sanitizeHTML($this->rawInput('content')) : $this->input('content'),
             'rating'        => $this->input('rating') ?: 5,
             'show_on_home'  => $this->input('show_on_home') ? 1 : 0,
-            'content_en'      => $this->input('content_en') ?: null,
+            'content_en'      => function_exists('sanitizeHTML') ? sanitizeHTML($this->rawInput('content_en')) : $this->input('content_en'),
             'client_title_en' => $this->input('client_title_en') ?: null,
         ];
 
