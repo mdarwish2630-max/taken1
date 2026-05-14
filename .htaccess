@@ -22,7 +22,6 @@ RewriteRule ^(.*)$ public/index.php [QSA,L]
 # [FIX-30] منع الوصول لمجلدات التطبيق
 <IfModule mod_rewrite.c>
     RewriteRule ^(app|vendor|core) - [F,L]
-    RewriteRule ^(.*)\.(php|inc|tpl)$ - [F,L]
 </IfModule>
 
 Options -Indexes

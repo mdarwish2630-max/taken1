@@ -184,7 +184,7 @@ require_once __DIR__ . '/_navbar.php';
                     </div>
                     <p class="font-black">
                         <span data-count="<?= preg_replace('/[^0-9]/', '', $stats[0]->value) ?>" data-suffix="<?= $stats[0]->suffix ?? '+' ?>">0</span>
-                        <?= $lang === 'en' && !empty($stats[0]->label_en) ? $stats[0]->label_en : ($stats[0]->label ?? '') ?>
+                        <?= htmlspecialchars($lang === 'en' && !empty($stats[0]->label_en) ? $stats[0]->label_en : ($stats[0]->label ?? '')) ?>
                     </p>
                 <?php endif; ?>
             </div>

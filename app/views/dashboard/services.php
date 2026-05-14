@@ -43,11 +43,11 @@
                         <td>
                             <div class="d-flex align-center gap-2">
                                 <?php if ($service->image): ?>
-                                <img src="<?= upload($service->image) ?>" alt="<?= $service->title ?>" 
+                                <img src="<?= upload($service->image) ?>" alt="<?= htmlspecialchars($service->title) ?>" 
                                      style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
                                 <?php endif; ?>
                                 <div>
-                                    <strong><?= $service->title ?></strong>
+                                    <strong><?= htmlspecialchars($service->title) ?></strong>
                                     <?php if ($service->price): ?>
                                     <br><small style="color: var(--accent);"><?= $service->price_text ?: $service->price . ' ر.س' ?></small>
                                     <?php endif; ?>

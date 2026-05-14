@@ -113,10 +113,10 @@
                                      style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                                 <?php endif; ?>
                                 <div>
-                                    <strong><?= $testimonial->client_name ?></strong>
+                                    <strong><?= htmlspecialchars($testimonial->client_name) ?></strong>
                                     <?php if ($testimonial->client_company): ?>
                                     <div style="font-size: 0.75rem; color: #64748b;">
-                                        <?= $testimonial->client_company ?>
+                                        <?= htmlspecialchars($testimonial->client_company) ?>
                                     </div>
                                     <?php endif; ?>
                                 </div>
@@ -124,8 +124,8 @@
                         </td>
                         <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">
                             <?= mb_strlen($testimonial->content) > 100 
-                                ? mb_substr($testimonial->content, 0, 100) . '...'
-                                : $testimonial->content ?>
+                                ? mb_substr(htmlspecialchars($testimonial->content), 0, 100) . '...'
+                                : htmlspecialchars($testimonial->content) ?>
                         </td>
                         <td>
                             <span style="color: #f59e0b;">

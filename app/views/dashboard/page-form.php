@@ -29,14 +29,14 @@ $isEdit = !empty($page);
             <div class="form-group">
                 <label class="form-label"><?= lang('title') ?> (العربية) *</label>
                 <input type="text" name="title" class="form-control" dir="rtl"
-                       value="<?= $isEdit ? $page->title : '' ?>" required
+                       value="<?= $isEdit ? htmlspecialchars($page->title) : '' ?>" required
                        placeholder="<?= lang('page_title_placeholder') ?>">
             </div>
             
             <div class="form-group">
                 <label class="form-label"><?= lang('content') ?> (العربية)</label>
                 <textarea name="content" class="form-control" rows="10" dir="rtl"
-                          placeholder="<?= lang('page_content_placeholder') ?>"><?= $isEdit ? $page->content : '' ?></textarea>
+                          placeholder="<?= lang('page_content_placeholder') ?>"><?= $isEdit ? htmlspecialchars($page->content) : '' ?></textarea>
             </div>
 
             <!-- English Fields -->
@@ -48,21 +48,21 @@ $isEdit = !empty($page);
             <div class="form-group">
                 <label class="form-label">Page Title (English)</label>
                 <input type="text" name="title_en" class="form-control" dir="ltr"
-                       value="<?= $isEdit ? ($page->title_en ?? '') : '' ?>"
+                       value="<?= $isEdit ? htmlspecialchars($page->title_en ?? '') : '' ?>"
                        placeholder="Page title in English">
             </div>
 
             <div class="form-group">
                 <label class="form-label">Content (English)</label>
                 <textarea name="content_en" class="form-control" rows="10" dir="ltr"
-                          placeholder="Page content in English"><?= $isEdit ? ($page->content_en ?? '') : '' ?></textarea>
+                          placeholder="Page content in English"><?= $isEdit ? htmlspecialchars($page->content_en ?? '') : '' ?></textarea>
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                 <div class="form-group">
                     <label class="form-label"><?= lang('meta_title') ?></label>
                     <input type="text" name="meta_title" class="form-control" 
-                           value="<?= $isEdit ? $page->meta_title : '' ?>"
+                           value="<?= $isEdit ? htmlspecialchars($page->meta_title ?? '') : '' ?>"
                            placeholder="<?= lang('meta_title_placeholder') ?>">
                     <span class="form-hint"><?= lang('meta_title_hint') ?></span>
                 </div>
@@ -86,7 +86,7 @@ $isEdit = !empty($page);
             <div class="form-group">
                 <label class="form-label"><?= lang('meta_description') ?></label>
                 <textarea name="meta_description" class="form-control" rows="3" 
-                          placeholder="<?= lang('meta_description_placeholder') ?>"><?= $isEdit ? $page->meta_description : '' ?></textarea>
+                          placeholder="<?= lang('meta_description_placeholder') ?>"><?= $isEdit ? htmlspecialchars($page->meta_description ?? '') : '' ?></textarea>
                 <span class="form-hint"><?= lang('meta_description_hint') ?></span>
             </div>
             

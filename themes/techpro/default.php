@@ -165,7 +165,7 @@ require_once __DIR__ . '/_navbar.php';
                         <span class="w-10 h-10 rounded-full bg-white border-2 border-[#ff7a00] flex items-center justify-center text-sm">&#128100;</span>
                     <?php endfor; ?>
                 </div>
-                <p class="font-black"><?= htmlspecialchars($stats[0]->value ?? '8K+') ?> <?= $lang === 'en' && !empty($stats[0]->label_en) ? $stats[0]->label_en : ($stats[0]->label ?? '') ?></p>
+                <p class="font-black"><?= htmlspecialchars($stats[0]->value ?? '8K+') ?> <?= htmlspecialchars($lang === 'en' && !empty($stats[0]->label_en) ? $stats[0]->label_en : ($stats[0]->label ?? '')) ?></p>
             </div>
             <img src="https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?q=80&w=700&auto=format&fit=crop" class="w-full h-[210px] object-cover" loading="lazy">
             <img src="https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?q=80&w=700&auto=format&fit=crop" class="w-full h-[210px] object-cover" loading="lazy">

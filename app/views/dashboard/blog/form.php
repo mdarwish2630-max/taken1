@@ -39,7 +39,7 @@ $isEdit = !empty($post);
                         <div class="input-group">
                             <span class="input-group-text"><?= url('/' . $tenant->slug . '/blog/') ?></span>
                             <input type="text" name="slug" class="form-control" id="postSlug"
-                                   value="<?= $isEdit ? $post->slug : '' ?>"
+                                   value="<?= $isEdit ? htmlspecialchars($post->slug) : '' ?>"
                                    placeholder="post-url-slug">
                         </div>
                         <small class="text-muted"><?= lang('slug_hint') ?></small>

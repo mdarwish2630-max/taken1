@@ -33,8 +33,8 @@
                 <div class="feature-icon">
                     <i class="<?= $feature->icon ?: 'fas fa-star' ?>"></i>
                 </div>
-                <h4><?= $feature->title ?></h4>
-                <p><?= $feature->description ?></p>
+                <h4><?= htmlspecialchars($feature->title) ?></h4>
+                <p><?= htmlspecialchars($feature->description) ?></p>
                 <div class="feature-actions">
                     <span class="badge <?= $feature->is_active ? 'badge-success' : 'badge-secondary' ?>">
                         <?= $feature->is_active ? (lang('active') ?? 'نشط') : (lang('inactive') ?? 'غير نشط') ?>

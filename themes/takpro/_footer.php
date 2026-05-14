@@ -25,7 +25,7 @@ $year = date('Y');
         <?php if ($phone): ?>
             <div><i class="fas fa-phone ml-2"></i><?= htmlspecialchars($phone) ?></div>
         <?php endif; ?>
-        <div><i class="fas fa-clock ml-2"></i><?= $workingHours ?: (($lang ?? 'ar') === 'en' ? '24/7 All Week' : '24/7 طوال الأسبوع') ?></div>
+        <div><i class="fas fa-clock ml-2"></i><?= htmlspecialchars($workingHours ?: (($lang ?? 'ar') === 'en' ? '24/7 All Week' : '24/7 طوال الأسبوع')) ?></div>
         <div><i class="fas fa-globe ml-2"></i><?= ($lang ?? 'ar') === 'en' ? 'Service in All Areas' : 'خدمة في كل المناطق' ?></div>
     </div>
 </section>

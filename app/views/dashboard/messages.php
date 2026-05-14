@@ -20,9 +20,9 @@
                 
                 <div class="message-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                     <div>
-                        <strong><?= $message->name ?></strong>
+                        <strong><?= htmlspecialchars($message->name) ?></strong>
                         <small style="color: var(--secondary); margin-<?= langDir() === 'rtl' ? 'right' : 'left' ?>: 0.5rem;">
-                            <?= $message->email ?>
+                            <?= htmlspecialchars($message->email) ?>
                         </small>
                     </div>
                     <small style="color: var(--secondary);">
@@ -33,18 +33,18 @@
                 <?php if ($message->phone): ?>
                 <div style="margin-bottom: 0.5rem;">
                     <i class="fas fa-phone" style="color: var(--primary);"></i>
-                    <a href="tel:<?= $message->phone ?>"><?= $message->phone ?></a>
+                    <a href="tel:<?= htmlspecialchars($message->phone) ?>"><?= htmlspecialchars($message->phone) ?></a>
                 </div>
                 <?php endif; ?>
                 
                 <?php if ($message->subject): ?>
                 <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--primary);">
-                    <?= $message->subject ?>
+                    <?= htmlspecialchars($message->subject) ?>
                 </div>
                 <?php endif; ?>
                 
                 <div class="message-content" style="color: #555; line-height: 1.6;">
-                    <?= nl2br($message->message) ?>
+                    <?= nl2br(htmlspecialchars($message->message)) ?>
                 </div>
                 
                 <div class="message-actions mt-3" style="display: flex; gap: 0.5rem;">
@@ -74,7 +74,7 @@
 function markAsRead(id) {
     fetch('<?= url('/dashboard/messages/read/') ?>' + id, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': '<?= Security::csrfToken() ?>' }
     }).then(() => location.reload());
 }
 </script>

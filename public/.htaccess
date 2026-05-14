@@ -19,14 +19,7 @@ RewriteRule ^(.*)$ public/index.php [QSA,L]
     Deny from all
 </FilesMatch>
 
-# [FIX-30] منع الوصول لمجلدات التطبيق
-<IfModule mod_rewrite.c>
-    RewriteRule ^(app|vendor|core) - [F,L]
-    # Block PHP execution EVERYWHERE (including public/)
-    RewriteRule ^(.*)\.(php|inc|tpl)$ - [F,L]
-</IfModule>
-
-# [SECURITY] Block direct access to ALL PHP files in public/ except index.php
+# [SECURITY] Block direct access to PHP files in public/ except index.php
 <FilesMatch "\.php[0-9]?$">
     Order allow,deny
     Deny from all

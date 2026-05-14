@@ -34,12 +34,12 @@
             <?php foreach ($gallery as $image): ?>
             <div class="gallery-item-wrapper">
                 <div class="gallery-item">
-                    <img src="<?= upload($image->image) ?>" alt="<?= $image->title ?>">
+                    <img src="<?= upload($image->image) ?>" alt="<?= htmlspecialchars($image->title) ?>">
                     <div class="gallery-overlay">
                         <div class="gallery-overlay-text">
-                            <span class="gallery-title-ar"><?= $image->title ?></span>
+                            <span class="gallery-title-ar"><?= htmlspecialchars($image->title) ?></span>
                             <?php if ($image->title_en): ?>
-                            <span class="gallery-title-en"><?= $image->title_en ?></span>
+                            <span class="gallery-title-en"><?= htmlspecialchars($image->title_en) ?></span>
                             <?php endif; ?>
                         </div>
                         <button type="button" class="btn btn-danger btn-sm gallery-delete-btn"

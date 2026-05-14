@@ -33,7 +33,7 @@
                     <tr>
                         <td>
                             <div style="font-weight: 500;">
-                                <?= $page->title ?>
+                                <?= htmlspecialchars($page->title) ?>
                                 <?php if ($page->is_home): ?>
                                     <span class="badge badge-info" style="margin-inline-start: 0.5rem;"><?= lang('home_page') ?></span>
                                 <?php endif; ?>
@@ -93,7 +93,8 @@ function deletePage(id) {
         fetch('<?= url('/dashboard/pages/delete/') ?>' + id, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': '<?= Security::csrfToken() ?>'
             }
         })
         .then(response => response.json())

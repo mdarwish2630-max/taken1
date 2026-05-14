@@ -109,7 +109,7 @@ $statusLabels = [
                 <?php if (!empty($theme->name_en)): ?>
                 <p class="theme-name-en-sm"><?= $this->e($theme->name_en) ?></p>
                 <?php endif; ?>
-                <p class="theme-description"><?= $theme->description ?></p>
+                <p class="theme-description"><?= $this->e($theme->description) ?></p>
 
                 <?php if ($isPaid): ?>
                 <div class="theme-price-display">

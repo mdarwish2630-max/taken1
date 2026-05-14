@@ -134,7 +134,7 @@ require_once __DIR__ . '/_navbar.php';
                                 </span>
                             </button>
                             <div id="<?= $faqId ?>" class="faq-answer overflow-hidden max-h-0 transition-all duration-300 ease-in-out">
-                                <div class="px-6 pb-6 text-gray-600 leading-relaxed text-sm border-t border-gray-200 pt-4"><?= $faqA ?></div>
+                                <div class="px-6 pb-6 text-gray-600 leading-relaxed text-sm border-t border-gray-200 pt-4"><?= htmlspecialchars($faqA) ?></div>
                             </div>
                         </div>
                         <?php $faqIndex++; ?>

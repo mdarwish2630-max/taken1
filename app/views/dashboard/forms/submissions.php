@@ -131,9 +131,13 @@ function viewSubmission(id) {
     let html = '<table class="table"><tbody>';
     
     for (const [key, value] of Object.entries(data)) {
+        const safeKey = document.createElement('span');
+        safeKey.textContent = key;
+        const safeVal = document.createElement('span');
+        safeVal.textContent = Array.isArray(value) ? value.join(', ') : value;
         html += `<tr>
-            <th width="30%">${key}</th>
-            <td>${Array.isArray(value) ? value.join(', ') : value}</td>
+            <th width="30%">${safeKey.innerHTML}</th>
+            <td>${safeVal.innerHTML}</td>
         </tr>`;
     }
     
@@ -157,7 +161,8 @@ function deleteSubmission(id) {
         fetch('<?= url('/dashboard/forms/submission/delete/') ?>' + id, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': '<?= Security::csrfToken() ?>'
             }
         })
         .then(response => response.json())

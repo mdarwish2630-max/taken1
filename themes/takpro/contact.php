@@ -125,7 +125,7 @@ require_once __DIR__ . '/_navbar.php';
                         <?= $lang === 'en' ? 'Working Hours' : 'ساعات العمل' ?>
                     </h3>
                     <p class="font-bold text-lg">
-                        <?= $workingHours ?: ($lang === 'en' ? 'Available 24/7 - All Week' : 'متاحون 24/7 - طوال الأسبوع') ?>
+                        <?= htmlspecialchars($workingHours ?: ($lang === 'en' ? 'Available 24/7 - All Week' : 'متاحون 24/7 - طوال الأسبوع')) ?>
                     </p>
                 </div>
             </div>
