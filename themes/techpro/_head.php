@@ -8,7 +8,7 @@ $lang  = $lang ?? 'ar';
 $title = $title ?? htmlspecialchars($tenant->site_name ?? 'تك برو');
 $metaDesc  = $meta_description ?? $tenant->meta_description ?? '';
 $metaKeys  = $tenant->meta_keywords ?? '';
-$siteBase  = $siteBase ?? ('/site/' . $tenant->slug);
+$siteBase  = $siteBase ?? (BASE_PATH . '/site/' . $tenant->slug);
 ?>
 <!DOCTYPE html>
 <html lang="<?= $lang ?>" dir="<?= $isRtl ? 'rtl' : 'ltr' ?>">

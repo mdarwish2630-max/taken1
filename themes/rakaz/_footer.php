@@ -55,7 +55,7 @@
             <ul class="space-y-3 text-gray-400">
                 <?php if (!empty($services)): ?>
                     <?php foreach (array_slice($services, 0, 5) as $svc): ?>
-                        <li><a href="<?= url(($siteBase ?? '/') . '/service/' . ($svc->slug ?? '')) ?>" class="hover:text-copper transition-colors text-sm"><?= htmlspecialchars(($lang ?? 'ar') === 'en' ? ($svc->title_en ?? $svc->title ?? '') : ($svc->title ?? '')) ?></a></li>
+                        <li><a href="<?= url(($siteBase ?? BASE_PATH) . '/service/' . ($svc->slug ?? '')) ?>" class="hover:text-copper transition-colors text-sm"><?= htmlspecialchars(($lang ?? 'ar') === 'en' ? ($svc->title_en ?? $svc->title ?? '') : ($svc->title ?? '')) ?></a></li>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </ul>
@@ -70,10 +70,10 @@
             <ul class="space-y-3 text-gray-400">
                 <?php foreach ($menu ?? [] as $item): ?>
                 <?php
-                $navHref = $siteBase ?? '/';
+                $navHref = $siteBase ?? BASE_PATH;
                 $slug = strtolower($item->slug ?? '');
-                if ($item->is_home == 1 || empty($slug)) { $navHref = $siteBase ?? '/'; }
-                else { $navHref = ($siteBase ?? '/') . '/' . $slug; }
+                if ($item->is_home == 1 || empty($slug)) { $navHref = $siteBase ?? BASE_PATH; }
+                else { $navHref = ($siteBase ?? BASE_PATH) . '/' . $slug; }
                 ?>
                 <li>
                     <a href="<?= url($navHref) ?>"

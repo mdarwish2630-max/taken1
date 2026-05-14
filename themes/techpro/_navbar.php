@@ -3,7 +3,7 @@
  * Tek Pro Theme — Navbar Partial
  * White bar with dark left logo panel + orange accents
  */
-$siteBase = $siteBase ?? ('/site/' . $tenant->slug);
+$siteBase = $siteBase ?? (BASE_PATH . '/site/' . $tenant->slug);
 $whatsapp = $tenant->contact_whatsapp ?? $tenant->contact_phone ?? '#';
 $siteName = htmlspecialchars($tenant->site_name ?? 'تك برو');
 $logoLetter = mb_substr($tenant->site_name ?? 'T', 0, 1);
@@ -38,14 +38,20 @@ $waNumber = preg_replace('/[^0-9+]/', '', $whatsapp);
         <nav class="hidden lg:flex items-center h-full text-sm font-extrabold text-[#202020]">
             <?php if (!empty($menu)): foreach ($menu as $item): ?>
                 <?php
-                    $navHref = $siteBase;
-                    $slug = strtolower($item->slug ?? '');
-                    if ($item->is_home == 1 || empty($slug)) { $navHref = $siteBase; }
-                    else { $navHref = $siteBase . '/' . $slug; }
-                    $navLabel = $lang === 'en' && !empty($item->title_en) ? $item->title_en : ($item->title ?? '');
-                    $isActive = (!isset($page->slug) && $item->is_home == 1) || (isset($page->slug) && strtolower($page->slug) === $slug);
+                    // التوافق مع المنو الجديد (array) والقديم (object)
+                    $navHref = $item['url'] ?? '';
+                    $navLabel = ($lang === 'en' && !empty($item['label_en'])) ? $item['label_en'] : ($item['label'] ?? ($item->title ?? ''));
+                    $isHome = $item['is_home'] ?? ($item->is_home ?? 0);
+                    $newTab = ($item['open_in_new_tab'] ?? 0) ? ' target="_blank" rel="noopener"' : '';
+                    $isActive = false;
+                    if ($isHome && (!isset($page->slug) || empty($page->slug))) $isActive = true;
+                    if (!$isHome && isset($page->slug)) {
+                        $currentSlug = $item['section_key'] ?? '';
+                        if (empty($currentSlug)) $currentSlug = basename($navHref);
+                        if (strtolower($page->slug) === strtolower($currentSlug)) $isActive = true;
+                    }
                 ?>
-                <a href="<?= url($navHref) ?>"
+                <a href="<?= htmlspecialchars($navHref) ?>"<?= $newTab ?>
                    class="h-full px-4 flex items-center border-b-4 transition <?= $isActive ? 'border-[#ff7a00] text-[#ff7a00]' : 'border-transparent hover:border-[#ff7a00] hover:text-[#ff7a00]' ?>">
                     <?= htmlspecialchars($navLabel) ?>
                 </a>
@@ -69,14 +75,19 @@ $waNumber = preg_replace('/[^0-9+]/', '', $whatsapp);
         <nav class="flex flex-col gap-1 p-4">
             <?php if (!empty($menu)): foreach ($menu as $item): ?>
                 <?php
-                    $navHref = $siteBase;
-                    $slug = strtolower($item->slug ?? '');
-                    if ($item->is_home == 1 || empty($slug)) { $navHref = $siteBase; }
-                    else { $navHref = $siteBase . '/' . $slug; }
-                    $navLabel = $lang === 'en' && !empty($item->title_en) ? $item->title_en : ($item->title ?? '');
-                    $isActive = (!isset($page->slug) && $item->is_home == 1) || (isset($page->slug) && strtolower($page->slug) === $slug);
+                    $navHref = $item['url'] ?? '';
+                    $navLabel = ($lang === 'en' && !empty($item['label_en'])) ? $item['label_en'] : ($item['label'] ?? ($item->title ?? ''));
+                    $isHome = $item['is_home'] ?? ($item->is_home ?? 0);
+                    $newTab = ($item['open_in_new_tab'] ?? 0) ? ' target="_blank" rel="noopener"' : '';
+                    $isActive = false;
+                    if ($isHome && (!isset($page->slug) || empty($page->slug))) $isActive = true;
+                    if (!$isHome && isset($page->slug)) {
+                        $currentSlug = $item['section_key'] ?? '';
+                        if (empty($currentSlug)) $currentSlug = basename($navHref);
+                        if (strtolower($page->slug) === strtolower($currentSlug)) $isActive = true;
+                    }
                 ?>
-                <a href="<?= url($navHref) ?>"
+                <a href="<?= htmlspecialchars($navHref) ?>"<?= $newTab ?>
                    class="px-4 py-3 rounded-lg font-bold transition <?= $isActive ? 'bg-[#ff7a00]/10 text-[#ff7a00]' : 'text-gray-700 hover:bg-gray-50 hover:text-[#ff7a00]' ?>">
                     <?= htmlspecialchars($navLabel) ?>
                 </a>

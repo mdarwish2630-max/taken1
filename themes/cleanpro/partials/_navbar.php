@@ -3,7 +3,7 @@
  * CleanPro Theme — Navbar Partial
  * Top bar + Sticky header navigation
  */
-$siteBase = $siteBase ?? ('/site/' . $tenant->slug);
+$siteBase = $siteBase ?? (BASE_PATH . '/site/' . $tenant->slug);
 $isRtl    = ($dir ?? 'rtl') === 'rtl';
 $lang     = $lang ?? 'ar';
 $whatsapp = $tenant->contact_whatsapp ?? $tenant->contact_phone ?? '';
@@ -43,15 +43,22 @@ $address  = $tenant->address ?? '';
         </a>
 
         <nav class="cpro-menu" id="cproMenu">
-            <?php if (!empty($menu)): foreach ($menu as $item):
-                $navHref = $siteBase;
-                $slug = strtolower($item->slug ?? '');
-                if ($item->is_home == 1 || empty($slug)) { $navHref = $siteBase; }
-                else { $navHref = $siteBase . '/' . $slug; }
-                $navLabel = $lang === 'en' && !empty($item->title_en) ? $item->title_en : ($item->title ?? '');
-                $isActive = (isset($page->slug) && strtolower($page->slug) === $slug) || (empty($page->slug ?? null) && ($item->is_home ?? 0) == 1);
-            ?>
-                <a href="<?= url($navHref) ?>" class="<?= $isActive ? 'active' : '' ?>"><?= htmlspecialchars($navLabel) ?></a>
+            <?php if (!empty($menu)): foreach ($menu as $item): ?>
+                <?php
+                    // التوافق مع المنو الجديد (array) والقديم (object)
+                    $navHref = $item['url'] ?? '';
+                    $navLabel = ($lang === 'en' && !empty($item['label_en'])) ? $item['label_en'] : ($item['label'] ?? ($item->title ?? ''));
+                    $isHome = $item['is_home'] ?? ($item->is_home ?? 0);
+                    $newTab = ($item['open_in_new_tab'] ?? 0) ? ' target="_blank" rel="noopener"' : '';
+                    $isActive = false;
+                    if ($isHome && (!isset($page->slug) || empty($page->slug))) $isActive = true;
+                    if (!$isHome && isset($page->slug)) {
+                        $currentSlug = $item['section_key'] ?? '';
+                        if (empty($currentSlug)) $currentSlug = basename($navHref);
+                        if (strtolower($page->slug) === strtolower($currentSlug)) $isActive = true;
+                    }
+                ?>
+                <a href="<?= htmlspecialchars($navHref) ?>"<?= $newTab ?> class="<?= $isActive ? 'active' : '' ?>"><?= htmlspecialchars($navLabel) ?></a>
             <?php endforeach; endif; ?>
         </nav>
 
@@ -65,15 +72,22 @@ $address  = $tenant->address ?? '';
     </div>
 
     <div class="cpro-mobile-menu" id="cproMobileMenu">
-        <?php if (!empty($menu)): foreach ($menu as $item):
-            $navHref = $siteBase;
-            $slug = strtolower($item->slug ?? '');
-            if ($item->is_home == 1 || empty($slug)) { $navHref = $siteBase; }
-            else { $navHref = $siteBase . '/' . $slug; }
-            $navLabel = $lang === 'en' && !empty($item->title_en) ? $item->title_en : ($item->title ?? '');
-            $isActive = (isset($page->slug) && strtolower($page->slug) === $slug) || (empty($page->slug ?? null) && ($item->is_home ?? 0) == 1);
-        ?>
-            <a href="<?= url($navHref) ?>" class="<?= $isActive ? 'active' : '' ?>"><?= htmlspecialchars($navLabel) ?></a>
+        <?php if (!empty($menu)): foreach ($menu as $item): ?>
+            <?php
+                // التوافق مع المنو الجديد (array) والقديم (object)
+                $navHref = $item['url'] ?? '';
+                $navLabel = ($lang === 'en' && !empty($item['label_en'])) ? $item['label_en'] : ($item['label'] ?? ($item->title ?? ''));
+                $isHome = $item['is_home'] ?? ($item->is_home ?? 0);
+                $newTab = ($item['open_in_new_tab'] ?? 0) ? ' target="_blank" rel="noopener"' : '';
+                $isActive = false;
+                if ($isHome && (!isset($page->slug) || empty($page->slug))) $isActive = true;
+                if (!$isHome && isset($page->slug)) {
+                    $currentSlug = $item['section_key'] ?? '';
+                    if (empty($currentSlug)) $currentSlug = basename($navHref);
+                    if (strtolower($page->slug) === strtolower($currentSlug)) $isActive = true;
+                }
+            ?>
+            <a href="<?= htmlspecialchars($navHref) ?>"<?= $newTab ?> class="<?= $isActive ? 'active' : '' ?>"><?= htmlspecialchars($navLabel) ?></a>
         <?php endforeach; endif; ?>
         <a href="<?= url($siteBase . '/booking') ?>" style="color:var(--blue);font-weight:900"><?= $lang === 'en' ? 'Book Now' : 'احجز الآن' ?></a>
     </div>

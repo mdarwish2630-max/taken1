@@ -16,6 +16,7 @@ class SiteController extends Controller
     private $siteStatModel;
     private $siteFeatureModel;
     private $partnerModel;
+    private $menuModel;
 
     public function __construct()
     {
@@ -30,6 +31,37 @@ class SiteController extends Controller
         $this->siteStatModel = $this->model('SiteStat');
         $this->siteFeatureModel = $this->model('SiteFeature');
         $this->partnerModel = $this->model('Partner');
+        $this->menuModel = $this->model('MenuModel');
+    }
+
+    /**
+     * الحصول على عناصر المنو لموقع معين
+     * تستخدم site_menu أولاً، إذا فاضية ترجع من pages
+     */
+    private function getMenuForSite($tenantId, $siteBase)
+    {
+        $menuItems = $this->menuModel->getActiveMenuItems($tenantId, $siteBase);
+        if (!empty($menuItems)) {
+            return $menuItems;
+        }
+        // Fallback: إذا ما في عناصر منو (جدول فاضي أو قديم)
+        $pages = $this->pageModel->getMenuPages($tenantId);
+        $result = [];
+        foreach ($pages as $p) {
+            $result[] = [
+                'id'        => $p->id,
+                'label'     => $p->title,
+                'label_en'  => $p->title_en,
+                'url'       => $p->is_home ? $siteBase : $siteBase . '/' . $p->slug,
+                'is_home'   => (int)$p->is_home,
+                'open_in_new_tab' => 0,
+                'icon'      => 'fa-file-alt',
+                'item_type' => 'page',
+                'section_key' => null,
+                'menu_order'=> (int)($p->menu_order ?? 0),
+            ];
+        }
+        return $result;
     }
 
     /**
@@ -129,7 +161,7 @@ class SiteController extends Controller
         $data = [
             'tenant' => $tenant,
             'page' => $page,
-            'menu' => $this->pageModel->getMenuPages($tenant->id),
+            'menu' => $this->getMenuForSite($tenant->id, BASE_PATH . '/site/' . $tenant->slug),
             'banners' => $this->bannerModel->getHeroBanners($tenant->id),
             'services' => $this->serviceModel->getHomeServices($tenant->id, 6),
             'gallery' => $this->galleryModel->getActiveGallery($tenant->id, 8),
@@ -144,7 +176,7 @@ class SiteController extends Controller
             'meta_description' => $page->meta_description ?: $tenant->meta_description,
             'lang'  => $currentLang,
             'dir'   => $currentDir,
-            'siteBase' => '/site/' . $tenant->slug,
+            'siteBase' => BASE_PATH . '/site/' . $tenant->slug,
             'themeSettings' => $themeSettings,
             'themeCustomCSS' => $themeCustomCSS,
             'themeFontsUrl' => $themeFontsUrl,
@@ -679,12 +711,12 @@ public function previewDemoService($themeSlug, $serviceSlug)
         $data = [
             'tenant' => $tenant,
             'service' => $service,
-            'menu' => $this->pageModel->getMenuPages($tenant->id),
+            'menu' => $this->getMenuForSite($tenant->id, BASE_PATH . '/site/' . $tenant->slug),
             'title' => $service->title . ' - ' . $tenant->site_name,
             'related_services' => $this->serviceModel->getTenantServices($tenant->id),
             'lang'  => $currentLang,
             'dir'   => $currentDir,
-            'siteBase' => '/site/' . $tenant->slug,
+            'siteBase' => BASE_PATH . '/site/' . $tenant->slug,
         ];
 
         $this->renderTheme($tenant->theme_slug, 'service', $data);
@@ -722,7 +754,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
             'tenant' => $tenant,
             'page' => $servicesPage,
             'services' => $this->serviceModel->getTenantServices($tenant->id),
-            'menu' => $this->pageModel->getMenuPages($tenant->id),
+            'menu' => $this->getMenuForSite($tenant->id, BASE_PATH . '/site/' . $tenant->slug),
             'banners' => $this->bannerModel->getHeroBanners($tenant->id),
             'sectionsConfig' => $this->tenantModel->getSectionsConfig($tenant->id),
             'siteStats' => $this->siteStatModel->getTenantStats($tenant->id, true),
@@ -731,7 +763,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
             'title' => lang('our_services') . ' - ' . $tenant->site_name,
             'lang'  => $currentLang,
             'dir'   => $currentDir,
-            'siteBase' => '/site/' . $tenant->slug,
+            'siteBase' => BASE_PATH . '/site/' . $tenant->slug,
         ];
 
         $this->renderTheme($tenant->theme_slug, 'services', $data);
@@ -757,7 +789,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
         $data = [
             'tenant' => $tenant,
             'gallery' => $this->galleryModel->getActiveGallery($tenant->id),
-            'menu' => $this->pageModel->getMenuPages($tenant->id),
+            'menu' => $this->getMenuForSite($tenant->id, BASE_PATH . '/site/' . $tenant->slug),
             'banners' => $this->bannerModel->getHeroBanners($tenant->id),
             'sectionsConfig' => $this->tenantModel->getSectionsConfig($tenant->id),
             'services' => $this->serviceModel->getHomeServices($tenant->id, 6),
@@ -765,7 +797,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
             'title' => lang('our_gallery') . ' - ' . $tenant->site_name,
             'lang'  => $currentLang,
             'dir'   => $currentDir,
-            'siteBase' => '/site/' . $tenant->slug,
+            'siteBase' => BASE_PATH . '/site/' . $tenant->slug,
         ];
 
         $this->renderTheme($tenant->theme_slug, 'gallery', $data);
@@ -790,7 +822,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
 
         $data = [
             'tenant' => $tenant,
-            'menu' => $this->pageModel->getMenuPages($tenant->id),
+            'menu' => $this->getMenuForSite($tenant->id, BASE_PATH . '/site/' . $tenant->slug),
             'banners' => $this->bannerModel->getHeroBanners($tenant->id),
             'sectionsConfig' => $this->tenantModel->getSectionsConfig($tenant->id),
             'services' => $this->serviceModel->getHomeServices($tenant->id, 6),
@@ -801,7 +833,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
             'title' => lang('contact_us') . ' - ' . $tenant->site_name,
             'lang'  => $currentLang,
             'dir'   => $currentDir,
-            'siteBase' => '/site/' . $tenant->slug,
+            'siteBase' => BASE_PATH . '/site/' . $tenant->slug,
         ];
 
         $this->renderTheme($tenant->theme_slug, 'contact', $data);
@@ -841,7 +873,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
             'services' => $this->serviceModel->getHomeServices($tenant->id, 6),
             'testimonials' => $this->testimonialModel->getHomeTestimonials($tenant->id, 6),
             'gallery' => $this->galleryModel->getActiveGallery($tenant->id, 6),
-            'menu' => $this->pageModel->getMenuPages($tenant->id),
+            'menu' => $this->getMenuForSite($tenant->id, BASE_PATH . '/site/' . $tenant->slug),
             'banners' => $this->bannerModel->getHeroBanners($tenant->id),
             'sectionsConfig' => $this->tenantModel->getSectionsConfig($tenant->id),
             'faqItems' => $this->faqModel->getTenantFaqs($tenant->id, true),
@@ -851,7 +883,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
             'title' => lang('about_us') . ' - ' . $tenant->site_name,
             'lang'  => $currentLang,
             'dir'   => $currentDir,
-            'siteBase' => '/site/' . $tenant->slug,
+            'siteBase' => BASE_PATH . '/site/' . $tenant->slug,
         ];
 
         $this->renderTheme($tenant->theme_slug, 'about', $data);
@@ -943,7 +975,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
         }
         $data = [
             'tenant' => $tenant, 'page' => $page,
-            'menu' => $this->pageModel->getMenuPages($tenant->id),
+            'menu' => $this->getMenuForSite($tenant->id, BASE_PATH . '/site/' . $tenant->slug),
             'banners' => $this->bannerModel->getHeroBanners($tenant->id),
             'services' => $this->serviceModel->getHomeServices($tenant->id, 6),
             'gallery' => $this->galleryModel->getActiveGallery($tenant->id, 8),
@@ -958,7 +990,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
             'meta_description' => $tenant->meta_description,
             'lang'  => function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar'),
             'dir'   => (function_exists('lang') && lang() === 'en') ? 'ltr' : 'rtl',
-            'siteBase' => '/site/' . $tenant->slug,
+            'siteBase' => BASE_PATH . '/site/' . $tenant->slug,
         ];
         $this->renderTheme($themeSlug, 'faq', $data);
     }
@@ -989,7 +1021,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
         }
         $data = [
             'tenant' => $tenant, 'page' => $page,
-            'menu' => $this->pageModel->getMenuPages($tenant->id),
+            'menu' => $this->getMenuForSite($tenant->id, BASE_PATH . '/site/' . $tenant->slug),
             'banners' => $this->bannerModel->getHeroBanners($tenant->id),
             'services' => $this->serviceModel->getHomeServices($tenant->id, 6),
             'gallery' => $this->galleryModel->getActiveGallery($tenant->id, 8),
@@ -1002,7 +1034,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
             'meta_description' => $tenant->meta_description,
             'lang'  => function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar'),
             'dir'   => (function_exists('lang') && lang() === 'en') ? 'ltr' : 'rtl',
-            'siteBase' => '/site/' . $tenant->slug,
+            'siteBase' => BASE_PATH . '/site/' . $tenant->slug,
         ];
         $this->renderTheme($themeSlug, 'partners', $data);
     }
@@ -1033,7 +1065,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
         }
         $data = [
             'tenant' => $tenant, 'page' => $page,
-            'menu' => $this->pageModel->getMenuPages($tenant->id),
+            'menu' => $this->getMenuForSite($tenant->id, BASE_PATH . '/site/' . $tenant->slug),
             'banners' => $this->bannerModel->getHeroBanners($tenant->id),
             'services' => $this->serviceModel->getHomeServices($tenant->id, 20),
             'gallery' => $this->galleryModel->getActiveGallery($tenant->id, 8),
@@ -1047,7 +1079,7 @@ public function previewDemoService($themeSlug, $serviceSlug)
             'meta_description' => $tenant->meta_description,
             'lang'  => function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar'),
             'dir'   => (function_exists('lang') && lang() === 'en') ? 'ltr' : 'rtl',
-            'siteBase' => '/site/' . $tenant->slug,
+            'siteBase' => BASE_PATH . '/site/' . $tenant->slug,
         ];
         $this->renderTheme($themeSlug, 'booking', $data);
     }

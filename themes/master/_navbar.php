@@ -2,7 +2,7 @@
 /**
  * Master Theme — Navbar Partial
  */
-$siteBase = $siteBase ?? ('/site/' . $tenant->slug);
+$siteBase = $siteBase ?? (BASE_PATH . '/site/' . $tenant->slug);
 $whatsapp = $tenant->contact_whatsapp ?? $tenant->contact_phone ?? '#';
 $siteName = htmlspecialchars($tenant->site_name ?? 'تكوين');
 $siteDesc = mb_substr(htmlspecialchars($tenant->meta_description ?? ''), 0, 50);
@@ -28,14 +28,20 @@ $logoLetter = mb_substr($tenant->site_name ?? 'M', 0, 1);
         <nav class="hidden lg:flex items-center gap-8 text-sm text-gray-300">
             <?php if (!empty($menu)): foreach ($menu as $item): ?>
                 <?php
-                    $navHref = $siteBase;
-                    $slug = strtolower($item->slug ?? '');
-                    if ($item->is_home == 1 || empty($slug)) { $navHref = $siteBase; }
-                    else { $navHref = $siteBase . '/' . $slug; }
-                    $navLabel = $lang === 'en' && !empty($item->title_en) ? $item->title_en : ($item->title ?? '');
-                    $isActive = (!isset($page->slug) && $item->is_home == 1) || (isset($page->slug) && strtolower($page->slug) === $slug);
+                    // التوافق مع المنو الجديد (array) والقديم (object)
+                    $navHref = $item['url'] ?? '';
+                    $navLabel = ($lang === 'en' && !empty($item['label_en'])) ? $item['label_en'] : ($item['label'] ?? ($item->title ?? ''));
+                    $isHome = $item['is_home'] ?? ($item->is_home ?? 0);
+                    $newTab = ($item['open_in_new_tab'] ?? 0) ? ' target="_blank" rel="noopener"' : '';
+                    $isActive = false;
+                    if ($isHome && (!isset($page->slug) || empty($page->slug))) $isActive = true;
+                    if (!$isHome && isset($page->slug)) {
+                        $currentSlug = $item['section_key'] ?? '';
+                        if (empty($currentSlug)) $currentSlug = basename($navHref);
+                        if (strtolower($page->slug) === strtolower($currentSlug)) $isActive = true;
+                    }
                 ?>
-                <a href="<?= url($navHref) ?>" class="hover:text-cyan-400 transition <?= $isActive ? 'text-cyan-400 font-bold' : '' ?>"><?= htmlspecialchars($navLabel) ?></a>
+                <a href="<?= htmlspecialchars($navHref) ?>"<?= $newTab ?> class="hover:text-cyan-400 transition <?= $isActive ? 'text-cyan-400 font-bold' : '' ?>"><?= htmlspecialchars($navLabel) ?></a>
             <?php endforeach; endif; ?>
         </nav>
 
@@ -56,13 +62,12 @@ $logoLetter = mb_substr($tenant->site_name ?? 'M', 0, 1);
         <nav class="flex flex-col gap-1 p-4">
             <?php if (!empty($menu)): foreach ($menu as $item): ?>
                 <?php
-                    $navHref = $siteBase;
-                    $slug = strtolower($item->slug ?? '');
-                    if ($item->is_home == 1 || empty($slug)) { $navHref = $siteBase; }
-                    else { $navHref = $siteBase . '/' . $slug; }
-                    $navLabel = $lang === 'en' && !empty($item->title_en) ? $item->title_en : ($item->title ?? '');
+                    // التوافق مع المنو الجديد (array) والقديم (object)
+                    $navHref = $item['url'] ?? '';
+                    $navLabel = ($lang === 'en' && !empty($item['label_en'])) ? $item['label_en'] : ($item['label'] ?? ($item->title ?? ''));
+                    $newTab = ($item['open_in_new_tab'] ?? 0) ? ' target="_blank" rel="noopener"' : '';
                 ?>
-                <a href="<?= url($navHref) ?>" class="px-4 py-3 rounded-xl text-gray-300 hover:text-cyan-400 hover:bg-white/5 transition"><?= htmlspecialchars($navLabel) ?></a>
+                <a href="<?= htmlspecialchars($navHref) ?>"<?= $newTab ?> class="px-4 py-3 rounded-xl text-gray-300 hover:text-cyan-400 hover:bg-white/5 transition"><?= htmlspecialchars($navLabel) ?></a>
             <?php endforeach; endif; ?>
             <a href="https://wa.me/<?= preg_replace('/[^0-9+]/', '', $whatsapp) ?>" target="_blank"
                class="mt-2 text-center bg-cyan-500 hover:bg-cyan-400 transition px-5 py-3 rounded-xl font-semibold text-sm">

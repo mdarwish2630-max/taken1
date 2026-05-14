@@ -3,7 +3,7 @@
  * CleanPro Theme — Footer Partial
  * 4-column footer with dark navy background
  */
-$siteBase = $siteBase ?? ('/site/' . $tenant->slug);
+$siteBase = $siteBase ?? (BASE_PATH . '/site/' . $tenant->slug);
 $lang     = $lang ?? 'ar';
 $whatsapp = $tenant->contact_whatsapp ?? $tenant->contact_phone ?? '';
 $waNumber = preg_replace('/[^0-9+]/', '', $whatsapp);

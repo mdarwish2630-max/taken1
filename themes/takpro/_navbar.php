@@ -3,7 +3,7 @@
  * TakPro Theme — Navbar Partial
  * Top bar + Header with dark logo area and navigation
  */
-$siteBase = $siteBase ?? ('/site/' . $tenant->slug);
+$siteBase = $siteBase ?? (BASE_PATH . '/site/' . $tenant->slug);
 $whatsapp = $tenant->contact_whatsapp ?? $tenant->contact_phone ?? '#';
 $siteName = htmlspecialchars($tenant->site_name ?? 'تك برو');
 $siteNameEn = htmlspecialchars($tenant->site_name_en ?? 'TakPro');
@@ -44,21 +44,24 @@ $displaySiteName = ($lang ?? 'ar') === 'en' ? $siteNameEn : $siteName;
                     $navItems = [];
                     if (!empty($menu)) {
                         foreach ($menu as $item) {
-                            $navHref = $siteBase;
-                            $slug = strtolower($item->slug ?? '');
-                            if ($item->is_home == 1 || empty($slug)) {
-                                $navHref = $siteBase;
-                            } else {
-                                $navHref = $siteBase . '/' . $slug;
+                            // التوافق مع المنو الجديد (array) والقديم (object)
+                            $navHref = $item['url'] ?? '';
+                            $navLabel = ($lang === 'en' && !empty($item['label_en'])) ? $item['label_en'] : ($item['label'] ?? ($item->title ?? ''));
+                            $isHome = $item['is_home'] ?? ($item->is_home ?? 0);
+                            $newTab = ($item['open_in_new_tab'] ?? 0) ? ' target="_blank" rel="noopener"' : '';
+                            $isActive = false;
+                            if ($isHome && (!isset($page->slug) || empty($page->slug))) $isActive = true;
+                            if (!$isHome && isset($page->slug)) {
+                                $currentSlug = $item['section_key'] ?? '';
+                                if (empty($currentSlug)) $currentSlug = basename($navHref);
+                                if (strtolower($page->slug) === strtolower($currentSlug)) $isActive = true;
                             }
-                            $navLabel = $lang === 'en' && !empty($item->title_en) ? $item->title_en : ($item->title ?? '');
-                            $isActive = (!isset($page->slug) && $item->is_home == 1) || (isset($page->slug) && strtolower($page->slug) === $slug);
-                            $navItems[] = ['href' => $navHref, 'label' => $navLabel, 'active' => $isActive];
+                            $navItems[] = ['href' => $navHref, 'label' => $navLabel, 'active' => $isActive, 'newTab' => $newTab];
                         }
                     }
                 ?>
                 <?php foreach ($navItems as $ni => $navItem): ?>
-                    <a href="<?= url($navItem['href']) ?>"
+                    <a href="<?= htmlspecialchars($navItem['href']) ?>"<?= $navItem['newTab'] ?? '' ?>
                        class="h-full px-4 flex items-center border-b-4 <?= $navItem['active'] ? 'border-brand text-brand' : 'border-transparent hover:border-brand hover:text-brand' ?> transition">
                         <?= htmlspecialchars($navItem['label']) ?>
                     </a>
@@ -82,7 +85,7 @@ $displaySiteName = ($lang ?? 'ar') === 'en' ? $siteNameEn : $siteName;
     <div id="takproMobileMenu" class="hidden lg:hidden bg-white shadow-xl border-t">
         <nav class="flex flex-col gap-1 p-4">
             <?php foreach ($navItems as $navItem): ?>
-                <a href="<?= url($navItem['href']) ?>"
+                <a href="<?= htmlspecialchars($navItem['href']) ?>"<?= $navItem['newTab'] ?? '' ?>
                    class="px-4 py-3 rounded-xl text-dark hover:text-brand hover:bg-orange-50 transition font-bold <?= $navItem['active'] ? 'text-brand bg-orange-50' : '' ?>">
                     <?= htmlspecialchars($navItem['label']) ?>
                 </a>

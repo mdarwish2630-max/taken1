@@ -148,23 +148,54 @@ function formatPrice($price, $currency = 'SAR')
 }
 
 /**
- * توليد slug من نص
+ * تحويل النص العربي إلى إنجليزي (Transliteration)
+ * مثال: "خدمة تصميم المواقع" → "khadmat-tasmeem-almawaeat"
+ */
+function transliterateToEnglish($text)
+{
+    $map = [
+        'أ' => 'a', 'إ' => 'i', 'آ' => 'aa', 'ا' => 'a',
+        'ب' => 'b', 'ة' => 'h', 'ت' => 't', 'ث' => 'th',
+        'ج' => 'j', 'ح' => 'h', 'خ' => 'kh', 'د' => 'd',
+        'ذ' => 'dh', 'ر' => 'r', 'ز' => 'z', 'س' => 's',
+        'ش' => 'sh', 'ص' => 's', 'ض' => 'd', 'ط' => 't',
+        'ظ' => 'z', 'ع' => 'a', 'غ' => 'gh', 'ف' => 'f',
+        'ق' => 'q', 'ك' => 'k', 'ل' => 'l', 'م' => 'm',
+        'ن' => 'n', 'ه' => 'h', 'و' => 'w', 'ي' => 'y',
+        'ى' => 'a', 'ؤ' => 'w', 'ئ' => 'y', '亭' => 't',
+    ];
+
+    $text = str_replace(array_keys($map), array_values($map), $text);
+    return $text;
+}
+
+/**
+ * توليد slug إنجليزي من أي نص (عربي أو إنجليزي)
+ * إذا كان العنوان عربي يتم تحويله transliteration
+ * إذا فشل التحويل يُولّد slug عشوائي
  */
 function generateSlug($text, $separator = '-')
 {
     // تحويل للأحرف الصغيرة
     $text = mb_strtolower($text, 'UTF-8');
-    
-    // استبدال المسافات
-    $text = str_replace(' ', $separator, $text);
-    
-    // إزالة الأحرف الخاصة
-    $text = preg_replace('/[^a-z0-9\-\p{Arabic}]/u', '', $text);
-    
+
+    // تحويل الأحرف العربية إلى إنجليزي
+    $text = transliterateToEnglish($text);
+
+    // إزالة كل شيء ما عدا الأحرف اللاتينية والأرقام
+    $text = preg_replace('/[^a-z0-9]/u', $separator, $text);
+
     // إزالة الـ separators المتكررة
     $text = preg_replace('/' . $separator . '+/', $separator, $text);
-    
-    return trim($text, $separator);
+
+    $text = trim($text, $separator);
+
+    // إذا كان النص فارغ بعد التنظيف (مثلاً كان رموز فقط)، نولّد slug عشوائي
+    if (empty($text)) {
+        $text = 'page-' . strtolower(substr(md5(uniqid(mt_rand(), true)), 0, 8));
+    }
+
+    return $text;
 }
 
 /**

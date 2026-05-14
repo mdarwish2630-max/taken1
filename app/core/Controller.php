@@ -138,11 +138,49 @@ abstract class Controller
     }
 
     /**
+     * الحصول على بيانات JSON من body الطلب
+     * يُخزّن النتيجة لتجابة القراءة المتعددة
+     */
+    private $jsonBody = null;
+
+    private function getJsonBody()
+    {
+        if ($this->jsonBody !== null) {
+            return $this->jsonBody;
+        }
+        $this->jsonBody = [];
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? ($_SERVER['HTTP_CONTENT_TYPE'] ?? '');
+        $isJson = (stripos($contentType, 'application/json') !== false);
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+        // قراءة body الطلب إذا كان JSON أو إذا كان POST و $_POST فارغة
+        // (حالة XAMPP حيث CONTENT_TYPE قد لا يكون مضبوطاً بشكل صحيح)
+        if ($isJson || ($method === 'POST' && empty($_POST))) {
+            $raw = file_get_contents('php://input');
+            if (!empty($raw)) {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    $this->jsonBody = $decoded;
+                }
+            }
+        }
+        return $this->jsonBody;
+    }
+
+    /**
+     * الحصول على جميع بيانات الطلب (GET + POST + JSON body)
+     */
+    private function getAllInput()
+    {
+        return array_merge($_GET, $_POST, $this->getJsonBody());
+    }
+
+    /**
      * الحصول على البيانات المرسلة (بدون تنقية - للمحتوى الغني مثل HTML)
      */
     protected function rawInput($key = null, $default = null)
     {
-        $data = array_merge($_GET, $_POST);
+        $data = $this->getAllInput();
         
         if ($key === null) {
             return $data;
@@ -156,7 +194,7 @@ abstract class Controller
      */
     protected function input($key = null, $default = null)
     {
-        $data = array_merge($_GET, $_POST);
+        $data = $this->getAllInput();
         
         if ($key === null) {
             return Security::sanitize($data);
@@ -211,11 +249,18 @@ abstract class Controller
 
     /**
      * التحقق من رمز CSRF
+     * يتحقق من الـ token في POST body أو في Header (X-CSRF-Token)
      */
     protected function verifyCsrf()
     {
+        // البحث عن الـ token في POST body أولاً
         $token = $this->input(CSRF_TOKEN_NAME);
-        
+
+        // إذا لم يُعثر عليه، نبحث في Header (لطلبات AJAX)
+        if (empty($token) && isset($_SERVER['HTTP_X_CSRF_TOKEN'])) {
+            $token = $_SERVER['HTTP_X_CSRF_TOKEN'];
+        }
+
         if (!Security::verifyCsrfToken($token)) {
             if ($this->isAjax()) {
                 $this->jsonError('رمز الأمان غير صالح', [], 403);

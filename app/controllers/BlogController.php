@@ -208,6 +208,59 @@ class BlogController extends Controller
     }
 
     /**
+     * تجهيز البيانات المشتركة لكل صفحات الموقع العام
+     * (نفس البيانات اللي SiteController يجهزها)
+     */
+    private function prepareSiteData($tenant, $slug, $extra = [])
+    {
+        // تحديد لغة الموقع
+        if (method_exists($this, 'setSiteLanguage')) {
+            $this->setSiteLanguage($tenant, $slug);
+        } elseif (isset($_GET['lang']) && in_array($_GET['lang'], ['ar', 'en'], true)) {
+            if (function_exists('Language::setLocale')) Language::setLocale($_GET['lang']);
+        } elseif (isset($_COOKIE['site_lang_' . $slug]) && in_array($_COOKIE['site_lang_' . $slug], ['ar', 'en'])) {
+            if (function_exists('Language::setLocale')) Language::setLocale($_COOKIE['site_lang_' . $slug]);
+        } elseif (!empty($tenant->default_language) && in_array($tenant->default_language, ['ar', 'en'])) {
+            if (function_exists('Language::setLocale')) Language::setLocale($tenant->default_language);
+        }
+
+        $currentLang = function_exists('lang') ? lang() : ($tenant->default_language ?? 'ar');
+        $currentDir  = ($currentLang === 'en') ? 'ltr' : 'rtl';
+        $siteBase = BASE_PATH . '/site/' . $tenant->slug;
+
+        // تحميل إعدادات الثيم
+        $themeSettings = (object)['primary_color' => '#0f172a'];
+        $themeCustomCSS = '';
+        $themeFontsUrl = '';
+        if (file_exists(ROOT_PATH . '/app/models/ThemeSettings.php')) {
+            require_once ROOT_PATH . '/app/models/ThemeSettings.php';
+            $tsModel = new \ThemeSettings();
+            $themeSettings = $tsModel->getTenantSettings($tenant->id);
+            $themeCustomCSS = $tsModel->generateCustomCSS($tenant->id, $tenant);
+            $themeFontsUrl = $tsModel->getGoogleFontsUrl($tenant->id);
+        }
+
+        // تحميل المنو من site_menu
+        $menu = [];
+        if (file_exists(ROOT_PATH . '/app/models/MenuModel.php')) {
+            require_once ROOT_PATH . '/app/models/MenuModel.php';
+            $menuModel = new \MenuModel();
+            $menu = $menuModel->getActiveMenuItems($tenant->id, $siteBase);
+        }
+
+        return array_merge([
+            'tenant' => $tenant,
+            'menu' => $menu,
+            'lang' => $currentLang,
+            'dir' => $currentDir,
+            'siteBase' => $siteBase,
+            'themeSettings' => $themeSettings,
+            'themeCustomCSS' => $themeCustomCSS,
+            'themeFontsUrl' => $themeFontsUrl,
+        ], $extra);
+    }
+
+    /**
      * عرض مقال على الموقع (صفحة عامة)
      */
     public function show($slug, $postSlug)
@@ -232,16 +285,15 @@ class BlogController extends Controller
         // المقالات ذات الصلة
         $relatedPosts = $this->blogModel->getRelated($tenant->id, $post->id, $post->category, 3);
 
-        // تحميل الثيم
-        $themePath = THEMES_PATH . '/' . ($tenant->theme_slug ?? 'general') . '/blog-post.php';
-
-        $data = [
-            'tenant' => $tenant,
+        $data = $this->prepareSiteData($tenant, $slug, [
             'post' => $post,
             'related_posts' => $relatedPosts,
             'title' => $post->title . ' - ' . $tenant->site_name,
-            'meta_description' => $post->meta_description ?: $post->excerpt
-        ];
+            'meta_description' => $post->meta_description ?: $post->excerpt,
+        ]);
+
+        $themeSlug = !empty($tenant->theme_slug) ? $tenant->theme_slug : 'cleanpro';
+        $themePath = THEMES_PATH . '/' . $themeSlug . '/blog-post.php';
 
         if (file_exists($themePath)) {
             extract($data);
@@ -274,16 +326,22 @@ class BlogController extends Controller
 
         $categories = $this->blogModel->getCategories($tenant->id);
 
-        $data = [
-            'tenant' => $tenant,
+        $data = $this->prepareSiteData($tenant, $slug, [
             'posts' => $posts,
             'categories' => $categories,
             'current_category' => $category,
-            'title' => lang('blog') . ' - ' . $tenant->site_name
-        ];
+            'page' => (object)[
+                'slug' => 'blog',
+                'title' => lang('blog'),
+                'title_en' => 'Blog',
+                'template' => 'blog',
+                'is_home' => 0,
+            ],
+            'title' => lang('blog') . ' - ' . $tenant->site_name,
+        ]);
 
-        // تحميل الثيم
-        $themePath = THEMES_PATH . '/' . ($tenant->theme_slug ?? 'general') . '/blog.php';
+        $themeSlug = !empty($tenant->theme_slug) ? $tenant->theme_slug : 'cleanpro';
+        $themePath = THEMES_PATH . '/' . $themeSlug . '/blog.php';
 
         if (file_exists($themePath)) {
             extract($data);

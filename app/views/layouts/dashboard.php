@@ -376,6 +376,11 @@ $dir = Language::direction();
                     <span><?= lang('blog') ?? 'المدونة' ?></span>
                 </a>
 
+                <a href="<?= url('/dashboard/menu') ?>" class="nav-item <?= Router::is('/dashboard/menu') ? 'active' : '' ?>">
+                    <i class="fas fa-bars"></i>
+                    <span>إدارة المنو</span>
+                </a>
+
                 <a href="<?= url('/dashboard/pages') ?>" class="nav-item <?= Router::is('/dashboard/pages') ? 'active' : '' ?>">
                     <i class="fas fa-file-alt"></i>
                     <span><?= lang('pages') ?></span>

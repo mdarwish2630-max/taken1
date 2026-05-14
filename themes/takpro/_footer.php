@@ -2,7 +2,7 @@
 /**
  * TakPro Theme — Footer Partial
  */
-$siteBase  = $siteBase ?? ('/site/' . $tenant->slug);
+$siteBase  = $siteBase ?? (BASE_PATH . '/site/' . $tenant->slug);
 $siteName  = htmlspecialchars($tenant->site_name ?? 'تك برو');
 $siteNameEn = htmlspecialchars($tenant->site_name_en ?? 'TakPro');
 $displaySiteName = ($lang ?? 'ar') === 'en' ? $siteNameEn : $siteName;

@@ -162,6 +162,16 @@ Router::group(['middleware' => 'customer'], function() {
     Router::post('/dashboard/pages/edit/{id}', 'PageController@update');
     Router::post('/dashboard/pages/delete/{id}', 'PageController@delete');
 
+    // إدارة المنو
+    Router::get('/dashboard/menu', 'MenuController@index');
+    Router::post('/dashboard/menu/add-section', 'MenuController@addSection');
+    Router::post('/dashboard/menu/add-page', 'MenuController@addPage');
+    Router::post('/dashboard/menu/add-external', 'MenuController@addExternal');
+    Router::post('/dashboard/menu/update-order', 'MenuController@updateOrder');
+    Router::post('/dashboard/menu/toggle', 'MenuController@toggle');
+    Router::post('/dashboard/menu/remove', 'MenuController@remove');
+    Router::post('/dashboard/menu/update-labels', 'MenuController@updateLabels');
+
     // Blog
     Router::get('/dashboard/blog', 'BlogController@index');
     Router::get('/dashboard/blog/add', 'BlogController@add');

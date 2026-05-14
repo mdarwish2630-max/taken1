@@ -3,7 +3,7 @@
  * Tek Pro Theme — Footer Partial
  * Dark footer with orange accents
  */
-$siteBase  = $siteBase ?? ('/site/' . $tenant->slug);
+$siteBase  = $siteBase ?? (BASE_PATH . '/site/' . $tenant->slug);
 $siteName  = htmlspecialchars($tenant->site_name ?? 'تك برو');
 $phone     = $tenant->contact_phone ?? '';
 $email     = $tenant->contact_email ?? '';

@@ -2,7 +2,7 @@
 /**
  * Master Theme — Footer Partial
  */
-$siteBase  = $siteBase ?? ('/site/' . $tenant->slug);
+$siteBase  = $siteBase ?? (BASE_PATH . '/site/' . $tenant->slug);
 $siteName  = htmlspecialchars($tenant->site_name ?? 'تكوين');
 $phone     = $tenant->contact_phone ?? '';
 $email     = $tenant->contact_email ?? '';

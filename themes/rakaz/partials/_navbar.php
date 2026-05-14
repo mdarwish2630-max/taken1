@@ -3,7 +3,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
             <!-- Logo -->
-            <a href="<?php echo url($siteBase ?? '/'); ?>" class="flex items-center gap-3">
+            <a href="<?php echo url($siteBase ?? BASE_PATH); ?>" class="flex items-center gap-3">
                 <?php if (!empty($site_logo)): ?>
                     <img src="<?php echo htmlspecialchars($site_logo); ?>" alt="<?php echo htmlspecialchars($site_name ?? 'ركاز'); ?>" class="h-12 w-auto">
                 <?php else: ?>
@@ -50,9 +50,9 @@
                 foreach ($finalNav as $pageKey => $pageTitle):
                     // Generate correct URL based on page type
                     if ($pageKey === 'home') {
-                        $navUrl = $siteBase ?? '/';
+                        $navUrl = $siteBase ?? BASE_PATH;
                     } else {
-                        $navUrl = ($siteBase ?? '/') . '/' . $pageKey;
+                        $navUrl = ($siteBase ?? BASE_PATH) . '/' . $pageKey;
                     }
 
                     // Highlight active page (page is an object, not array)
@@ -68,7 +68,7 @@
                 <?php endforeach; ?>
 
                 <!-- CTA Button -->
-                <a href="<?php echo url(($siteBase ?? '/') . '/booking'); ?>"
+                <a href="<?php echo url(($siteBase ?? BASE_PATH) . '/booking'); ?>"
                    class="btn-primary text-white px-6 py-2.5 rounded-full text-sm font-semibold mr-2">
                     احجز موعد
                 </a>
@@ -85,9 +85,9 @@
             <div class="flex flex-col gap-1">
                 <?php foreach ($finalNav as $pageKey => $pageTitle):
                     if ($pageKey === 'home') {
-                        $navUrl = $siteBase ?? '/';
+                        $navUrl = $siteBase ?? BASE_PATH;
                     } else {
-                        $navUrl = ($siteBase ?? '/') . '/' . $pageKey;
+                        $navUrl = ($siteBase ?? BASE_PATH) . '/' . $pageKey;
                     }
                     $isActive = (isset($page) && isset($page->slug) && $page->slug === $pageKey) ? true : false;
                 ?>
@@ -99,7 +99,7 @@
                         <?php echo htmlspecialchars($pageTitle); ?>
                     </a>
                 <?php endforeach; ?>
-                <a href="<?php echo url(($siteBase ?? '/') . '/booking'); ?>"
+                <a href="<?php echo url(($siteBase ?? BASE_PATH) . '/booking'); ?>"
                    class="btn-primary text-white px-6 py-3 rounded-2xl text-sm font-semibold text-center mt-2">
                     احجز موعد
                 </a>
