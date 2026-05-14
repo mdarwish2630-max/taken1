@@ -896,6 +896,12 @@ public function previewDemoService($themeSlug, $serviceSlug)
     {
         $this->verifyCsrf();
 
+        // [SEC-FIX-04] Rate Limiting لمنع Spam على نموذج التواصل
+        $clientIp = Security::getClientIp();
+        if (!Security::rateLimit('contact_' . $clientIp, 5, 1)) {
+            $this->jsonError('تم تجاوز الحد الأقصى للإرسال. يرجى المحاولة لاحقاً');
+        }
+
         $tenant = $this->tenantModel->findBySlug($slug);
 
         if (!$tenant) {

@@ -94,9 +94,9 @@ class ThemeController extends Controller
             'header_fixed' => $this->input('header_fixed') ? 1 : 0,
             'sidebar_position' => $this->input('sidebar_position', 'right'),
             
-            // CSS و JS مخصص
-            'custom_css' => $this->input('custom_css'),
-            'custom_js' => $this->input('custom_js'),
+            // CSS و JS مخصص - [SEC-FIX-01] تنظيف باستخدام الدوال المتخصصة
+            'custom_css' => function_exists('sanitizeCSS') ? sanitizeCSS($this->rawInput('custom_css')) : $this->input('custom_css'),
+            'custom_js' => $this->sanitizeCustomJS($this->rawInput('custom_js')),
         ];
 
         if ($this->themeSettingsModel->updateSettings($tenant->id, $data)) {
@@ -144,6 +144,31 @@ class ThemeController extends Controller
             'Poppins' => 'Poppins',
             'Montserrat' => 'Montserrat',
         ];
+    }
+
+    /**
+     * تنظيف كود JavaScript المخصص
+     * يزيل الأكواد الخبيثة مع السماح بـ JS عادي
+     * [SEC-FIX-01] منع XSS عبر حقن </script> أو event handlers
+     */
+    private function sanitizeCustomJS($js)
+    {
+        if (empty($js)) return '';
+        $js = (string)$js;
+        // إزالة محاولات إغلاق تاغ script وفتح تاغات HTML/JS جديدة
+        $js = preg_replace('#</script[^>]*>#si', '', $js);
+        // إزالة محاولات حقن تاغات HTML داخل السياق
+        $js = preg_replace('#<script[^>]*>#si', '', $js);
+        $js = preg_replace('#</?iframe[^>]*>#si', '', $js);
+        $js = preg_replace('#</?embed[^>]*>#si', '', $js);
+        $js = preg_replace('#</?object[^>]*>#si', '', $js);
+        $js = preg_replace('#</?link[^>]*>#si', '', $js);
+        $js = preg_replace('#</?meta[^>]*>#si', '', $js);
+        $js = preg_replace('#document\.cookie#si', '/* blocked */', $js);
+        $js = preg_replace('#document\.write\s*\(.*?\)#si', '', $js);
+        $js = preg_replace('#eval\s*\(.*?\)#si', '', $js);
+        $js = preg_replace('#Function\s*\(.*?\)#si', '', $js);
+        return trim($js);
     }
 
     /**

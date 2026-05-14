@@ -253,7 +253,8 @@ class Security
     public static function generateCaptcha()
     {
         // توليد كود عشوائي من 5 أرقام (يبدأ دائماً برقم غير صفر)
-        $code = (string)mt_rand(10000, 99999);
+        // [SEC-FIX-02] استخدام random_int بدلاً من mt_rand (تشفيرياً آمن)
+        $code = (string)random_int(10000, 99999);
 
         // حفظ الكود في الجلسة
         Session::put('captcha_answer', $code);

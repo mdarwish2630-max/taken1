@@ -48,11 +48,15 @@ define('PASSWORD_MAX_LENGTH', 128);
 define('MAX_LOGIN_ATTEMPTS', 5);
 define('LOGIN_LOCKOUT_TIME', 900); // 15 دقيقة
 define('BCRYPT_COST', 12);
+// [SEC-FIX-08] مفتاح تشفير لكلمات المرور الحساسة (SMTP)
+// يجب تغيير هذا المفتاح في بيئة الإنتاج إلى قيمة عشوائية فريدة
+define('APP_KEY', 'takweenweb_' . hash('sha256', 'sec_key_' . (DB_HOST ?? 'localhost')));
 
 // إعدادات الرفع
 define('UPLOAD_PATH', ROOT_PATH . '/uploads');
 define('UPLOADS_PATH', ROOT_PATH . '/public/uploads');
 define('MAX_UPLOAD_SIZE', 5242880); // 5MB
+// [SEC-FIX-05] إزالة SVG من الملفات المسموحة (SVG يسمح بـ XSS عبر JavaScript مدمج)
 define('ALLOWED_IMAGE_TYPES', ['jpg', 'jpeg', 'png', 'gif', 'webp']);
 define('ALLOWED_FILE_TYPES', ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx']);
 
@@ -88,8 +92,9 @@ if (DEBUG_MODE) {
 // [FIX-02] إضافة Security Headers
 // =============================================
 if (headers_sent() === false) {
-    // Content Security Policy - منع تنفيذ الأكواد الخبيثة
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://code.iconify.design https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; frame-src 'self' https://www.youtube.com https://player.vimeo.com; connect-src 'self';");
+    // [SEC-FIX-09] تحسين Content Security Policy - تقييد script-src و style-src
+    // إزالة 'unsafe-eval' بالكامل وتقييد 'unsafe-inline' قدر الإمكان
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://code.iconify.design https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; frame-src 'self' https://www.youtube.com https://player.vimeo.com; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';");
 
     // منع تضمين الموقع في iframe (Clickjacking Protection)
     header("X-Frame-Options: SAMEORIGIN");

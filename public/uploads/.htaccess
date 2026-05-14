@@ -1,0 +1,12 @@
+# [SEC-FIX-06] منع تنفيذ أي ملفات برمجية في مجلد الرفع العام
+# Allow only image and document types
+<FilesMatch "\.(?i:php[0-9]?|phtml|pht|phps|cgi|pl|py|jsp|asp|aspx|sh|bash|htaccess)$">
+    Deny from all
+</FilesMatch>
+
+# Block SVG files (XSS vector)
+<FilesMatch "\.(?i:svg)$">
+    Deny from all
+</FilesMatch>
+
+Options -Indexes

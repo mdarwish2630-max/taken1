@@ -244,7 +244,7 @@ class FormController extends Controller
                 $recipients = [$tenant->contact_email];
             }
             
-            $subject = "استجابة جديدة - {$form->name}";
+            $subject = "استجابة جديدة - " . preg_replace('/[\r\n]/', '', htmlspecialchars($form->name, ENT_QUOTES, 'UTF-8'));
             $body = $this->formatEmailBody($data, $fields);
             
             foreach ($recipients as $email) {

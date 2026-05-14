@@ -1,0 +1,3 @@
+# [SEC-FIX-06] منع الوصول المباشر لملفات vendor
+# Deny all access to vendor directory
+Deny from all

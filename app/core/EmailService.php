@@ -57,6 +57,11 @@ class EmailService
                 }
             }
 
+            // [SEC-FIX-08] فك تشفير كلمة مرور SMTP
+            if (!empty($config['smtp_password'])) {
+                $config['smtp_password'] = self::decryptSmtpPassword($config['smtp_password']);
+            }
+
             // إذا لم توجد إعدادات في DB، نستخدم الإعدادات الافتراضية
             if (empty($config)) {
                 $config = [
@@ -414,6 +419,7 @@ class EmailService
 
     /**
      * حفظ إعدادات SMTP
+     * [SEC-FIX-08] تشفير كلمة مرور SMTP قبل التخزين
      */
     public static function saveSmtpSettings($settings)
     {
@@ -422,6 +428,12 @@ class EmailService
 
             foreach ($settings as $key => $value) {
                 if (strpos($key, 'smtp_') !== 0) continue;
+
+                // [SEC-FIX-08] تشفير كلمة مرور SMTP قبل التخزين
+                $storedValue = $value;
+                if ($key === 'smtp_password' && !empty($value)) {
+                    $storedValue = self::encryptSmtpPassword($value);
+                }
 
                 // تحقق من وجود الإعداد
                 $exists = $db->query(
@@ -432,12 +444,12 @@ class EmailService
                 if ($exists->count > 0) {
                     $db->query(
                         "UPDATE settings SET setting_value = ? WHERE setting_key = ?",
-                        [$value, $key]
+                        [$storedValue, $key]
                     );
                 } else {
                     $db->query(
                         "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)",
-                        [$key, $value]
+                        [$key, $storedValue]
                     );
                 }
             }
@@ -451,7 +463,34 @@ class EmailService
     }
 
     /**
+     * تشفير كلمة مرور SMTP
+     * [SEC-FIX-08]
+     */
+    private static function encryptSmtpPassword($password)
+    {
+        $key = hash('sha256', (defined('APP_KEY') ? APP_KEY : 'takweenweb_secret_key_2024'));
+        $iv = openssl_random_pseudo_bytes(16);
+        $encrypted = openssl_encrypt($password, 'AES-256-CBC', $key, 0, $iv);
+        return base64_encode($iv . '::' . $encrypted);
+    }
+
+    /**
+     * فك تشفير كلمة مرور SMTP
+     * [SEC-FIX-08]
+     */
+    private static function decryptSmtpPassword($encrypted)
+    {
+        if (empty($encrypted)) return '';
+        $parts = explode('::', base64_decode($encrypted), 2);
+        if (count($parts) !== 2) return $encrypted; // غير مشفر (توافق رجعي)
+        $key = hash('sha256', (defined('APP_KEY') ? APP_KEY : 'takweenweb_secret_key_2024'));
+        $decrypted = openssl_decrypt($parts[1], 'AES-256-CBC', $key, 0, $parts[0]);
+        return $decrypted !== false ? $decrypted : '';
+    }
+
+    /**
      * جلب إعدادات SMTP الحالية
+     * [SEC-FIX-08] فك تشفير كلمة المرور عند العرض
      */
     public static function getSmtpSettings()
     {
@@ -466,6 +505,11 @@ class EmailService
                 foreach ($rows as $row) {
                     $config[$row->setting_key] = $row->setting_value;
                 }
+            }
+
+            // [SEC-FIX-08] فك تشفير كلمة مرور SMTP
+            if (!empty($config['smtp_password'])) {
+                $config['smtp_password'] = self::decryptSmtpPassword($config['smtp_password']);
             }
 
             return $config;

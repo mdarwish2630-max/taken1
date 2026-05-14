@@ -392,16 +392,17 @@ class DashboardController extends Controller
         $data = [
             'tenant_id' => $tenant->id,
             'title' => $this->input('title'),
-            'description' => $this->rawInput('description'),
-            'content' => $this->rawInput('content'),
+            // [SEC-FIX-03] تنقية HTML الغني قبل الحفظ لمنع Stored XSS
+            'description' => function_exists('sanitizeHTML') ? sanitizeHTML($this->rawInput('description')) : $this->input('description'),
+            'content' => function_exists('sanitizeHTML') ? sanitizeHTML($this->rawInput('content')) : $this->input('content'),
             'icon' => $this->input('icon'),
             'price' => $this->input('price') ?: null,
             'price_text' => $this->input('price_text'),
             'show_on_home' => $this->input('show_on_home') ? 1 : 0,
             'status' => $this->input('status') ?: 'active',
             'title_en' => $this->input('title_en') ?: null,
-            'description_en' => $this->rawInput('description_en'),
-            'content_en' => $this->rawInput('content_en')
+            'description_en' => function_exists('sanitizeHTML') ? sanitizeHTML($this->rawInput('description_en')) : $this->input('description_en'),
+            'content_en' => function_exists('sanitizeHTML') ? sanitizeHTML($this->rawInput('content_en')) : $this->input('content_en')
         ];
 
         // رفع الصورة
@@ -458,16 +459,17 @@ class DashboardController extends Controller
 
         $data = [
             'title' => $this->input('title'),
-            'description' => $this->rawInput('description'),
-            'content' => $this->rawInput('content'),
+            // [SEC-FIX-03] تنقية HTML الغني قبل الحفظ
+            'description' => function_exists('sanitizeHTML') ? sanitizeHTML($this->rawInput('description')) : $this->input('description'),
+            'content' => function_exists('sanitizeHTML') ? sanitizeHTML($this->rawInput('content')) : $this->input('content'),
             'icon' => $this->input('icon'),
             'price' => $this->input('price') ?: null,
             'price_text' => $this->input('price_text'),
             'show_on_home' => $this->input('show_on_home') ? 1 : 0,
             'status' => $this->input('status') ?: 'active',
             'title_en' => $this->input('title_en') ?: null,
-            'description_en' => $this->rawInput('description_en'),
-            'content_en' => $this->rawInput('content_en')
+            'description_en' => function_exists('sanitizeHTML') ? sanitizeHTML($this->rawInput('description_en')) : $this->input('description_en'),
+            'content_en' => function_exists('sanitizeHTML') ? sanitizeHTML($this->rawInput('content_en')) : $this->input('content_en')
         ];
 
         // رفع صورة جديدة
